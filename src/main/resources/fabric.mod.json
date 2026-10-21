@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "spearlunger",
+  "version": "${version}",
+  "name": "Spear Lunger",
+  "description": "Auto lunge (R) va eng yaqin o'yinchiga lunge + mace (X).",
+  "authors": ["Me"],
+  "license": "MIT",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["uz.spearlunger.SpearLungerClient"]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.1",
+    "minecraft": "~1.21.11",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
