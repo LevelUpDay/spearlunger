@@ -7,6 +7,7 @@ import net.minecraft.text.Text;
 
 import java.util.function.IntConsumer;
 import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 public class SettingsScreen extends Screen {
     private final Screen parent;
@@ -20,15 +21,30 @@ public class SettingsScreen extends Screen {
     protected void init() {
         Config c = Config.get();
         int x = width / 2 - 100;
-        int y = height / 2 - 50;
-        addDrawableChild(new IntSlider(x, y, 200, 20, 0, 40, c.lungeDelayTicks,
-                v -> "Lunge delay: " + v + " tick (" + (v * 50) + " ms)", v -> c.lungeDelayTicks = v));
-        addDrawableChild(new IntSlider(x, y + 24, 200, 20, 5, 200, c.rangeHorizontal,
+        int y = height / 2 - 90;
+        addDrawableChild(new IntSlider(x, y, 200, 20, 0, 40, c.extraDelayTicks,
+                v -> "Qo'shimcha kechikish: " + v + " tick (" + (v * 50) + " ms)", v -> c.extraDelayTicks = v));
+        addDrawableChild(new IntSlider(x, y + 24, 200, 20, 0, 20, c.minFood,
+                v -> v == 0 ? "Min ochlik: o'chiq" : "Min ochlik: " + v, v -> c.minFood = v));
+        addDrawableChild(new IntSlider(x, y + 48, 200, 20, 5, 200, c.rangeHorizontal,
                 v -> "X gorizontal masofa: " + v, v -> c.rangeHorizontal = v));
-        addDrawableChild(new IntSlider(x, y + 48, 200, 20, 5, 400, c.rangeVertical,
+        addDrawableChild(new IntSlider(x, y + 72, 200, 20, 5, 400, c.rangeVertical,
                 v -> "X vertikal masofa: " + v, v -> c.rangeVertical = v));
+        addDrawableChild(new IntSlider(x, y + 96, 200, 20, 20, 60, (int) Math.round(c.maceReach * 10),
+                v -> "X mace masofasi: " + (v / 10.0) + " blok", v -> c.maceReach = v / 10.0));
+        addDrawableChild(toggle(x, y + 120, () -> "X: uzoqda gorizontal qarash: " + (c.flattenPitch ? "ON" : "OFF"),
+                () -> c.flattenPitch = !c.flattenPitch));
+        addDrawableChild(toggle(x, y + 144, () -> "X: faqat havoda: " + (c.targetRequireAir ? "ON" : "OFF"),
+                () -> c.targetRequireAir = !c.targetRequireAir));
         addDrawableChild(ButtonWidget.builder(Text.literal("Tayyor"), b -> close())
-                .dimensions(x, y + 80, 200, 20).build());
+                .dimensions(x, y + 172, 200, 20).build());
+    }
+
+    private static ButtonWidget toggle(int x, int y, Supplier<String> label, Runnable action) {
+        return ButtonWidget.builder(Text.literal(label.get()), b -> {
+            action.run();
+            b.setMessage(Text.literal(label.get()));
+        }).dimensions(x, y, 200, 20).build();
     }
 
     @Override

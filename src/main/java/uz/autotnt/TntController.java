@@ -67,7 +67,7 @@ public class TntController {
         AutoTntConfig cfg = AutoTntConfig.get();
 
         for (AbstractClientPlayerEntity t : client.world.getPlayers()) {
-            Vec3d cur = t.getPos();
+            Vec3d cur = t.getEntityPos();
             Vec3d prev = lastPos.get(t.getUuid());
             if (prev != null) velocity.put(t.getUuid(), cur.subtract(prev));
             lastPos.put(t.getUuid(), cur);
@@ -204,7 +204,7 @@ public class TntController {
         PlayerEntity target = cf.predictTarget ? pickTarget(w, p, eye, vel) : null;
         if (target != null) {
             Vec3d v = velocity.getOrDefault(target.getUuid(), Vec3d.ZERO);
-            Vec3d pred = target.getPos().add(v.x * cf.lookaheadTicks, 0, v.z * cf.lookaheadTicks);
+            Vec3d pred = target.getEntityPos().add(v.x * cf.lookaheadTicks, 0, v.z * cf.lookaheadTicks);
             ground = groundBelow(w, BlockPos.ofFloored(pred));
             if (ground == null) return "nishon ostida tekis yer topilmadi";
             dir = horizDir(pred.x - eye.x, pred.z - eye.z);
@@ -399,7 +399,7 @@ public class TntController {
 
     private boolean nearFriend(ClientWorld w, Vec3d pos, double radius) {
         for (AbstractClientPlayerEntity t : w.getPlayers()) {
-            if (isFriend(t) && t.getPos().distanceTo(pos) <= radius) return true;
+            if (isFriend(t) && t.getEntityPos().distanceTo(pos) <= radius) return true;
         }
         return false;
     }

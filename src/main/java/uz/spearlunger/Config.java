@@ -8,8 +8,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class Config {
-    /** Ikki lunge orasidagi kechikish (tick, 20 tick = 1 soniya). */
-    public int lungeDelayTicks = 4;
+    /**
+     * Cooldown to'lgandan keyin qo'shimcha kutish (tick, 20 tick = 1 soniya).
+     * Nayza cooldown'i baribir majburiy (netherite ~23 tick, diamond ~21 tick), bu undan tashqari.
+     */
+    public int extraDelayTicks = 0;
+    /** Ochlik shundan past bo'lsa lunge qilmaydi (0 = o'chiq). Lunge III har safar ~3 ochlik yeydi. */
+    public int minFood = 6;
+    /** X: uzoqda pitch = 0 qilib qarash (Lunge impulsi faqat gorizontal, pastga qarasa kuchsiz). */
+    public boolean flattenPitch = true;
+    /** X: faqat havoda ishga tushadi (mace uchun tushish masofasi kerak). */
+    public boolean targetRequireAir = true;
+    /** X: nishongacha shu masofada mace bilan uradi (blok). */
+    public double maceReach = 3.0;
+    /** X: eng ko'pi bilan shuncha tick ishlaydi. */
+    public int targetTimeoutTicks = 200;
     /** X uchun qidiruv: gorizontal masofa (blok). */
     public int rangeHorizontal = 50;
     /** X uchun qidiruv: vertikal masofa (blok). */

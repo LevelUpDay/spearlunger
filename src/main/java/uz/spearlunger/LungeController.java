@@ -2,32 +2,39 @@ package uz.spearlunger;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.PiercingWeaponComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.enchantment.Enchantment;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 1.21.11 nayza mexanikasi:
+ *  - nayzada minimum_attack_charge = 1.0, ya'ni jab (chap tugma) faqat attack cooldown TO'LIQ bo'lganda ishlaydi;
+ *  - qo'ldagi item almashsa cooldown 0 ga tushadi (PlayerEntity.resetTicksSince);
+ *  - Lunge impulsi faqat gorizontal: qarash yo'nalishi * cos(pitch), shuning uchun pastga qarasangiz kuchsiz uchadi;
+ *  - suvda, elytra'da va minib turganda Lunge ishlamaydi.
+ * Shuning uchun nayzani qo'lda ushlab turamiz va cooldown to'lishi bilan jab qilamiz.
+ */
 public class LungeController {
     private enum Mode { NONE, HOLD, TARGET }
-    private enum Phase { SELECT_SPEAR, ATTACK, SELECT_OTHER, WAIT, SELECT_MACE, MACE_ATTACK, FINISH }
 
     private Mode mode = Mode.NONE;
-    private Phase phase = Phase.SELECT_SPEAR;
-    private int wait = 0;
     private int ticksRunning = 0;
+    private int sinceReady = 0;
     private int lunges = 0;
     private int originalSlot = 0;
+    private boolean finishNextTick = false;
+    private String lastWarn = null;
     private PlayerEntity target = null;
 
     // ------------------------------------------------------------ tick
@@ -35,6 +42,7 @@ public class LungeController {
         ClientPlayerEntity player = client.player;
         if (player == null || client.world == null || client.interactionManager == null) {
             mode = Mode.NONE;
+            target = null;
             return;
         }
 
@@ -43,7 +51,7 @@ public class LungeController {
         while (SpearLungerClient.keyHold.wasPressed()) { /* bosishlarni tozalaymiz */ }
 
         if (client.currentScreen != null) {
-            if (mode != Mode.NONE) stop(client, player, null);
+            if (mode != Mode.NONE) stop(player, null);
             return;
         }
         while (SpearLungerClient.keySettings.wasPressed()) {
@@ -52,27 +60,52 @@ public class LungeController {
         }
 
         if (mode == Mode.TARGET) {
+            if (xPressed) {
+                stop(player, "§eX: bekor qilindi.");
+                return;
+            }
             tickTarget(client, player);
             return;
         }
 
         if (xPressed) {
-            if (mode == Mode.HOLD) stop(client, player, null);
+            if (mode == Mode.HOLD) stop(player, null);
             startTarget(client, player);
             return;
         }
 
         if (SpearLungerClient.keyHold.isPressed()) {
             if (mode != Mode.HOLD) {
+                int s = findLungeSpear(player);
+                if (s < 0) {
+                    say(player, "§cHotbar'da Lunge enchantli nayza topilmadi.");
+                    // tugma qo'yib yuborilguncha qayta-qayta yozmaslik uchun HOLD'ga o'tamiz, lekin hech narsa qilmaymiz
+                    mode = Mode.HOLD;
+                    originalSlot = player.getInventory().getSelectedSlot();
+                    return;
+                }
                 mode = Mode.HOLD;
-                phase = Phase.SELECT_SPEAR;
-                wait = 0;
                 originalSlot = player.getInventory().getSelectedSlot();
+                sinceReady = 0;
+                lastWarn = null;
+                select(player, s);
             }
-            cycle(client, player);
+            tickHold(client, player);
         } else if (mode == Mode.HOLD) {
-            stop(client, player, null);
+            stop(player, null);
         }
+    }
+
+    // ------------------------------------------------------------ R rejimi
+    private void tickHold(MinecraftClient client, ClientPlayerEntity player) {
+        int s = findLungeSpear(player);
+        if (s < 0) return;
+        if (player.getInventory().getSelectedSlot() != s) {
+            select(player, s);
+            sinceReady = 0;
+            return;
+        }
+        tryLunge(client, player);
     }
 
     // ------------------------------------------------------------ X rejimi
@@ -83,111 +116,136 @@ public class LungeController {
                     + " blok) boshqa o'yinchi topilmadi.");
             return;
         }
-        if (player.isOnGround()) {
+        if (Config.get().targetRequireAir && player.isOnGround()) {
             say(player, "§cX: siz havoda emassiz (yerda turibsiz).");
+            return;
+        }
+        int s = findLungeSpear(player);
+        if (s < 0) {
+            say(player, "§cHotbar'da Lunge enchantli nayza topilmadi.");
             return;
         }
         target = t;
         mode = Mode.TARGET;
-        phase = Phase.SELECT_SPEAR;
         ticksRunning = 0;
+        sinceReady = 0;
         lunges = 0;
-        wait = 0;
+        finishNextTick = false;
+        lastWarn = null;
         originalSlot = player.getInventory().getSelectedSlot();
+        select(player, s);
         say(player, "§aX: nishon — " + t.getName().getString());
     }
 
     private void tickTarget(MinecraftClient client, ClientPlayerEntity player) {
+        if (finishNextTick) {
+            stop(player, "§aX: tugadi.");
+            return;
+        }
         ticksRunning++;
         if (target == null || !target.isAlive() || target.isRemoved()) {
-            stop(client, player, "§eX: nishon yo'qoldi.");
+            stop(player, "§eX: nishon yo'qoldi.");
             return;
         }
-        if (ticksRunning > 200) {
-            stop(client, player, "§eX: vaqt tugadi.");
+        if (ticksRunning > Config.get().targetTimeoutTicks) {
+            stop(player, "§eX: vaqt tugadi.");
             return;
         }
-        aim(player, target);
-
-        switch (phase) {
-            case SELECT_MACE -> {
-                int s = findMace(player);
-                if (s < 0) { stop(client, player, "§cHotbar'da mace topilmadi."); return; }
-                select(player, s);
-                phase = Phase.MACE_ATTACK;
-                return;
-            }
-            case MACE_ATTACK -> {
-                pressAttack(client);
-                phase = Phase.FINISH;
-                return;
-            }
-            case FINISH -> {
-                stop(client, player, "§aX: tugadi.");
-                return;
-            }
-            default -> { }
-        }
-
-        if (player.isOnGround() && lunges > 0) {
-            stop(client, player, "§eX: yerga tushdingiz.");
+        if (player.isOnGround() && lunges > 0 && Config.get().targetRequireAir) {
+            stop(player, "§eX: yerga tushdingiz.");
             return;
         }
 
-        boolean arrived = player.distanceTo(target) <= 3.5f;
-        boolean stalled = lunges > 0 && phase == Phase.WAIT
-                && player.getVelocity().horizontalLength() < 0.05;
-        if (arrived || stalled) {
-            phase = Phase.SELECT_MACE;
+        double dist = player.getEyePos().distanceTo(closestPoint(target, player.getEyePos()));
+        boolean inMaceRange = dist <= Config.get().maceReach;
+
+        // Yaqin bo'lsa to'liq nishonga olamiz, uzoqda esa pitch = 0, shunda Lunge impulsi to'liq gorizontal bo'ladi.
+        aim(player, target, !inMaceRange && Config.get().flattenPitch);
+
+        if (inMaceRange) {
+            int m = findMace(player);
+            if (m < 0) {
+                stop(player, "§cHotbar'da mace topilmadi.");
+                return;
+            }
+            // Bir tickda almashtirib uramiz: server slot paketini oladi va cooldown reset bo'lishidan oldin hujumni hisoblaydi.
+            select(player, m);
+            client.interactionManager.attackEntity(player, target);
+            player.swingHand(Hand.MAIN_HAND);
+            finishNextTick = true;
             return;
         }
-        cycle(client, player);
+
+        int s = findLungeSpear(player);
+        if (s < 0) {
+            stop(player, "§cHotbar'da Lunge enchantli nayza topilmadi.");
+            return;
+        }
+        if (player.getInventory().getSelectedSlot() != s) {
+            select(player, s);
+            sinceReady = 0;
+            return;
+        }
+        tryLunge(client, player);
     }
 
-    // ------------------------------------------------------------ lunge sikli
-    private void cycle(MinecraftClient client, ClientPlayerEntity player) {
-        switch (phase) {
-            case SELECT_SPEAR -> {
-                int s = findLungeSpear(player);
-                if (s < 0) {
-                    stop(client, player, "§cHotbar'da Lunge enchantli nayza topilmadi.");
-                    return;
-                }
-                select(player, s);
-                phase = Phase.ATTACK;
-            }
-            case ATTACK -> {
-                pressAttack(client);
-                lunges++;
-                phase = Phase.SELECT_OTHER;
-            }
-            case SELECT_OTHER -> {
-                int s = findOtherItem(player);
-                if (s >= 0) select(player, s);
-                wait = Config.get().lungeDelayTicks;
-                phase = Phase.WAIT;
-            }
-            case WAIT -> {
-                if (wait-- <= 0) phase = Phase.SELECT_SPEAR;
-            }
-            default -> { }
+    // ------------------------------------------------------------ lunge
+    /** Cooldown to'lgan bo'lsa jab qiladi (Lunge shu jab'dan keyin ishga tushadi). */
+    private void tryLunge(MinecraftClient client, ClientPlayerEntity player) {
+        ItemStack stack = player.getMainHandStack();
+        PiercingWeaponComponent piercing = stack.get(DataComponentTypes.PIERCING_WEAPON);
+        if (piercing == null) return;
+
+        String block = blockedReason(player);
+        if (block != null) {
+            warnOnce(player, block);
+            return;
+        }
+        lastWarn = null;
+
+        if (player.isBelowMinimumAttackCharge(stack, 0) || player.getAttackCooldownProgress(0.0f) < 1.0f) {
+            sinceReady = 0;
+            return;
+        }
+        if (sinceReady++ < Config.get().extraDelayTicks) return;
+        if (client.interactionManager.isFlyingLocked()) return;
+
+        client.interactionManager.attackWithPiercingWeapon(piercing);
+        player.swingHand(Hand.MAIN_HAND);
+        lunges++;
+        sinceReady = 0;
+    }
+
+    /** Lunge ishlamaydigan holatlar (enchantment talablari + ochlik limiti). */
+    private String blockedReason(ClientPlayerEntity player) {
+        if (player.hasVehicle()) return "§eLunge: minib turganda ishlamaydi.";
+        if (player.isGliding()) return "§eLunge: elytra bilan uchayotganda ishlamaydi.";
+        if (player.isTouchingWater()) return "§eLunge: suvda ishlamaydi.";
+        int minFood = Config.get().minFood;
+        if (minFood > 0 && !player.getAbilities().creativeMode && player.getHungerManager().getFoodLevel() < minFood) {
+            return "§eLunge: ochlik " + player.getHungerManager().getFoodLevel() + " < " + minFood + " (sozlamada o'zgartiring).";
+        }
+        return null;
+    }
+
+    private void warnOnce(ClientPlayerEntity player, String msg) {
+        if (!msg.equals(lastWarn)) {
+            player.sendMessage(Text.literal(msg), true);
+            lastWarn = msg;
         }
     }
 
-    private void stop(MinecraftClient client, ClientPlayerEntity player, String msg) {
+    private void stop(ClientPlayerEntity player, String msg) {
         if (player != null) {
             select(player, originalSlot);
             if (msg != null) say(player, msg);
         }
         mode = Mode.NONE;
         target = null;
+        finishNextTick = false;
     }
 
     // ------------------------------------------------------------ yordamchilar
-    private void pressAttack(MinecraftClient client) {
-        KeyBinding.onKeyPressed(InputUtil.fromTranslationKey(client.options.attackKey.getBoundKeyTranslationKey()));
-    }
-
     private void select(ClientPlayerEntity player, int slot) {
         if (slot >= 0 && slot < 9) player.getInventory().setSelectedSlot(slot);
     }
@@ -196,15 +254,22 @@ public class LungeController {
         player.sendMessage(Text.literal(msg), false);
     }
 
-    private void aim(ClientPlayerEntity player, PlayerEntity t) {
+    private void aim(ClientPlayerEntity player, PlayerEntity t, boolean flat) {
         Vec3d eye = player.getEyePos();
         Vec3d to = t.getBoundingBox().getCenter();
         double dx = to.x - eye.x, dy = to.y - eye.y, dz = to.z - eye.z;
-        double flat = Math.sqrt(dx * dx + dz * dz);
+        double horiz = Math.sqrt(dx * dx + dz * dz);
         float yaw = (float) (MathHelper.atan2(dz, dx) * 180.0 / Math.PI) - 90.0f;
-        float pitch = (float) -(MathHelper.atan2(dy, flat) * 180.0 / Math.PI);
+        float pitch = flat ? 0.0f : (float) -(MathHelper.atan2(dy, horiz) * 180.0 / Math.PI);
         player.setYaw(yaw);
         player.setPitch(pitch);
+    }
+
+    private static Vec3d closestPoint(PlayerEntity t, Vec3d from) {
+        var b = t.getBoundingBox();
+        return new Vec3d(MathHelper.clamp(from.x, b.minX, b.maxX),
+                MathHelper.clamp(from.y, b.minY, b.maxY),
+                MathHelper.clamp(from.z, b.minZ, b.maxZ));
     }
 
     private PlayerEntity findNearestPlayer(MinecraftClient client, ClientPlayerEntity player) {
@@ -215,47 +280,43 @@ public class LungeController {
         return list.stream().min(Comparator.comparingDouble(p -> p.squaredDistanceTo(player))).orElse(null);
     }
 
-    private static boolean isSpear(ItemStack s) {
-        return !s.isEmpty() && Registries.ITEM.getId(s.getItem()).getPath().endsWith("_spear");
-    }
-
-    private static boolean hasEnchant(ItemStack s, String name) {
+    private static int enchantLevel(ItemStack s, String name) {
         for (RegistryEntry<Enchantment> e : s.getEnchantments().getEnchantments()) {
-            if (e.getKey().map(k -> k.getValue().getPath().equals(name)).orElse(false)) return true;
+            if (e.getKey().map(k -> k.getValue().getPath().equals(name)).orElse(false)) {
+                return s.getEnchantments().getLevel(e);
+            }
         }
-        return false;
+        return 0;
     }
 
+    /** Eng yuqori Lunge darajali nayza (tenglikda hozir qo'ldagisi). */
     private int findLungeSpear(ClientPlayerEntity p) {
+        int best = -1, bestLevel = 0;
+        int sel = p.getInventory().getSelectedSlot();
         for (int i = 0; i < 9; i++) {
             ItemStack s = p.getInventory().getStack(i);
-            if (isSpear(s) && hasEnchant(s, "lunge")) return i;
-        }
-        return -1;
-    }
-
-    /** Wind Burst > Breach > oddiy mace. */
-    private int findMace(ClientPlayerEntity p) {
-        int best = -1, bestScore = 0;
-        for (int i = 0; i < 9; i++) {
-            ItemStack s = p.getInventory().getStack(i);
-            if (s.isOf(Items.MACE)) {
-                int score = hasEnchant(s, "wind_burst") ? 3 : hasEnchant(s, "breach") ? 2 : 1;
-                if (score > bestScore) { bestScore = score; best = i; }
+            if (s.isEmpty() || !s.contains(DataComponentTypes.PIERCING_WEAPON)) continue;
+            int lvl = enchantLevel(s, "lunge");
+            if (lvl > bestLevel || (lvl == bestLevel && lvl > 0 && i == sel)) {
+                bestLevel = lvl;
+                best = i;
             }
         }
         return best;
     }
 
-    /** Avval ovqat, bo'lmasa lungega xalaqit bermaydigan boshqa slot. */
-    private int findOtherItem(ClientPlayerEntity p) {
-        for (int i = 0; i < 9; i++) {
-            if (p.getInventory().getStack(i).contains(DataComponentTypes.FOOD)) return i;
-        }
+    /** Wind Burst > Breach > Density > oddiy mace. */
+    private int findMace(ClientPlayerEntity p) {
+        int best = -1, bestScore = 0;
         for (int i = 0; i < 9; i++) {
             ItemStack s = p.getInventory().getStack(i);
-            if (!isSpear(s) && !s.isOf(Items.MACE)) return i;
+            if (s.isOf(Items.MACE)) {
+                int score = enchantLevel(s, "wind_burst") > 0 ? 4
+                        : enchantLevel(s, "breach") > 0 ? 3
+                        : enchantLevel(s, "density") > 0 ? 2 : 1;
+                if (score > bestScore) { bestScore = score; best = i; }
+            }
         }
-        return -1;
+        return best;
     }
 }
