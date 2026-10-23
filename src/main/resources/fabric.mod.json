@@ -2,13 +2,18 @@
   "schemaVersion": 1,
   "id": "spearlunger",
   "version": "${version}",
-  "name": "Spear Lunger",
-  "description": "Auto lunge (R) va eng yaqin o'yinchiga lunge + mace (X).",
-  "authors": ["Me"],
+  "name": "Spear Lunger + Auto TNT Cart",
+  "description": "Auto Lunge nayza (R/X), auto TNT minecart (B/Z) va anti-cheat sozlamalari (O).",
+  "authors": [
+    "LevelUpDay"
+  ],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
-    "client": ["uz.spearlunger.SpearLungerClient"]
+    "client": [
+      "uz.spearlunger.SpearLungerClient",
+      "uz.autotnt.AutoTntClient"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.18.1",
