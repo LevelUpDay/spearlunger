@@ -24,27 +24,12 @@ jobs:
           C=$(find ~/.gradle .gradle -name '*.jar' | grep -i minecraft | grep -v sources); echo "$C"
           for j in $C; do unzip -oq "$(realpath $j)" 'data/minecraft/enchantment/*' 'data/minecraft/item/*spear*' -d /tmp/mc 2>/dev/null; done
           cd /tmp/src
-          echo "===== LUNGE JSON"; cat /tmp/mc/data/minecraft/enchantment/lunge.json || find /tmp/mc -name '*lunge*'
-          f(){ echo "===== $1"; cat "$1"; }
-          g(){ echo "===== GREP $1 in $2"; grep -n -A${3:-25} "$1" $2; }
-          g "private boolean doAttack" net/minecraft/client/MinecraftClient.java 70
-          g "void handleInputEvents" net/minecraft/client/MinecraftClient.java 120
-          grep -n "attackCooldown" net/minecraft/client/MinecraftClient.java
-          grep -rln "PIERCING_WEAPON\|PiercingWeapon" net/minecraft | head -30
-          f net/minecraft/component/type/PiercingWeaponComponent.java
-          f net/minecraft/component/type/AttackRangeComponent.java
-          for x in $(grep -rl "MINIMUM_ATTACK_CHARGE" net/minecraft); do echo "== $x"; grep -n -B3 -A10 "MINIMUM_ATTACK_CHARGE" $x; done
-          grep -n -i "stab\|piercing\|spear" net/minecraft/client/network/ClientPlayerInteractionManager.java
-          g "resetLastAttackedTicks\|getAttackCooldownProgress\|lastAttackedTicks" net/minecraft/entity/player/PlayerEntity.java 8
-          grep -n -i "spear\|lunge" net/minecraft/item/Items.java | head -20
-          g "static Item.Settings spear\|Settings spear(" net/minecraft/item/Item.java 40
-          grep -rn -i "STAB" net/minecraft/network/packet/c2s/play/*.java | head -20
-          for x in $(grep -rl "STAB" net/minecraft/server/network/ServerPlayNetworkHandler.java); do grep -n -B5 -A40 "case STAB" $x; done
-          grep -rln "post_piercing_attack\|POST_PIERCING_ATTACK" net/minecraft | head
-          for x in $(grep -rl "POST_PIERCING_ATTACK" net/minecraft | grep -v Enchantment); do echo "== $x"; grep -n -B10 -A15 "POST_PIERCING_ATTACK" $x; done
-          f net/minecraft/enchantment/effect/entity/ApplyImpulseEnchantmentEffect.java
-          f net/minecraft/enchantment/effect/entity/ApplyExhaustionEnchantmentEffect.java
-          echo "===== getPos?"; grep -n "public final Vec3d getPos\|public Vec3d getPos\|getEntityPos()" net/minecraft/entity/Entity.java | head
-          g "public void setSelectedSlot" net/minecraft/entity/player/PlayerInventory.java 10
-          g "private void doItemUse" net/minecraft/client/MinecraftClient.java 15
-          echo "===== spear item data"; ls /tmp/mc/data/minecraft/item 2>/dev/null | head
+          g "public void attackWithPiercingWeapon" net/minecraft/client/network/ClientPlayerInteractionManager.java 8
+          g "public boolean isFlyingLocked" net/minecraft/client/network/ClientPlayerInteractionManager.java 6
+          g "private void syncSelectedSlot" net/minecraft/client/network/ClientPlayerInteractionManager.java 10
+          grep -rn "resetTicksSince()" net/minecraft | head -20
+          grep -n -B12 -A3 "resetTicksSince()" net/minecraft/entity/LivingEntity.java net/minecraft/entity/player/PlayerEntity.java | head -80
+          grep -n -A12 "EntityAttributes.ATTACK_SPEED," net/minecraft/item/Item.java | sed -n 1,40p
+          g "public void beforePlayerAttack\|public void useAttackEnchantmentEffects" net/minecraft/entity/LivingEntity.java 15
+          g "public void beforePlayerAttack\|public void useAttackEnchantmentEffects" net/minecraft/entity/player/PlayerEntity.java 15
+          grep -rn "POST_PIERCING_ATTACK" net/minecraft | head
