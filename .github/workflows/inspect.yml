@@ -14,13 +14,15 @@ jobs:
       - run: chmod +x ./gradlew && ./gradlew genSources --no-configuration-cache
       - name: dump
         run: |
+          set +e
+          cd "$GITHUB_WORKSPACE"
           mkdir -p /tmp/src /tmp/mc
           J=$(find ~/.gradle .gradle -name 'minecraft-*sources.jar' 2>/dev/null | grep -v common | head -1)
           [ -z "$J" ] && J=$(find ~/.gradle .gradle -name '*sources.jar' | grep -i minecraft | head -1)
           echo "JAR=$J"; find ~/.gradle .gradle -name '*sources.jar' | grep -i minecraft
-          for j in $(find ~/.gradle .gradle -name '*sources.jar' | grep -i minecraft); do (cd /tmp/src && unzip -oq "$j"); done
-          C=$(find ~/.gradle .gradle -name '*client*.jar' | grep -i minecraft | grep -v sources | head -3); echo "$C"
-          for j in $C; do (cd /tmp/mc && unzip -oq "$j" 'data/minecraft/enchantment/*' 'data/minecraft/tags/item/enchantable/*' 2>/dev/null || true); done
+          for j in $(find ~/.gradle .gradle -name '*sources.jar' | grep -i minecraft); do unzip -oq "$(realpath $j)" -d /tmp/src; done
+          C=$(find ~/.gradle .gradle -name '*.jar' | grep -i minecraft | grep -v sources); echo "$C"
+          for j in $C; do unzip -oq "$(realpath $j)" 'data/minecraft/enchantment/*' 'data/minecraft/item/*spear*' -d /tmp/mc 2>/dev/null; done
           cd /tmp/src
           echo "===== LUNGE JSON"; cat /tmp/mc/data/minecraft/enchantment/lunge.json || find /tmp/mc -name '*lunge*'
           f(){ echo "===== $1"; cat "$1"; }
@@ -42,3 +44,7 @@ jobs:
           for x in $(grep -rl "POST_PIERCING_ATTACK" net/minecraft | grep -v Enchantment); do echo "== $x"; grep -n -B10 -A15 "POST_PIERCING_ATTACK" $x; done
           f net/minecraft/enchantment/effect/entity/ApplyImpulseEnchantmentEffect.java
           f net/minecraft/enchantment/effect/entity/ApplyExhaustionEnchantmentEffect.java
+          echo "===== getPos?"; grep -n "public final Vec3d getPos\|public Vec3d getPos\|getEntityPos()" net/minecraft/entity/Entity.java | head
+          g "public void setSelectedSlot" net/minecraft/entity/player/PlayerInventory.java 10
+          g "private void doItemUse" net/minecraft/client/MinecraftClient.java 15
+          echo "===== spear item data"; ls /tmp/mc/data/minecraft/item 2>/dev/null | head
