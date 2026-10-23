@@ -2,13 +2,16 @@
   "schemaVersion": 1,
   "id": "spearlunger",
   "version": "${version}",
-  "name": "Spear Lunger",
-  "description": "Auto lunge (R) va eng yaqin o'yinchiga lunge + mace (X).",
+  "name": "Spear Lunger + Auto TNT Cart",
+  "description": "Auto lunge (R/X) va auto TNT minecart (B/Z).",
   "authors": ["Me"],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {
-    "client": ["uz.spearlunger.SpearLungerClient"]
+    "client": [
+      "uz.spearlunger.SpearLungerClient",
+      "uz.autotnt.AutoTntClient"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.18.1",
