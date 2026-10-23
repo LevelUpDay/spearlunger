@@ -28,6 +28,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
+import uz.spearlunger.Config;
+import uz.spearlunger.Rotations;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -160,7 +162,17 @@ public class TntController {
     // ------------------------------------------------------------ reja
     /** Xato bo'lsa sababini qaytaradi, hammasi joyida bo'lsa null. */
     private String plan(MinecraftClient c, ClientPlayerEntity p, Vec3d vel, boolean flame, int crossSlot) {
+        List<int[]> swaps = new ArrayList<>();
+        String err = planInner(c, p, vel, flame, crossSlot, swaps);
+        if (err != null && AutoTntConfig.get().restoreInventory) restoreSwaps(c, p, swaps);
+        return err;
+    }
+
+    private String planInner(MinecraftClient c, ClientPlayerEntity p, Vec3d vel, boolean flame, int crossSlot,
+                             List<int[]> swaps) {
         AutoTntConfig cfg = AutoTntConfig.get();
+        final Config.AntiCheat ac = Config.get().ac();
+        final float origYaw = p.getYaw(), origPitch = p.getPitch();
         AutoTntConfig.Profile cf = cfg.p();
         ClientWorld w = c.world;
         final int mode = Math.floorMod(cf.ignition, 4);
@@ -172,21 +184,21 @@ public class TntController {
         if (crossSlot >= 0) reserved[crossSlot] = true;
 
         // ---- kerakli narsalarni hotbar'ga tayyorlaymiz (kerak bo'lsa inventardan olib keladi)
-        final int railSlot = ensure(c, p, mode == 3 ? Items.ACTIVATOR_RAIL : Items.RAIL, reserved);
+        final int railSlot = ensure(c, p, swaps, mode == 3 ? Items.ACTIVATOR_RAIL : Items.RAIL, reserved);
         if (railSlot < 0) return (mode == 3 ? "activator rail" : "rail") + " yo'q (hotbar/inventar)";
-        final int cart0 = ensure(c, p, Items.TNT_MINECART, reserved);
+        final int cart0 = ensure(c, p, swaps, Items.TNT_MINECART, reserved);
         if (cart0 < 0) return "TNT minecart yo'q (hotbar/inventar)";
         int flintTmp = -1, fireTmp = -1, redTmp = -1;
         if (needFlint) {
-            flintTmp = ensure(c, p, Items.FLINT_AND_STEEL, reserved);
+            flintTmp = ensure(c, p, swaps, Items.FLINT_AND_STEEL, reserved);
             if (flintTmp < 0) return (mode == 0 ? "Flame yo'q va " : "") + "flint and steel yo'q (hotbar/inventar)";
         }
         if (mode == 2) {
-            fireTmp = ensure(c, p, Items.FIRE_CHARGE, reserved);
+            fireTmp = ensure(c, p, swaps, Items.FIRE_CHARGE, reserved);
             if (fireTmp < 0) return "fire charge yo'q (hotbar/inventar)";
         }
         if (mode == 3) {
-            redTmp = ensure(c, p, Items.REDSTONE_BLOCK, reserved);
+            redTmp = ensure(c, p, swaps, Items.REDSTONE_BLOCK, reserved);
             if (redTmp < 0) return "redstone block yo'q (hotbar/inventar)";
         }
         final int flintSlot = flintTmp, fireSlot = fireTmp, redSlot = redTmp;
@@ -252,7 +264,7 @@ public class TntController {
         for (int i = 0; i < n; i++) {
             final BlockPos g = grounds.get(i);
             if (!w.getBlockState(g.up()).isIn(BlockTags.RAILS)) {
-                steps.add(() -> { useOnBlock(c, p, railSlot, g); return true; });
+                addUse(c, p, railSlot, g);
             }
         }
         final List<BlockPos> railPositions = new ArrayList<>();
@@ -260,7 +272,7 @@ public class TntController {
             final int slot = cartSlots.get(i);
             final BlockPos rp = grounds.get(i).up();
             railPositions.add(rp);
-            steps.add(() -> { useOnBlock(c, p, slot, rp); return true; });
+            addUse(c, p, slot, rp);
         }
 
         BlockPos lastGround = grounds.get(n - 1);
@@ -274,7 +286,7 @@ public class TntController {
             BlockPos cand = canPlaceOnTop(w, a) ? a : (canPlaceOnTop(w, b) ? b : null);
             if (cand != null) {
                 final BlockPos cc = cand;
-                steps.add(() -> { useOnBlock(c, p, redSlot, cc); return true; });
+                addUse(c, p, redSlot, cc);
             } else {
                 steps.add(() -> { say(p, "§eRedstone block qo'yib bo'lmadi (joy mos emas).", false); return true; });
             }
@@ -282,6 +294,7 @@ public class TntController {
 
         if (crossSlot >= 0) {
             final int cs = crossSlot;
+            if (ac.rotateToBlocks) steps.add(() -> Rotations.turn(p, origYaw, origPitch, 0.5f));
             steps.add(() -> {
                 p.getInventory().setSelectedSlot(cs);
                 c.interactionManager.interactItem(p, Hand.MAIN_HAND);
@@ -290,7 +303,11 @@ public class TntController {
         }
 
         final boolean cross = crossSlot >= 0;
+        if (ac.rotateToBlocks && ac.restoreView && !cross) {
+            steps.add(() -> Rotations.turn(p, origYaw, origPitch));
+        }
         steps.add(() -> {
+            if (cfg.restoreInventory) restoreSwaps(c, p, swaps);
             p.getInventory().setSelectedSlot(original);
             if (cross) say(p, "§7Crossbow: OFF", true);
             return true;
@@ -303,7 +320,7 @@ public class TntController {
 
     private void addFire(MinecraftClient c, ClientPlayerEntity p, ClientWorld w, int slot, BlockPos ahead) {
         if (canPlaceOnTop(w, ahead)) {
-            steps.add(() -> { useOnBlock(c, p, slot, ahead); return true; });
+            addUse(c, p, slot, ahead);
         } else {
             steps.add(() -> { say(p, "§eOlovni oldinga qo'yib bo'lmadi (joy mos emas).", false); return true; });
         }
@@ -332,8 +349,13 @@ public class TntController {
                 }
                 return false;
             }
+            Entity cart = found.get(0);
+            if (Config.get().ac().rotateToBlocks) {
+                Vec3d eye = p.getEyePos(), to = cart.getBoundingBox().getCenter();
+                if (!Rotations.turn(p, Rotations.yawTo(eye, to), Rotations.pitchTo(eye, to)) && ++waited <= 60) return false;
+            }
             p.getInventory().setSelectedSlot(slot);
-            c.interactionManager.interactEntity(p, found.get(0), Hand.MAIN_HAND);
+            c.interactionManager.interactEntity(p, cart, Hand.MAIN_HAND);
             return true;
         }
     }
@@ -372,6 +394,27 @@ public class TntController {
 
     private void bad(ClientPlayerEntity p) {
         if (AutoTntConfig.get().sounds) p.playSound(SoundEvents.ENTITY_VILLAGER_NO, 0.8f, 1.0f);
+    }
+
+    /** Blokka (kerak bo'lsa avval unga silliq qarab) item ishlatish qadamlarini qo'shadi. */
+    private void addUse(MinecraftClient c, ClientPlayerEntity p, int slot, BlockPos base) {
+        if (Config.get().ac().rotateToBlocks) {
+            Vec3d point = Vec3d.ofCenter(base).add(0, 0.5, 0);
+            steps.add(() -> {
+                Vec3d eye = p.getEyePos();
+                return Rotations.turn(p, Rotations.yawTo(eye, point), Rotations.pitchTo(eye, point));
+            });
+        }
+        steps.add(() -> { useOnBlock(c, p, slot, base); return true; });
+    }
+
+    /** ensure() inventardan hotbar'ga ko'chirgan narsalarni joyiga qaytaradi (SWAP simmetrik). */
+    private void restoreSwaps(MinecraftClient c, ClientPlayerEntity p, List<int[]> swaps) {
+        for (int i = swaps.size() - 1; i >= 0; i--) {
+            int[] sw = swaps.get(i);
+            c.interactionManager.clickSlot(p.playerScreenHandler.syncId, sw[0], sw[1], SlotActionType.SWAP, p);
+        }
+        swaps.clear();
     }
 
     private void useOnBlock(MinecraftClient c, ClientPlayerEntity p, int slot, BlockPos base) {
@@ -462,7 +505,7 @@ public class TntController {
     }
 
     /** Narsa hotbar'da bo'lsa slotini qaytaradi; yo'q bo'lsa inventardan hotbar'ga ko'chiradi. */
-    private int ensure(MinecraftClient c, ClientPlayerEntity p, Item item, boolean[] reserved) {
+    private int ensure(MinecraftClient c, ClientPlayerEntity p, List<int[]> swaps, Item item, boolean[] reserved) {
         int s = find(p, item);
         if (s >= 0) { reserved[s] = true; return s; }
         if (!AutoTntConfig.get().autoRefill) return -1;
@@ -477,6 +520,7 @@ public class TntController {
             }
             if (target < 0) return -1;
             c.interactionManager.clickSlot(p.playerScreenHandler.syncId, inv, target, SlotActionType.SWAP, p);
+            swaps.add(new int[] { inv, target });
             reserved[target] = true;
             return target;
         }

@@ -3,8 +3,10 @@
   "id": "spearlunger",
   "version": "${version}",
   "name": "Spear Lunger + Auto TNT Cart",
-  "description": "Auto lunge (R/X) va auto TNT minecart (B/Z).",
-  "authors": ["Me"],
+  "description": "Auto Lunge nayza (R/X), auto TNT minecart (B/Z) va anti-cheat sozlamalari (O).",
+  "authors": [
+    "LevelUpDay"
+  ],
   "license": "MIT",
   "environment": "client",
   "entrypoints": {

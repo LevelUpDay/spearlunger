@@ -1,8 +1,8 @@
 {
   "key.category.spearlunger.main": "Spear Lunger",
-  "key.spearlunger.hold": "Auto Lunge (hold)",
-  "key.spearlunger.target": "Lunge to nearest player + mace",
-  "key.spearlunger.settings": "Open settings",
+  "key.spearlunger.hold": "Auto Lunge (hold / toggle)",
+  "key.spearlunger.target": "Lunge to target + mace",
+  "key.spearlunger.settings": "Settings menu",
   "key.category.autotnt.main": "Auto TNT Cart",
   "key.autotnt.bow": "Bow auto-TNT on/off",
   "key.autotnt.crossbow": "Crossbow auto-TNT (one shot)",

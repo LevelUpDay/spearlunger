@@ -50,6 +50,8 @@ public class TntSettingsScreen extends Screen {
                 v -> "Minecart soni: " + v, v -> cf.cartCount = v));
         addDrawableChild(new IntSlider(x1, y + 5 * s, w, 20, 0, 20, cf.friendRadius,
                 v -> "Do'st radiusi: " + v, v -> cf.friendRadius = v));
+        addDrawableChild(btn(x1, y + 6 * s, w, () -> "Inventarga qaytarish: " + onoff(cfg.restoreInventory),
+                () -> cfg.restoreInventory = !cfg.restoreInventory));
 
         // o'ng ustun
         addDrawableChild(btn(x2, y, w, () -> "Bow auto-TNT: " + onoff(cfg.bowMode), () -> cfg.bowMode = !cfg.bowMode));

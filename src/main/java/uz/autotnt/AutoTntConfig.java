@@ -28,6 +28,7 @@ public class AutoTntConfig {
     public boolean messages = true;
     public boolean hud = true;
     public boolean autoRefill = true;     // hotbar'da yo'q narsani inventardan olib keladi
+    public boolean restoreInventory = true; // ishlatib bo'lgach olib kelinganlarini joyiga qaytaradi
     public int active = 0;
     public Profile[] profiles = { new Profile(), new Profile(), new Profile() };
     public List<String> friends = new ArrayList<>();
