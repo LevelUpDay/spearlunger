@@ -7,7 +7,7 @@ Kerakli modlar: Fabric Loader, Fabric API.
 
 | Tugma | Vazifa |
 |---|---|
-| **R** | Auto Lunge: Lunge enchantli nayza bilan cooldown to'lishi bilan avtomatik jab (bosib turish yoki bir bosib yoqish) |
+| **R** | Auto Lunge: Lunge enchantli nayza bilan cooldown to'lishi bilan avtomatik jab. Bir bossangiz yoqiladi (yana bossangiz o'chadi), bosib tursangiz qo'yib yuborguncha ishlaydi |
 | **X** | Nishonga lunge qilib uchish, yaqinlashganda mace bilan urish (yerda bo'lsangiz wind charge bilan sakraydi). Yana bossangiz bekor bo'ladi |
 | **O** | ClickGUI menyusi (Meteor uslubida) |
 | **B** | Kamon auto-TNT yoqish/o'chirish |
@@ -17,6 +17,10 @@ Kerakli modlar: Fabric Loader, Fabric API.
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
 
 ## ClickGUI (O)
+
+Har bir modulning sozlamalarida birinchi qator — **Yoqish/o'chirish** tugmasi: bosing va klaviaturadan harf tanlang.
+ClickGUI'da modul ustida **o'rta tugma** (g'ildirak) bosilsa ham darhol tugma tanlash boshlanadi; bog'langan tugma
+modul nomi yonida `[G]` kabi ko'rinadi.
 
 Kategoriyalar alohida panellarda: Combat, Movement, World, Client. Panel sarlavhasini sudrab joyini o'zgartirish mumkin.
 - modul ustida **chap tugma** — yoqish/o'chirish;

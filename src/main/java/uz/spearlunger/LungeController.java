@@ -49,6 +49,10 @@ public class LungeController {
     private int lunges = 0;
     private int originalSlot = 0;
     private boolean toggled = false;
+    // R: bir bosish = yoqish/o'chirish, bosib turish = qo'yib yuborguncha (rMode 0)
+    private boolean rWasDown = false;
+    private int rPressTicks = 0;
+    private boolean rIgnoreUntilRelease = false;
     private String lastWarn = null;
     private LivingEntity target = null;
 
@@ -111,16 +115,7 @@ public class LungeController {
             return;
         }
 
-        boolean wantHold;
-        if (Config.get().holdToggle) {
-            if (holdPresses % 2 == 1) {
-                toggled = !toggled;
-                player.sendMessage(Text.literal(toggled ? "§aAuto Lunge: ON" : "§cAuto Lunge: OFF"), true);
-            }
-            wantHold = toggled;
-        } else {
-            wantHold = SpearLungerClient.keyHold.isPressed();
-        }
+        boolean wantHold = wantHold(player, holdPresses);
 
         if (wantHold) {
             if (mode != Mode.HOLD) {
@@ -131,7 +126,7 @@ public class LungeController {
                 lastWarn = null;
                 if (s < 0) {
                     say(player, "§cHotbar'da Lunge enchantli (yaroqli) nayza topilmadi.");
-                    if (Config.get().holdToggle) stop(client, player, null);
+                    if (toggled) stop(client, player, null);
                     // bosib turish rejimida tugma qo'yib yuborilguncha hech narsa qilmaymiz
                     return;
                 }
@@ -144,6 +139,46 @@ public class LungeController {
     }
 
     // ------------------------------------------------------------ R rejimi
+    /** R holati: rMode 0 = avto (bir bosish yoqadi/o'chiradi, bosib turish - qo'yib yuborguncha), 1 = bosib turish, 2 = bosib yoqish. */
+    private boolean wantHold(ClientPlayerEntity player, int presses) {
+        int rMode = Math.floorMod(Config.get().rMode, 3);
+        boolean down = SpearLungerClient.keyHold.isPressed();
+        boolean result;
+        if (rMode == 1) {
+            result = down;
+        } else if (rMode == 2) {
+            if (presses % 2 == 1) setToggled(player, !toggled);
+            result = toggled;
+        } else {
+            if (down && !rWasDown) {
+                // bosish boshlandi
+                rPressTicks = 0;
+                if (toggled) {
+                    setToggled(player, false);
+                    rIgnoreUntilRelease = true;
+                }
+            } else if (!down && !rWasDown && presses > 0) {
+                // juda tez bosildi (bitta tick ichida bosib qo'yib yuborildi)
+                setToggled(player, !toggled);
+            }
+            if (down) rPressTicks++;
+            if (!down && rWasDown) {
+                // qisqa bosish = yoqish; uzoq bosib turilgan bo'lsa qo'yib yuborilganda o'chadi
+                if (!rIgnoreUntilRelease && rPressTicks <= 6) setToggled(player, true);
+                rIgnoreUntilRelease = false;
+            }
+            result = toggled || (down && !rIgnoreUntilRelease);
+        }
+        rWasDown = down;
+        return result;
+    }
+
+    private void setToggled(ClientPlayerEntity player, boolean on) {
+        if (toggled == on) return;
+        toggled = on;
+        player.sendMessage(Text.literal(on ? "§aAuto Lunge: ON §7(R - o'chirish)" : "§cAuto Lunge: OFF"), true);
+    }
+
     private void tickHold(MinecraftClient client, ClientPlayerEntity player) {
         if (eating) {
             tickEat(client, player);
@@ -242,7 +277,8 @@ public class LungeController {
         lunges = 0;
         lastWarn = null;
         originalSlot = player.getInventory().getSelectedSlot();
-        if (start == Phase.FLY) select(player, s);
+        // nayza boshidanoq qo'lda: cooldown uchish paytida to'ladi (almashtirilsa 0 dan boshlanadi)
+        select(player, s);
         say(player, "§aX: nishon — " + t.getName().getString());
     }
 
@@ -271,24 +307,27 @@ public class LungeController {
         switch (phase) {
             case LAUNCH_AIM -> {
                 // pastga qarab wind charge otamiz: portlash bizni tepaga uloqtiradi
-                if (Rotations.turn(player, yawToTarget, 90.0f)) {
+                boolean down = Rotations.turn(player, yawToTarget, 90.0f);
+                // nayza cooldown'i cho'qqigacha to'lishi uchun biroz to'lgan bo'lsin
+                boolean charged = player.getAttackCooldownProgress(0.0f) >= 0.55f || phaseTicks > 30;
+                if (down && charged) {
                     int w = find(player, Items.WIND_CHARGE);
                     if (w < 0) { stop(client, player, "§cWind charge tugadi."); return; }
+                    int spear = player.getInventory().getSelectedSlot();
+                    // bir tickda: wind charge'ga o'tib otamiz va darhol nayzaga qaytamiz -
+                    // player tick'idan oldin qaytgani uchun nayza cooldown'i nolga tushmaydi
                     select(player, w);
                     client.interactionManager.interactItem(player, Hand.MAIN_HAND);
                     player.swingHand(Hand.MAIN_HAND);
+                    select(player, spear);
                     phase = Phase.LAUNCH_WAIT;
                     phaseTicks = 0;
-                } else if (phaseTicks > 40) {
+                } else if (phaseTicks > 50) {
                     stop(client, player, "§eX: pastga burila olmadi.");
                 }
                 return;
             }
             case LAUNCH_WAIT -> {
-                if (phaseTicks == 1) {
-                    int s = findLungeSpear(player);
-                    if (s >= 0) select(player, s);
-                }
                 Rotations.turn(player, yawToTarget, 0.0f);
                 boolean apex = !player.isOnGround() && player.getVelocity().y <= 0.15;
                 if (apex || (!player.isOnGround() && phaseTicks > 25)) {

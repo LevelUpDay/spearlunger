@@ -80,7 +80,11 @@ public class ClickGuiScreen extends Screen {
                 if (hover) ctx.fill(x, ry, x + PANEL_W, ry + ROW_H, Theme.ROW_HOVER);
                 int color = m.toggleable() ? (m.isEnabled() ? Theme.TEXT : Theme.TEXT_OFF) : Theme.TEXT;
                 ctx.drawTextWithShadow(textRenderer, m.name, x + 6, ry + 4, color);
-                String arrow = m.toggleable() ? "..." : "›";
+                // Meteor kabi: bog'langan tugma o'ngda ko'rinadi
+                Setting.Key tk = m.toggleKey();
+                String arrow = tk != null && !tk.kb.isUnbound()
+                        ? "[" + tk.kb.getBoundKeyLocalizedText().getString() + "]"
+                        : m.toggleable() ? "..." : "›";
                 ctx.drawTextWithShadow(textRenderer, arrow, x + PANEL_W - 6 - textRenderer.getWidth(arrow), ry + 4,
                         Theme.TEXT_DIM);
                 ry += ROW_H;
@@ -93,7 +97,7 @@ public class ClickGuiScreen extends Screen {
             ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(hovered.desc), width / 2, by - 12, Theme.TEXT);
         }
         ctx.drawCenteredTextWithShadow(textRenderer,
-                Text.literal("Chap tugma: yoqish/o'chirish  •  O'ng tugma: sozlamalar  •  Sarlavhani sudrang"),
+                Text.literal("Chap: yoqish/o'chirish  •  O'ng: sozlamalar  •  O'rta: tugma (bind) berish  •  Sarlavhani sudrang"),
                 width / 2, by, Theme.TEXT_DIM);
     }
 
@@ -123,6 +127,7 @@ public class ClickGuiScreen extends Screen {
                 Module m = mods.get(idx);
                 if (button == 0 && m.toggleable()) m.toggle();
                 else if (button == 0 || button == 1) client.setScreen(new ModuleScreen(m, this));
+                else if (button == 2 && m.toggleKey() != null) client.setScreen(new ModuleScreen(m, this, true));
                 return true;
             }
         }

@@ -43,6 +43,15 @@ public final class Module {
         Modules.saveAll();
     }
 
+    /** Modulni yoqib-o'chiradigan tugma sozlamasi (birinchi "Yoqish/o'chirish" Key), yo'q bo'lsa null. */
+    public Setting.Key toggleKey() {
+        if (!toggleable()) return null;
+        for (Setting s : settings()) {
+            if (s instanceof Setting.Key k && s.name.startsWith(Setting.TOGGLE_KEY)) return k;
+        }
+        return null;
+    }
+
     /** Har chizishda qayta yig'iladi (masalan TNT profili almashsa qiymatlar yangilanadi). */
     public List<Setting> settings() { return settings.get(); }
 }
