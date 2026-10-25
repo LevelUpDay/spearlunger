@@ -3,6 +3,8 @@ package uz.spearlunger.gui;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
+import uz.autoshield.AutoShieldClient;
+import uz.autoshield.ShieldConfig;
 import uz.autoelytra.ElytraConfig;
 import uz.autotnt.AutoTntClient;
 import uz.autotnt.AutoTntConfig;
@@ -43,6 +45,7 @@ public final class Modules {
         ElytraConfig.save();
         TotemConfig.save();
         CobwebConfig.save();
+        ShieldConfig.save();
     }
 
     private static List<Module> build() {
@@ -156,6 +159,43 @@ public final class Modules {
                     bool("Xabarlar", "Nima uchun qo'yganini action bar'da yozadi", () -> c.messages,
                             v -> c.messages = v),
                     bool("HUD", "Ekranda cobweb soni", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Auto Shield", "Qo'lda qalqon bo'lsa, urmoqchi bo'lishsa o'zi ko'taradi",
+                Module.Category.COMBAT, () -> ShieldConfig.get().enabled, v -> ShieldConfig.get().enabled = v, () -> {
+            ShieldConfig c = ShieldConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoShieldClient.keyToggle),
+                    group("O'yinchilar"),
+                    bool("O'yinchilar", "Yaqinda sizga qarab turgan / yugurib kelayotgan o'yinchi", () -> c.players,
+                            v -> c.players = v),
+                    num("Masofa", "Shu masofada xavf deb hisoblanadi", 25, 80, () -> c.playerRangeTenths,
+                            v -> c.playerRangeTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Qarash burchagi", "Sizga shuncha gradus ichida qarab tursa", 10, 90, () -> c.faceAngle,
+                            v -> c.faceAngle = v, v -> v + "°"),
+                    bool("Kamon/arbalet", "Sizni kamon, arbalet yoki trident bilan nishonga olsa", () -> c.playerRanged,
+                            v -> c.playerRanged = v),
+                    bool("Mace", "Ustingizdan tushayotgan o'yinchi", () -> c.maceFall, v -> c.maceFall = v),
+                    group("Moblar"),
+                    bool("Moblar", "Yaqindagi dushman mob urmoqchi bo'lsa", () -> c.mobs, v -> c.mobs = v),
+                    num("Mob masofasi", "Shu masofada", 15, 60, () -> c.mobRangeTenths, v -> c.mobRangeTenths = v,
+                            v -> (v / 10.0) + " blok"),
+                    bool("Skelet/pillager", "Sizga qarab o'q tortayotgan moblar", () -> c.mobRanged,
+                            v -> c.mobRanged = v),
+                    bool("Creeper", "Portlay deb turgan creeper", () -> c.creepers, v -> c.creepers = v),
+                    group("Boshqa"),
+                    bool("O'qlar", "Sizga qarab uchayotgan o'q, trident, fireball", () -> c.projectiles,
+                            v -> c.projectiles = v),
+                    bool("Zarba yeganda", "Urishsa darhol ko'taradi", () -> c.onHurt, v -> c.onHurt = v),
+                    num("Ushlab turish", "Xavf o'tgach yana shuncha tick", 0, 30, () -> c.holdTicks,
+                            v -> c.holdTicks = v, v -> v + " tick"),
+                    bool("Hujumchiga burilish", "Orqangizdan kelsa unga buriladi (qalqon faqat oldni to'sadi)",
+                            () -> c.autoFace, v -> c.autoFace = v),
+                    bool("Urish uchun tushirish", "Chap tugmani bossangiz qalqon tushadi va urasiz", () -> c.lowerToAttack,
+                            v -> c.lowerToAttack = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar xavf emas", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("HUD", "Ekranda qalqon holati", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Elytra", "Firework bosilganda elytra'ni kiyadi, ochadi va firework'ga qaytadi",

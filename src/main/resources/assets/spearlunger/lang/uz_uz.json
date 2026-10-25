@@ -16,5 +16,7 @@
   "key.spearlunger.toggle": "Spear Lunger yoqish/o'chirish",
   "key.autotnt.toggle": "Auto TNT Cart yoqish/o'chirish",
   "key.category.autocobweb.main": "Auto Cobweb",
-  "key.autocobweb.toggle": "Auto Cobweb yoqish/o'chirish"
+  "key.autocobweb.toggle": "Auto Cobweb yoqish/o'chirish",
+  "key.category.autoshield.main": "Auto Shield",
+  "key.autoshield.toggle": "Auto Shield yoqish/o'chirish"
 }

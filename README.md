@@ -53,6 +53,18 @@ Hotbar (yoki inventar) dagi cobweb'ni o'zi qo'yadi:
 - **MLG**: baland joydan yiqilayotganda tagingizga — fall damage bo'lmaydi;
 - ikki qavat (oyoq + bosh), do'stlarga qo'ymaslik, masofa, kechikish, avval qarab qo'yish.
 
+## Auto Shield
+
+Faqat qo'lda (o'ng yoki chap) qalqon bo'lsa ishlaydi. Qalqon ko'tarilgach ~5 tickdan keyin to'sa boshlaydi,
+shuning uchun xavf zarbadan **oldin** aniqlanadi:
+- yaqinda sizga qarab turgan yoki yugurib kelayotgan o'yinchi; ustingizdan mace bilan tushayotgan o'yinchi;
+- sizni kamon/arbalet/trident bilan nishonga olgan o'yinchi yoki mob (skelet, pillager);
+- yaqindagi dushman mob, portlay deb turgan creeper, sizga qarab uchayotgan o'q/fireball;
+- zarba yesangiz darhol ko'taradi.
+
+Hujumchi orqada bo'lsa unga buriladi, chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. Bolta bilan
+o'chirilgan qalqonni ko'tarmaydi. Har bir tur alohida yoqiladi/o'chiriladi.
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:
