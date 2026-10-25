@@ -100,6 +100,16 @@ Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidag
 - **Proaktiv**: yaqinda zaryadlangan anchor paydo bo'lsa (dushmanniki ham) oldindan to'sadi;
 - obsidian afzal (portlashda buzilmaydi), bo'lmasa istalgan to'liq blok; Nether'da ishlamaydi (u yerda portlamaydi).
 
+## Fall Combo (Combat)
+
+Tepadan o'yinchi ustiga tushayotganingizda (standart 3+ blok):
+1. hotbar'da spear bo'lsa uni olib o'ng tugmani bosib turadi — kinetik zaryad, tushish tezligi zararni oshiradi;
+2. spear tegishi bilan (yoki yetarlicha yaqinlashganda) eng yaxshi **qilich**ga, bo'lmasa **bolta**ga o'tib uradi —
+   almashtirish va zarba bir tickda, shuning uchun zarba kuchsizlanmaydi; nishon qalqon ushlasa avval bolta bilan
+   qalqonini o'chiradi;
+3. oxirida **mace**'ni qo'lga oladi (urishni o'zingiz yoki X rejimi qiladi).
+Har bir qadam, masofalar, nishonga qarash va nishon turlari sozlanadi.
+
 ## Chest Stealer (World)
 
 Sandiq yoki shulker ochilganda faqat **tanlangan** itemlarni o'zi oladi (yoki hammasini / tanlanmaganlarni).

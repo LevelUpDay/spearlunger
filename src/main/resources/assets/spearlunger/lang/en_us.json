@@ -30,5 +30,7 @@
   "key.category.cheststealer.main": "Chest Stealer",
   "key.cheststealer.toggle": "Chest Stealer on/off",
   "key.category.nametags.main": "Nametags+",
-  "key.nametags.toggle": "Nametags+ on/off"
+  "key.nametags.toggle": "Nametags+ on/off",
+  "key.category.fallcombo.main": "Fall Combo",
+  "key.fallcombo.toggle": "Fall Combo on/off"
 }

@@ -16,6 +16,8 @@ import uz.autototem.AutoTotemClient;
 import uz.autototem.TotemConfig;
 import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
+import uz.fallcombo.FallComboClient;
+import uz.fallcombo.FallComboConfig;
 import uz.fastplace.FastPlaceClient;
 import uz.fastplace.FastPlaceConfig;
 import uz.cheststealer.ChestStealerClient;
@@ -65,6 +67,7 @@ public final class Modules {
         AnchorGuardConfig.save();
         StealerConfig.save();
         NametagsConfig.save();
+        FallComboConfig.save();
     }
 
     private static List<Module> build() {
@@ -303,6 +306,40 @@ public final class Modules {
                             v -> c.obsidianOnly = v),
                     bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan", () -> c.fromInventory,
                             v -> c.fromInventory = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
+        l.add(new Module("Fall Combo", "Tepadan tushayotganda: spear zaryadi → qilich/bolta → mace'ga o'tish",
+                Module.Category.COMBAT, () -> FallComboConfig.get().enabled, v -> FallComboConfig.get().enabled = v, () -> {
+            FallComboConfig c = FallComboConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", FallComboClient.keyToggle),
+                    group("Kombinatsiya"),
+                    bool("Spear zaryadi", "Avval spear bilan o'ng tugma (tushish tezligi zararni oshiradi)",
+                            () -> c.useSpear, v -> c.useSpear = v),
+                    bool("Qilich/bolta zarbasi", "Spear tegishi bilan qilichga (bo'lmasa boltaga) o'tib uradi",
+                            () -> c.followHit, v -> c.followHit = v),
+                    bool("Qalqonni sindirish", "Nishon qalqon ushlasa avval bolta bilan o'chiradi", () -> c.breakShield,
+                            v -> c.breakShield = v),
+                    bool("Mace'ga o'tish", "Oxirida mace'ni qo'lga oladi (zarbani o'zingiz/X rejimi beradi)",
+                            () -> c.endOnMace, v -> c.endOnMace = v),
+                    bool("1 tick swap", "Almashtirish va zarba bir tickda (zarba kuchsizlanmaydi)", () -> c.sameTickSwap,
+                            v -> c.sameTickSwap = v),
+                    bool("Nishonga qarash", "Tushayotganda nishonga buriladi", () -> c.aim, v -> c.aim = v),
+                    group("Masofalar"),
+                    num("Min balandlik", "Shundan baland tushayotganda", 1, 30, () -> c.minFall, v -> c.minFall = v,
+                            v -> v + " blok"),
+                    num("Nishon radiusi", "Ostingizdagi nishon gorizontal masofasi", 10, 80, () -> c.rangeTenths,
+                            v -> c.rangeTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Qilich masofasi", "Shu masofada qilich bilan uradi", 20, 45, () -> c.hitReachTenths,
+                            v -> c.hitReachTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Spear tegmasa", "Shu masofaga kelganda baribir qilichga o'tadi", 10, 45, () -> c.fallbackTenths,
+                            v -> c.fallbackTenths = v, v -> (v / 10.0) + " blok"),
+                    group("Nishon"),
+                    bool("O'yinchilar", "O'yinchilarga", () -> c.players, v -> c.players = v),
+                    bool("Moblar", "Dushman moblarga ham", () -> c.mobs, v -> c.mobs = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
 
