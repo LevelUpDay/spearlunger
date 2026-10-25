@@ -198,6 +198,11 @@ bo'lganda ishlash va "totem ishlatildi" xabari sozlanadi.
 
 ## Nayza qanday ishlaydi (1.21.11)
 
+- R va X nayzani **jab tickining o'zida** tanlaydi (almashtirish + jab bir tickda, mace'dagi "1 tick swap" kabi):
+  shuning uchun birinchi lunge kutmasdan darhol chiqadi. Keyingi lunge'lar orasida nayzaning o'z cooldown'i
+  (~1 soniya) bor — undan tezini vanilla server qabul qilmaydi.
+- X: wind charge darhol (pastga qarash faqat paketda) otiladi va yerdan uzilishi bilan lunge boshlanadi.
+
 - Nayzada `minimum_attack_charge = 1.0` bor, ya'ni jab faqat **cooldown 100%** bo'lganda ishlaydi
   (netherite ≈ 23 tick, diamond ≈ 21 tick). Shuning uchun 1 soniyada ~1 lunge, bundan tez bo'lmaydi.
 - Qo'ldagi item almashsa cooldown 0 dan boshlanadi, shuning uchun mod nayzani qo'lda ushlab turadi.

@@ -186,17 +186,26 @@ public class LungeController {
         }
         int s = findLungeSpear(player);
         if (s < 0) return;
-        if (player.getInventory().getSelectedSlot() != s) {
-            select(player, s);
-            sinceReady = 0;
-            return;
-        }
         if (hungerLow(player) && Config.get().autoEat) {
             int f = findFood(player);
             if (f >= 0) {
                 startEat(client, player, f);
                 return;
             }
+        }
+        swapAndLunge(client, player, s);
+    }
+
+    /**
+     * Nayzaga o'tish va jab BITTA tickda: qo'ldagi narsa almashganda cooldown player tick'ida nolga tushadi -
+     * undan oldin (shu tickning boshida) urilsa, server ham, client ham avvalgi (to'lgan) cooldown'ni hisoblaydi.
+     * Shuning uchun birinchi lunge darhol chiqadi, keyingilari esa nayzaning o'z cooldown'i bilan.
+     */
+    private void swapAndLunge(MinecraftClient client, ClientPlayerEntity player, int spear) {
+        if (player.getInventory().getSelectedSlot() != spear) {
+            select(player, spear);
+            nextExtraDelay = 0;
+            sinceReady = 1;   // qo'shimcha kechikishsiz - darhol
         }
         tryLunge(client, player);
     }
@@ -277,8 +286,7 @@ public class LungeController {
         lunges = 0;
         lastWarn = null;
         originalSlot = player.getInventory().getSelectedSlot();
-        // nayza boshidanoq qo'lda: cooldown uchish paytida to'ladi (almashtirilsa 0 dan boshlanadi)
-        select(player, s);
+        // nayzani oldindan olmaymiz: jab tickida bir tickda almashtiramiz (cooldown nolga tushmaydi)
         say(player, "§aX: nishon — " + t.getName().getString());
     }
 
@@ -306,31 +314,27 @@ public class LungeController {
 
         switch (phase) {
             case LAUNCH_AIM -> {
-                // pastga qarab wind charge otamiz: portlash bizni tepaga uloqtiradi
-                boolean down = Rotations.turn(player, yawToTarget, 90.0f);
-                // nayza cooldown'i cho'qqigacha to'lishi uchun biroz to'lgan bo'lsin
-                boolean charged = player.getAttackCooldownProgress(0.0f) >= 0.55f || phaseTicks > 30;
-                if (down && charged) {
-                    int w = find(player, Items.WIND_CHARGE);
-                    if (w < 0) { stop(client, player, "§cWind charge tugadi."); return; }
-                    int spear = player.getInventory().getSelectedSlot();
-                    // bir tickda: wind charge'ga o'tib otamiz va darhol nayzaga qaytamiz -
-                    // player tick'idan oldin qaytgani uchun nayza cooldown'i nolga tushmaydi
-                    select(player, w);
-                    client.interactionManager.interactItem(player, Hand.MAIN_HAND);
-                    player.swingHand(Hand.MAIN_HAND);
-                    select(player, spear);
-                    phase = Phase.LAUNCH_WAIT;
-                    phaseTicks = 0;
-                } else if (phaseTicks > 50) {
-                    stop(client, player, "§eX: pastga burila olmadi.");
-                }
+                // darhol: pastga qarash faqat ishlatish paketida (kamera qimirlamaydi), shu tickda eski slotga
+                int w = find(player, Items.WIND_CHARGE);
+                if (w < 0) { stop(client, player, "§cWind charge tugadi."); return; }
+                int back = player.getInventory().getSelectedSlot();
+                float oy = player.getYaw(), op = player.getPitch();
+                select(player, w);
+                player.setYaw(yawToTarget);
+                player.setPitch(90.0f);
+                client.interactionManager.interactItem(player, Hand.MAIN_HAND);
+                player.swingHand(Hand.MAIN_HAND);
+                player.setYaw(oy);
+                player.setPitch(op);
+                select(player, back);
+                phase = Phase.LAUNCH_WAIT;
+                phaseTicks = 0;
                 return;
             }
             case LAUNCH_WAIT -> {
                 Rotations.turn(player, yawToTarget, 0.0f);
-                boolean apex = !player.isOnGround() && player.getVelocity().y <= 0.15;
-                if (apex || (!player.isOnGround() && phaseTicks > 25)) {
+                // yerdan uzilishi bilan uchamiz (cho'qqini kutmaymiz)
+                if (!player.isOnGround() && phaseTicks >= 2) {
                     phase = Phase.FLY;
                     phaseTicks = 0;
                 } else if (phaseTicks > 40) {
@@ -386,12 +390,8 @@ public class LungeController {
             stop(client, player, "§cHotbar'da Lunge enchantli (yaroqli) nayza topilmadi.");
             return;
         }
-        if (player.getInventory().getSelectedSlot() != s) {
-            select(player, s);
-            sinceReady = 0;
-            return;
-        }
-        if (aimed) tryLunge(client, player);
+        // nayzani faqat shu yerda (jab tickida) olamiz - cooldown yo'qolmaydi
+        if (aimed) swapAndLunge(client, player, s);
     }
 
     // ------------------------------------------------------------ lunge
