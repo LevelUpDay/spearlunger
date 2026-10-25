@@ -14,6 +14,7 @@ Kerakli modlar: Fabric Loader, Fabric API.
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **J** | Mace Combo: pearl → wind charge → mace (bir bosish) |
 | **K** | Auto PvP yoqish/o'chirish |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
 
@@ -64,6 +65,15 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
   bilan o'chiradi;
 - **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
 HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
+
+## Mace Combo (Combat, J)
+
+Bir bosishda bitta kombinatsiya (yana bossangiz bekor):
+1. nishon uzoq bo'lsa (standart 12+ blok) uning oldiga **ender pearl** — pearl yetib borguncha nishon qayerga yurishi
+   va o'zingizning tezligingiz (yugurish, sakrash, uchish) hisoblanadi;
+2. yaqinlashgach oyog'ingiz ostiga **wind charge** (pastga qarash faqat paketda) — tepaga uchasiz;
+3. tushishda nishonga qarab turadi va masofaga kirishi bilan **mace**'ga o'tib uradi (zirhli nishonga Breach,
+   aks holda Density) — almashtirish va zarba bir tickda.
 
 ## Auto Cobweb
 

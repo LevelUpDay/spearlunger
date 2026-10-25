@@ -35,6 +35,10 @@ public class PvpConfig {
     public boolean axeShield = true;
     /** Tushayotganda mace (zirhli nishonga Breach, aks holda Density). */
     public boolean mace = true;
+    /** Mace combo: yaqinda yerda bo'lsangiz wind charge bilan tepaga sakrab, tushishda mace bilan uradi. */
+    public boolean maceCombo = true;
+    /** Shu masofada mace combo boshlanadi (blok). */
+    public int maceComboDist = 5;
     /** Mace uchun kamida shuncha tushish (blok). */
     public int maceMinFall = 2;
     /** Ochlik shundan kam bo'lsa lunge qilmaydi (Lunge ochlik yeydi). */

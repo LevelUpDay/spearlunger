@@ -26,6 +26,8 @@ import uz.fastplace.FastPlaceClient;
 import uz.fastplace.FastPlaceConfig;
 import uz.cheststealer.ChestStealerClient;
 import uz.cheststealer.StealerConfig;
+import uz.macecombo.MaceComboClient;
+import uz.macecombo.MaceComboConfig;
 import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
 import uz.norender.NoRenderClient;
@@ -81,6 +83,7 @@ public final class Modules {
         PearlConfig.save();
         ClutchConfig.save();
         PvpConfig.save();
+        MaceComboConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
     }
@@ -164,12 +167,39 @@ public final class Modules {
                             v -> c.mace = v),
                     num("Mace balandligi", "Kamida shuncha tushganda", 1, 20, () -> c.maceMinFall,
                             v -> c.maceMinFall = v, v -> v + " blok"),
+                    bool("Mace combo", "Yaqinda yerda bo'lsangiz wind charge bilan sakrab, tushishda mace bilan uradi",
+                            () -> c.maceCombo, v -> c.maceCombo = v),
+                    num("Combo masofasi", "Shu masofada sakraydi", 2, 10, () -> c.maceComboDist,
+                            v -> c.maceComboDist = v, v -> v + " blok"),
                     group("Nishon"),
                     bool("O'yinchilar", "O'yinchilarga", () -> c.players, v -> c.players = v),
                     bool("Moblar", "Dushman moblarga ham", () -> c.mobs, v -> c.mobs = v),
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Mace Combo", "J: pearl (uzoq bo'lsa) -> wind charge -> mace; harakatingiz va nishonniki hisoblanadi",
+                Module.Category.COMBAT, () -> MaceComboConfig.get().enabled, v -> MaceComboConfig.get().enabled = v, () -> {
+            MaceComboConfig c = MaceComboConfig.get();
+            return List.of(
+                    key("Kombinatsiya tugmasi", "Bir bosish - bitta kombinatsiya, yana bossangiz bekor (standart J)",
+                            MaceComboClient.keyCombo),
+                    bool("Ender pearl", "Nishon uzoq bo'lsa avval pearl bilan yaqinlashadi", () -> c.pearl,
+                            v -> c.pearl = v),
+                    num("Pearl masofasi", "Shundan uzoq bo'lsa pearl", 6, 40, () -> c.pearlDist, v -> c.pearlDist = v,
+                            v -> v + " blok"),
+                    num("Pearl oldinroq", "Pearl nishondan shuncha oldinga tushadi", 0, 50, () -> c.pearlShortTenths,
+                            v -> c.pearlShortTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Wind charge masofasi", "Shu masofada tepaga sakraydi", 2, 12, () -> c.windDist,
+                            v -> c.windDist = v, v -> v + " blok"),
+                    num("Mace masofasi", "Shu masofada mace bilan uradi", 20, 45, () -> c.reachTenths,
+                            v -> c.reachTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Nishon masofasi", "Eng yaqin dushmanni shu masofada qidiradi", 8, 96, () -> c.range,
+                            v -> c.range = v, v -> v + " blok"),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
 
         l.add(new Module("Auto Totem", "Chap qo'lda totem bo'lmasa inventardan qo'yadi",
@@ -427,6 +457,8 @@ public final class Modules {
                             v -> v + " blok"),
                     num("Balandlik", "Dushmandan kamida shuncha baland bo'lsangiz", 0, 20, () -> c.unequipMinAbove,
                             v -> c.unequipMinAbove = v, v -> v + " blok"),
+                    num("Oldindan", "Dushmangacha shuncha tick qolganda yechadi (tez uchsangiz uzoqroqdan)", 2, 30,
+                            () -> c.unequipLeadTicks, v -> c.unequipLeadTicks = v, v -> v + " tick"),
                     bool("Mace'ni olish", "Yechgach mace'ni qo'lga oladi", () -> c.unequipToMace,
                             v -> c.unequipToMace = v),
                     group("Qo'nish"),

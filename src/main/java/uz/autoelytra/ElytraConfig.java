@@ -36,6 +36,8 @@ public class ElytraConfig {
     public int unequipDist = 8;
     /** Dushmandan kamida shuncha baland bo'lsangiz (blok). */
     public int unequipMinAbove = 2;
+    /** Dushmangacha shuncha tick qolganda yechadi (tez uchsangiz oldinroq). */
+    public int unequipLeadTicks = 8;
     /** Yechgach mace'ni qo'lga oladi. */
     public boolean unequipToMace = true;
     public boolean messages = true;

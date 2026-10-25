@@ -75,6 +75,17 @@ public class PvpController {
             return;
         }
 
+        // ---- 1b. mace combo: yaqinda yerda tursak wind charge bilan tepaga sakraymiz - tushishda mace
+        if (cfg.maceCombo && mace >= 0 && p.isOnGround() && windCooldown == 0 && reachDist <= cfg.maceComboDist) {
+            int wind = find(p, Items.WIND_CHARGE);
+            if (wind >= 0 && !p.getItemCooldownManager().isCoolingDown(p.getInventory().getStack(wind))) {
+                launch(c, p, wind, Rotations.yawTo(eye, center));
+                windCooldown = 25;
+                state = "mace sakrash";
+                return;
+            }
+        }
+
         // ---- 2. yaqinda: nayza jab'i (standart) yoki qilich/bolta
         if (cfg.melee && reachDist <= melee) {
             boolean aimed = Rotations.turn(p, Rotations.yawTo(eye, center), Rotations.pitchTo(eye, center));
