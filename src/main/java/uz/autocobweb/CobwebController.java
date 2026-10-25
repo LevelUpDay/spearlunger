@@ -10,7 +10,6 @@ import net.minecraft.entity.mob.Monster;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -19,6 +18,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import uz.autotnt.AutoTntConfig;
+import uz.spearlunger.InvHelper;
 import uz.spearlunger.Rotations;
 
 import java.util.HashMap;
@@ -43,6 +43,8 @@ public class CobwebController {
     private final Map<UUID, Vec3d> velocity = new HashMap<>();
     private final Map<UUID, Integer> stillFor = new HashMap<>();
     private int cooldown = 0;
+    /** Inventardan vaqtincha olib kelingan: {inventar slot, hotbar slot}; qo'yilgach joyiga qaytadi. */
+    private int[] borrowed = null;
     private int aimTicks = 0;
     private BlockPos aiming = null;
     /** Ikki qavat uchun: keyingi qo'yiladigan bosh balandligi. */
@@ -237,6 +239,8 @@ public class CobwebController {
         c.interactionManager.interactBlock(p, Hand.MAIN_HAND, new BlockHitResult(pl.hit, pl.side, pl.base, false));
         p.swingHand(Hand.MAIN_HAND);
         p.getInventory().setSelectedSlot(original);
+        if (borrowed != null && InvHelper.returnItems()) InvHelper.swap(c, p, borrowed[0], borrowed[1]);
+        borrowed = null;
         cooldown = Math.max(0, cfg.placeDelay);
         aiming = null;
         if (cfg.messages) p.sendMessage(Text.literal("§7Cobweb: §f" + pl.why), true);
@@ -253,7 +257,8 @@ public class CobwebController {
             int target = -1;
             for (int h = 0; h < 9; h++) if (h != sel && p.getInventory().getStack(h).isEmpty()) { target = h; break; }
             if (target < 0) target = sel == 8 ? 7 : 8;
-            c.interactionManager.clickSlot(p.playerScreenHandler.syncId, i, target, SlotActionType.SWAP, p);
+            InvHelper.swap(c, p, i, target);
+            borrowed = new int[] { i, target };
             return target;
         }
         return -1;

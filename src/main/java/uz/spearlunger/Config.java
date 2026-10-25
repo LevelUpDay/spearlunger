@@ -32,6 +32,10 @@ public class Config {
         public boolean rotateToBlocks = true;
         /** TNT: tugagach kamerani avvalgi holatiga qaytarish. */
         public boolean restoreView = true;
+        /** Inventardan hotbar'ga olishda inventarni ochib-yopadi (E), aks holda ochmasdan. */
+        public boolean openInventory = true;
+        /** Inventardan olingan narsa ishlatilgach eski joyiga qaytariladi (hotbar'da o'zi qolmaydi). */
+        public boolean returnItems = true;
     }
 
     /**

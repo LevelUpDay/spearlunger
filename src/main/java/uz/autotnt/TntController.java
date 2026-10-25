@@ -19,7 +19,6 @@ import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.ItemTags;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -33,6 +32,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import uz.spearlunger.Config;
+import uz.spearlunger.InvHelper;
 import uz.spearlunger.Rotations;
 import uz.spearlunger.gui.Module;
 import uz.spearlunger.gui.ModuleScreen;
@@ -673,7 +673,7 @@ public class TntController {
     private void restoreSwaps(MinecraftClient c, ClientPlayerEntity p, List<int[]> swaps) {
         for (int i = swaps.size() - 1; i >= 0; i--) {
             int[] sw = swaps.get(i);
-            c.interactionManager.clickSlot(p.playerScreenHandler.syncId, sw[0], sw[1], SlotActionType.SWAP, p);
+            InvHelper.swap(c, p, sw[0], sw[1]);
         }
         swaps.clear();
     }
@@ -799,7 +799,7 @@ public class TntController {
                 for (int h = 0; h < 9; h++) if (!reserved[h]) { target = h; break; }
             }
             if (target < 0) return -1;
-            c.interactionManager.clickSlot(p.playerScreenHandler.syncId, inv, target, SlotActionType.SWAP, p);
+            InvHelper.swap(c, p, inv, target);
             swaps.add(new int[] { inv, target });
             reserved[target] = true;
             return target;

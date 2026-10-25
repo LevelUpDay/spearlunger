@@ -158,6 +158,11 @@ O → Anti-cheat oynasida:
 - **Mace: 1 tick swap**: almashtirish va urish bir tickda bo'ladi (OFF bo'lsa zarba juda kuchsiz).
 - **TNT: blokka qarash / kamerani qaytarish**: TNT rail/minecart qo'yishdan oldin o'sha joyga qaraydi.
 
+- **Inventarni ochib olish**: modullar inventardan hotbar'ga narsa olganda (TNT cart, damlama, cobweb, elytra,
+  obsidian...) vanilla'dagidek inventar ochilib (E), almashtirilib, yopiladi — ko'p serverlar ochmasdan qilingan
+  bosishlarni qaytaradi.
+- **Joyiga qaytarish**: olingan narsa ishlatilgach eski joyiga qaytadi, hotbar'dagi narsangiz ham o'z slotiga.
+
 Diqqat: bu sozlamalar aniqlanish xavfini kamaytiradi, lekin yo'q qilmaydi. Serverda ishlatish o'sha
 server qoidalariga bog'liq.
 

@@ -8,7 +8,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
+import uz.spearlunger.InvHelper;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -169,15 +169,11 @@ public class ElytraController {
                           boolean rememberChest) {
         steps.add(() -> {
             ItemStack before = p.getEquippedStack(EquipmentSlot.CHEST);
-            if (invSlot >= 9) {
-                c.interactionManager.clickSlot(p.playerScreenHandler.syncId, invSlot, hotbar, SlotActionType.SWAP, p);
-            }
+            if (invSlot >= 9) InvHelper.swap(c, p, invSlot, hotbar);
             Item prev = before.isEmpty() ? null : before.getItem();
             p.getInventory().setSelectedSlot(hotbar);
             c.interactionManager.interactItem(p, Hand.MAIN_HAND);
-            if (invSlot >= 9) {
-                c.interactionManager.clickSlot(p.playerScreenHandler.syncId, invSlot, hotbar, SlotActionType.SWAP, p);
-            }
+            if (invSlot >= 9) InvHelper.swap(c, p, invSlot, hotbar);
             p.getInventory().setSelectedSlot(original);
             if (rememberChest && ElytraConfig.get().restoreChest && prev != null && prev != Items.ELYTRA) {
                 savedChest = prev;

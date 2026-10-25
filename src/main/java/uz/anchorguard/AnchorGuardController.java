@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -22,6 +21,7 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import uz.spearlunger.InvHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +34,8 @@ import java.util.List;
  */
 public class AnchorGuardController {
     private boolean internal = false;
+    /** Inventardan vaqtincha olib kelingan: {inventar slot, hotbar slot}; qo'yilgach joyiga qaytadi. */
+    private int[] borrowed = null;
     private int scanCooldown = 0;
 
     // ------------------------------------------------------------ siz portlatganda
@@ -159,6 +161,8 @@ public class AnchorGuardController {
         } finally {
             internal = false;
             p.getInventory().setSelectedSlot(original);
+            if (borrowed != null && InvHelper.returnItems()) InvHelper.swap(c, p, borrowed[0], borrowed[1]);
+            borrowed = null;
         }
         return placed;
     }
@@ -206,7 +210,8 @@ public class AnchorGuardController {
         int target = -1;
         for (int h = 0; h < 9; h++) if (h != sel && p.getInventory().getStack(h).isEmpty()) { target = h; break; }
         if (target < 0) target = sel == 8 ? 7 : 8;
-        c.interactionManager.clickSlot(p.playerScreenHandler.syncId, best, target, SlotActionType.SWAP, p);
+        InvHelper.swap(c, p, best, target);
+        borrowed = new int[] { best, target };
         return target;
     }
 
