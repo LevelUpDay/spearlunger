@@ -18,5 +18,7 @@
   "key.category.autocobweb.main": "Auto Cobweb",
   "key.autocobweb.toggle": "Auto Cobweb on/off",
   "key.category.autoshield.main": "Auto Shield",
-  "key.autoshield.toggle": "Auto Shield on/off"
+  "key.autoshield.toggle": "Auto Shield on/off",
+  "key.category.autopotion.main": "Auto Potion",
+  "key.autopotion.toggle": "Auto Potion on/off"
 }

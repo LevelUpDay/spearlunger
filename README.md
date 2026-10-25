@@ -65,6 +65,17 @@ shuning uchun xavf zarbadan **oldin** aniqlanadi:
 Hujumchi orqada bo'lsa unga buriladi, chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. Bolta bilan
 o'chirilgan qalqonni ko'tarmaydi. Har bir tur alohida yoqiladi/o'chiriladi.
 
+## Auto Potion
+
+Jon belgilangan darajadan (standart 3 yurak) kam qolsa hotbar'dagi **Healing** splash damlamasini oyog'ingizga otadi
+va darhol eski slotga qaytadi. **Silent** rejimda kamera umuman qimirlamaydi — pastga qarash faqat otish paketida
+serverga ketadi, shuning uchun bir tickda bo'ladi. Qo'shimcha:
+- Healing bo'lmasa Regeneration, lingering damlamalar ham;
+- ovqat yeyayotgan yoki qalqon ushlab turgan bo'lsangiz ham to'xtatib otadi;
+- hotbar'da tugasa inventardagini olib keladi, umuman qolmasa ogohlantiradi;
+- buff damlamalar: Strength, Speed, yonganda Fire Resistance (effekt yo'q bo'lsa);
+- HUD: healing damlamalar soni.
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:

@@ -3,6 +3,8 @@ package uz.spearlunger.gui;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
+import uz.autopotion.AutoPotionClient;
+import uz.autopotion.PotionConfig;
 import uz.autoshield.AutoShieldClient;
 import uz.autoshield.ShieldConfig;
 import uz.autoelytra.ElytraConfig;
@@ -46,6 +48,7 @@ public final class Modules {
         TotemConfig.save();
         CobwebConfig.save();
         ShieldConfig.save();
+        PotionConfig.save();
     }
 
     private static List<Module> build() {
@@ -196,6 +199,39 @@ public final class Modules {
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar xavf emas", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("HUD", "Ekranda qalqon holati", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Auto Potion", "Jon kam qolsa Healing splash'ni oyog'ingizga otib, darhol qaytadi",
+                Module.Category.COMBAT, () -> PotionConfig.get().enabled, v -> PotionConfig.get().enabled = v, () -> {
+            PotionConfig c = PotionConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoPotionClient.keyToggle),
+                    group("Davolash"),
+                    num("Jon", "Shundan kam yoki teng bo'lsa otadi", 1, 19, () -> c.health, v -> c.health = v,
+                            v -> (v / 2.0) + " yurak"),
+                    bool("Absorption hisoblansin", "Sariq yuraklar ham jonga qo'shiladi", () -> c.countAbsorption,
+                            v -> c.countAbsorption = v),
+                    bool("Regeneration zaxira", "Healing bo'lmasa Regeneration damlamasini otadi", () -> c.useRegen,
+                            v -> c.useRegen = v),
+                    bool("Lingering ham", "Lingering damlamalarni ham ishlatadi", () -> c.useLingering,
+                            v -> c.useLingering = v),
+                    num("Kechikish", "Otishlar orasida", 1, 20, () -> c.cooldownTicks, v -> c.cooldownTicks = v,
+                            v -> v + " tick"),
+                    bool("Silent", "Kamera qimirlamaydi, pastga qarash faqat serverga ketadi (eng tez)", () -> c.silent,
+                            v -> c.silent = v),
+                    bool("To'xtatib otish", "Ovqat yeyayotgan / qalqon ushlab turgan bo'lsangiz ham", () -> c.interrupt,
+                            v -> c.interrupt = v),
+                    bool("Inventardan to'ldirish", "Hotbar'da tugasa inventardagini olib keladi", () -> c.refill,
+                            v -> c.refill = v),
+                    group("Buff damlamalar"),
+                    bool("Strength", "Strength effekti yo'q bo'lsa otadi", () -> c.buffStrength,
+                            v -> c.buffStrength = v),
+                    bool("Speed", "Speed effekti yo'q bo'lsa otadi", () -> c.buffSpeed, v -> c.buffSpeed = v),
+                    bool("Fire Resistance", "Yonayotgan / lavada bo'lsangiz", () -> c.buffFireRes,
+                            v -> c.buffFireRes = v),
+                    group("Boshqa"),
+                    bool("Xabarlar", "Damlama tugasa ogohlantiradi", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Ekranda healing damlamalar soni", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Elytra", "Firework bosilganda elytra'ni kiyadi, ochadi va firework'ga qaytadi",

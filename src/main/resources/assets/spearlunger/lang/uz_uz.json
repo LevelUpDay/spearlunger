@@ -18,5 +18,7 @@
   "key.category.autocobweb.main": "Auto Cobweb",
   "key.autocobweb.toggle": "Auto Cobweb yoqish/o'chirish",
   "key.category.autoshield.main": "Auto Shield",
-  "key.autoshield.toggle": "Auto Shield yoqish/o'chirish"
+  "key.autoshield.toggle": "Auto Shield yoqish/o'chirish",
+  "key.category.autopotion.main": "Auto Potion",
+  "key.autopotion.toggle": "Auto Potion yoqish/o'chirish"
 }
