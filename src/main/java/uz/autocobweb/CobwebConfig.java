@@ -25,10 +25,10 @@ public class CobwebConfig {
 
     /** Ustingizdan (mace bilan) tushayotgan dushman bo'lsa boshingiz ustiga. */
     public boolean antiMace = true;
-    /** Baland joydan yiqilayotganda tagingizga (fall damage bo'lmaydi). */
-    public boolean selfMlg = true;
-    /** Shundan baland yiqilganda MLG (blok). */
-    public int minFall = 5;
+    /** Anti-web: siz ipda qolsangiz suv paqiri bilan ipni yo'q qilib, suvni qaytarib oladi. */
+    public boolean antiWeb = true;
+    /** Suv bo'lmasa (yoki Nether'da) qaychi/qilich bilan kesadi. */
+    public boolean antiWebCut = true;
 
     /** Qo'yish masofasi (0.1 blok). */
     public int reachTenths = 45;

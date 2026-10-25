@@ -2,6 +2,8 @@ package uz.spearlunger.gui;
 
 import uz.anchorguard.AnchorGuardClient;
 import uz.anchorguard.AnchorGuardConfig;
+import uz.autoclutch.AutoClutchClient;
+import uz.autoclutch.ClutchConfig;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
@@ -71,6 +73,7 @@ public final class Modules {
         NametagsConfig.save();
         FallComboConfig.save();
         PearlConfig.save();
+        ClutchConfig.save();
     }
 
     private static List<Module> build() {
@@ -168,10 +171,10 @@ public final class Modules {
                     group("Himoya"),
                     bool("Anti-mace", "Ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga", () -> c.antiMace,
                             v -> c.antiMace = v),
-                    bool("MLG", "Baland joydan yiqilayotganda tagingizga (fall damage yo'q)", () -> c.selfMlg,
-                            v -> c.selfMlg = v),
-                    num("MLG balandligi", "Shundan baland yiqilganda", 3, 30, () -> c.minFall, v -> c.minFall = v,
-                            v -> v + " blok"),
+                    bool("Anti-web", "Ipga ilinsangiz: suv paqiri bilan ipni yo'q qiladi, suvni qaytarib oladi",
+                            () -> c.antiWeb, v -> c.antiWeb = v),
+                    bool("Anti-web: kesish", "Suv bo'lmasa (yoki Nether'da) qaychi/qilich bilan kesadi", () -> c.antiWebCut,
+                            v -> c.antiWebCut = v),
                     group("Qo'yish"),
                     num("Masofa", "Qo'yish masofasi", 30, 60, () -> c.reachTenths, v -> c.reachTenths = v,
                             v -> (v / 10.0) + " blok"),
@@ -376,6 +379,29 @@ public final class Modules {
                     group("Boshqa"),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
                     bool("HUD", "Uchayotganda elytra durability'si va firework soni", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Auto Clutch", "Yiqilayotganda tagingizga suv/powder snow/slime/cobweb... qo'yadi (MLG)",
+                Module.Category.MOVEMENT, () -> ClutchConfig.get().enabled, v -> ClutchConfig.get().enabled = v, () -> {
+            ClutchConfig c = ClutchConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)",
+                            AutoClutchClient.keyToggle),
+                    num("Min yiqilish", "Jami yiqilish shundan ko'p bo'lsa (3 blokdan ko'pi zarar)", 4, 40,
+                            () -> c.minFall, v -> c.minFall = v, v -> v + " blok"),
+                    group("Nimalar (ustuvorlik tartibida)"),
+                    bool("Suv paqiri", "Nether'da ishlatilmaydi", () -> c.water, v -> c.water = v),
+                    bool("Powder snow", "Powder snow paqiri", () -> c.powderSnow, v -> c.powderSnow = v),
+                    bool("Slime", "Slime block", () -> c.slime, v -> c.slime = v),
+                    bool("Cobweb", "Cobweb", () -> c.cobweb, v -> c.cobweb = v),
+                    bool("Scaffolding", "Scaffolding", () -> c.scaffolding, v -> c.scaffolding = v),
+                    bool("Pichan", "Hay bale (zararni 80% kamaytiradi)", () -> c.hay, v -> c.hay = v),
+                    group("Boshqa"),
+                    bool("Suvni qaytarib olish", "Qo'ngach suvni paqirga oladi", () -> c.pickupWater,
+                            v -> c.pickupWater = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
 
         l.add(new Module("Pearl Clutch", "Ender pearl: harakatingizni hisoblab aniq otadi, yiqilayotganda o'zi clutch qiladi",

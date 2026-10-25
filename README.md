@@ -54,8 +54,18 @@ Hotbar (yoki inventar) dagi cobweb'ni o'zi qo'yadi:
 - **Turgan dushman**: joyida turgan yoki devorga tiqilib qolgan dushman oyog'iga;
 - **Kelayotgan dushman**: yugurib yoki sakrab oldingizga kelayotgan dushman tushadigan joyga (oldindan hisoblaydi);
 - **Anti-mace**: ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga — u ipga ilinib, mace zarbasi bo'lmaydi;
-- **MLG**: baland joydan yiqilayotganda tagingizga — fall damage bo'lmaydi;
-- ikki qavat (oyoq + bosh), do'stlarga qo'ymaslik, masofa, kechikish, avval qarab qo'yish.
+- suvga va suvdagi dushmanga qo'ymaydi; o'zingizning tagingiz, oyog'ingiz, boshingiz va yoningizga qo'ymaydi;
+- **Anti-web**: o'zingiz ipga ilinib qolsangiz suv paqirini tanlab ipga suv quyadi (ip yo'q bo'ladi), keyingi tickda
+  suvni qaytarib oladi va eski slotga qaytadi; suv bo'lmasa (yoki Nether'da) qaychi/qilich bilan kesadi.
+
+Yiqilganda tagingizga qo'yish (MLG) endi **Auto Clutch** modulida.
+
+## Auto Clutch (Movement)
+
+Baland joydan yiqilayotganda yerga tegishdan oldin tagingizga yiqilish zararini yo'q qiladigan narsani qo'yadi —
+hotbar yoki inventarda nima bo'lsa (ustuvorlik): suv paqiri, powder snow, slime, cobweb, scaffolding, pichan.
+Suvni qo'ngach paqirga qaytarib oladi va eski slotga qaytadi. Nether'da suv ishlatilmaydi, suv/slime ustiga
+tushayotgan bo'lsangiz hech narsa qilmaydi. Void'ga yiqilishni Pearl Clutch qiladi.
 
 ## Auto Shield
 

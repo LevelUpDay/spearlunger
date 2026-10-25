@@ -27,8 +27,8 @@ import java.util.Map;
 import java.util.UUID;
 
 /**
- * Cobweb'ni o'zi qo'yadi (ustuvorlik tartibida):
- *  1. MLG: baland joydan yiqilayotganda tagingizga (cobweb fall damage'ni yo'q qiladi);
+ * Cobweb'ni o'zi qo'yadi (ustuvorlik tartibida). Suvga, o'zingizning tagingizga/yoningizga qo'ymaydi.
+ * Yiqilganda tagga qo'yish (MLG) Auto Clutch modulida. Siz ipga ilinib qolsangiz Anti-web suv bilan chiqaradi.
  *  2. Anti-mace: ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga (u ipga ilinib mace zarbasi bo'lmaydi);
  *  3. Joyida turgan / devorga tiqilgan dushman oyog'iga;
  *  4. Oldingizga yugurib yoki sakrab kelayotgan dushmanning tushadigan joyiga.
@@ -49,6 +49,7 @@ public class CobwebController {
     private BlockPos aiming = null;
     /** Ikki qavat uchun: keyingi qo'yiladigan bosh balandligi. */
     private BlockPos followUp = null;
+    private final AntiWeb antiWeb = new AntiWeb();
 
     public void tick(MinecraftClient c) {
         ClientPlayerEntity p = c.player;
@@ -69,6 +70,7 @@ public class CobwebController {
         trackVelocities(c.world, p);
 
         if (!cfg.enabled || c.currentScreen != null || p.isSpectator()) return;
+        if (cfg.antiWeb && antiWeb.tick(c, p, cfg)) return;   // ipdan chiqyapmiz
         if (cooldown > 0) {
             cooldown--;
             return;
@@ -80,7 +82,7 @@ public class CobwebController {
             aiming = null;
             return;
         }
-        if (cfg.rotate && !pl.why.equals("MLG")) {
+        if (cfg.rotate) {
             // boshqa joyga o'tgan bo'lsa qaytadan sanaymiz
             if (!pl.pos.equals(aiming)) {
                 aiming = pl.pos;
@@ -89,9 +91,6 @@ public class CobwebController {
             Vec3d eye = p.getEyePos();
             boolean aimed = Rotations.turn(p, Rotations.yawTo(eye, pl.hit), Rotations.pitchTo(eye, pl.hit));
             if (!aimed && ++aimTicks < 8) return;
-        } else if (cfg.rotate) {
-            // yiqilayotganda vaqt yo'q: to'g'ri pastga qaraymiz
-            p.setPitch(90.0f);
         }
         place(c, p, pl, cfg);
     }
@@ -106,26 +105,6 @@ public class CobwebController {
             followUp = null;
             Placement pl = placement(w, p, f, eye, reach, "2-qavat");
             if (pl != null) return pl;
-        }
-
-        // 1. MLG
-        if (cfg.selfMlg && !p.isOnGround() && !p.isGliding() && !p.getAbilities().flying && !p.isTouchingWater()
-                && p.fallDistance >= cfg.minFall && p.getVelocity().y < -0.4) {
-            BlockPos feet = p.getBlockPos();
-            for (int i = 0; i <= 5; i++) {
-                BlockPos g = feet.down(i + 1);
-                BlockState gs = w.getBlockState(g);
-                if (gs.isAir() || gs.isReplaceable()) continue;
-                BlockPos web = g.up();
-                double h = p.getY() - web.getY();
-                // keyingi tickda yetib kelamizmi
-                if (h <= Math.max(2.5, -p.getVelocity().y * 1.5) && !isWeb(w, web) && w.getBlockState(web).isReplaceable()
-                        && w.getBlockState(g).isSideSolidFullSquare(w, g, Direction.UP)) {
-                    Vec3d hit = Vec3d.ofCenter(g).add(0, 0.5, 0);
-                    if (eye.distanceTo(hit) <= reach + 1.0) return new Placement(web, g, Direction.UP, hit, "MLG");
-                }
-                break;
-            }
         }
 
         // 2. Anti-mace: tepada tushayotgan dushman
@@ -203,8 +182,11 @@ public class CobwebController {
     private Placement placement(ClientWorld w, ClientPlayerEntity p, BlockPos pos, Vec3d eye, double reach, String why) {
         BlockState st = w.getBlockState(pos);
         if (!st.isReplaceable() || isWeb(w, pos)) return null;
-        // o'zimizni ilintirib qo'ymaylik
-        if (p.getBoundingBox().expand(0.2, 0, 0.2).intersects(new Box(pos))) return null;
+        if (!st.getFluidState().isEmpty()) return null;   // suvda cobweb qo'yilmaydi / ishlamaydi
+        // o'zimizni ilintirib qo'ymaylik: tagimiz, oyog'imiz, boshimiz va yonimizdagi bloklarga emas
+        BlockPos feet = p.getBlockPos();
+        if (pos.equals(feet.down()) || pos.equals(feet) || pos.equals(feet.up())) return null;
+        if (p.getBoundingBox().expand(0.6, 0.5, 0.6).intersects(new Box(pos)) && !why.equals("Anti-mace")) return null;
         Placement best = null;
         double bestD = reach;
         BlockPos down = pos.down();
@@ -288,6 +270,7 @@ public class CobwebController {
     private List<LivingEntity> enemies(ClientWorld w, ClientPlayerEntity self, CobwebConfig cfg, double range) {
         return w.getEntitiesByClass(LivingEntity.class, self.getBoundingBox().expand(range), e -> {
             if (e == self || !e.isAlive() || e.distanceTo(self) > range) return false;
+            if (e.isTouchingWater()) return false;   // suvda cobweb ishlamaydi
             if (e instanceof PlayerEntity pl) {
                 return !pl.isSpectator() && !pl.isCreative() && !(cfg.ignoreFriends && isFriend(pl));
             }

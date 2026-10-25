@@ -34,5 +34,7 @@
   "key.category.fallcombo.main": "Fall Combo",
   "key.fallcombo.toggle": "Fall Combo on/off",
   "key.category.pearlclutch.main": "Pearl Clutch",
-  "key.pearlclutch.toggle": "Pearl Clutch on/off"
+  "key.pearlclutch.toggle": "Pearl Clutch on/off",
+  "key.category.autoclutch.main": "Auto Clutch",
+  "key.autoclutch.toggle": "Auto Clutch on/off"
 }

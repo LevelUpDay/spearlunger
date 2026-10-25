@@ -34,5 +34,7 @@
   "key.category.fallcombo.main": "Fall Combo",
   "key.fallcombo.toggle": "Fall Combo yoqish/o'chirish",
   "key.category.pearlclutch.main": "Pearl Clutch",
-  "key.pearlclutch.toggle": "Pearl Clutch yoqish/o'chirish"
+  "key.pearlclutch.toggle": "Pearl Clutch yoqish/o'chirish",
+  "key.category.autoclutch.main": "Auto Clutch",
+  "key.autoclutch.toggle": "Auto Clutch yoqish/o'chirish"
 }
