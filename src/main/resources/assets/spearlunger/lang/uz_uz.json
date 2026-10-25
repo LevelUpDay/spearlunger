@@ -20,5 +20,7 @@
   "key.category.autoshield.main": "Auto Shield",
   "key.autoshield.toggle": "Auto Shield yoqish/o'chirish",
   "key.category.autopotion.main": "Auto Potion",
-  "key.autopotion.toggle": "Auto Potion yoqish/o'chirish"
+  "key.autopotion.toggle": "Auto Potion yoqish/o'chirish",
+  "key.category.bowaim.main": "Bow Aim",
+  "key.bowaim.toggle": "Bow Aim yoqish/o'chirish"
 }

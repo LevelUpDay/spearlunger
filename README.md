@@ -76,6 +76,16 @@ serverga ketadi, shuning uchun bir tickda bo'ladi. Qo'shimcha:
 - buff damlamalar: Strength, Speed, yonganda Fire Resistance (effekt yo'q bo'lsa);
 - HUD: healing damlamalar soni.
 
+## Bow Aim
+
+Kamonni tortganingizda (yoki o'qlangan arbalet / trident ushlaganingizda) pritselga eng yaqin nishonga o'zi qaraydi:
+- o'q tushishi (gravitatsiya + havo qarshiligi) hisoblanadi, arbaletdagi firework to'g'ri chiziqda;
+- nishon qayerga yurayotgani va sakrayotgani oldindan hisoblanadi, o'q yetib borish vaqti bilan aniqlashtiriladi;
+- yugurib otsangiz o'z tezligingiz ham hisobga olinadi;
+- FOV, masofa, gavda/bosh/oyoq, devor orqasidagilarni olmaslik, nishonda qolish, do'stlarga emas, moblar;
+- **O'zi otsin** (standart o'chiq): kamon belgilangan % tortilib nishonga qaraganda o'zi qo'yib yuboradi;
+  o'ng tugmani bosib tursangiz ketma-ket otadi. Arbaletni ham otishi mumkin.
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:

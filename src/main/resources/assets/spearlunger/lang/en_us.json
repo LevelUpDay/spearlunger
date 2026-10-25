@@ -20,5 +20,7 @@
   "key.category.autoshield.main": "Auto Shield",
   "key.autoshield.toggle": "Auto Shield on/off",
   "key.category.autopotion.main": "Auto Potion",
-  "key.autopotion.toggle": "Auto Potion on/off"
+  "key.autopotion.toggle": "Auto Potion on/off",
+  "key.category.bowaim.main": "Bow Aim",
+  "key.bowaim.toggle": "Bow Aim on/off"
 }

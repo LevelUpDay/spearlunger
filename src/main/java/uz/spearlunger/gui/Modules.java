@@ -12,6 +12,8 @@ import uz.autotnt.AutoTntClient;
 import uz.autotnt.AutoTntConfig;
 import uz.autototem.AutoTotemClient;
 import uz.autototem.TotemConfig;
+import uz.bowaim.BowAimClient;
+import uz.bowaim.BowAimConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
@@ -49,6 +51,7 @@ public final class Modules {
         CobwebConfig.save();
         ShieldConfig.save();
         PotionConfig.save();
+        BowAimConfig.save();
     }
 
     private static List<Module> build() {
@@ -232,6 +235,43 @@ public final class Modules {
                     group("Boshqa"),
                     bool("Xabarlar", "Damlama tugasa ogohlantiradi", () -> c.messages, v -> c.messages = v),
                     bool("HUD", "Ekranda healing damlamalar soni", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Bow Aim", "Kamon/arbalet/trident bilan pritselga eng yaqin nishonni o'zi oladi",
+                Module.Category.COMBAT, () -> BowAimConfig.get().enabled, v -> BowAimConfig.get().enabled = v, () -> {
+            BowAimConfig c = BowAimConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", BowAimClient.keyToggle),
+                    group("Nishon"),
+                    num("FOV", "Pritseldan shuncha gradus ichidagi eng yaqini", 5, 180, () -> c.fov, v -> c.fov = v,
+                            v -> v + "°"),
+                    num("Masofa", "Eng uzoq masofa", 10, 150, () -> c.range, v -> c.range = v, v -> v + " blok"),
+                    choice("Qayerga", "Nishonning qaysi joyiga", new String[] {"Gavda", "Bosh", "Oyoq"},
+                            () -> Math.floorMod(c.aimPoint, 3), v -> c.aimPoint = v),
+                    bool("O'yinchilar", "O'yinchilarni nishonga olish", () -> c.players, v -> c.players = v),
+                    bool("Moblar", "Dushman moblarni ham", () -> c.mobs, v -> c.mobs = v),
+                    bool("Faqat ko'rinadigan", "Devor orqasidagilarni olmaydi", () -> c.visibleOnly,
+                            v -> c.visibleOnly = v),
+                    bool("Nishonda qolish", "Tanlangan nishondan sakramaydi", () -> c.stickyTarget,
+                            v -> c.stickyTarget = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    group("Hisoblash"),
+                    bool("Harakatni oldindan", "Qayerga yurayotgani / sakrayotganini hisobga oladi", () -> c.predict,
+                            v -> c.predict = v),
+                    bool("O'z tezligim", "Yugurib otganda o'z tezligingizni ham hisobga oladi", () -> c.selfVelocity,
+                            v -> c.selfVelocity = v),
+                    bool("Silliq burilish", "Anti-cheat burilish sozlamalari bilan (OFF - bir zumda)", () -> c.smooth,
+                            v -> c.smooth = v),
+                    bool("Trident", "Trident otganda ham", () -> c.trident, v -> c.trident = v),
+                    group("Otish"),
+                    bool("O'zi otsin", "Kamon tortilib nishonga qaraganda o'zi qo'yib yuboradi", () -> c.autoShoot,
+                            v -> c.autoShoot = v),
+                    num("Tortish", "Kamonni necha % tortganda otadi", 10, 100, () -> c.shootCharge,
+                            v -> c.shootCharge = v, v -> v + "%"),
+                    bool("Arbalet ham", "O'qlangan arbaletni nishonga qaraganda otadi", () -> c.crossbowShoot,
+                            v -> c.crossbowShoot = v),
+                    bool("HUD", "Ekranda nishon va masofa", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Elytra", "Firework bosilganda elytra'ni kiyadi, ochadi va firework'ga qaytadi",
