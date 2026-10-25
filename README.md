@@ -98,11 +98,14 @@ yoki bedwars'da ko'prik qurishda. "Faqat bloklar" yoqilgan bo'lsa ovqat, kamon v
 
 ## Anchor Guard (Combat)
 
-Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidagi to'liq blok zararni keskin kamaytiradi.
-- **Portlatganda**: zaryadlangan anchor'ni bossangiz mod o'sha zahoti oraga (oyoq + bosh balandligi) blok qo'yadi va
-  anchor'ning ustki tomonini bosib portlatadi — portlash kechikmaydi, sizning bosishingiz ham bekor bo'lmaydi;
-- **Proaktiv**: yaqinda zaryadlangan anchor paydo bo'lsa (dushmanniki ham) oldindan to'sadi;
-- obsidian afzal (portlashda buzilmaydi), bo'lmasa istalgan to'liq blok; Nether'da ishlamaydi (u yerda portlamaydi).
+Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidagi to'liq blok zararni sezilarli kamaytiradi.
+- **Anchor qo'yganda**: anchor qo'ysangiz o'sha bosishning o'zida (anchor'dan oldin) u bilan siz orangizga **bitta**
+  blok qo'yadi — o'sha joyga qaraydi, qo'yadi va qarashni darhol qaytaradi. Zaryadlash va portlatishga tegmaydi,
+  shuning uchun auto-anchor modlari bilan birga ishlaydi va portlash kechikmaydi;
+- mos bo'lmagan holatda qo'ymaydi: anchor boshingizdan baland (pastdan tepaga) yoki juda past bo'lsa, ustingizda
+  bo'lsa, joy band bo'lsa;
+- istalgan to'liq blok (obsidian afzal), xohlasangiz ikki qavat; **Dushman anchor'lari** (standart o'chiq) — yaqindagi
+  zaryadlangan anchor'larni oldindan to'sadi; Nether'da ishlamaydi (u yerda anchor portlamaydi).
 
 ## Fall Combo (Combat)
 

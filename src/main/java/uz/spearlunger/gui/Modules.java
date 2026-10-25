@@ -290,18 +290,19 @@ public final class Modules {
                     bool("HUD", "Ekranda nishon va masofa", () -> c.hud, v -> c.hud = v));
         }));
 
-        l.add(new Module("Anchor Guard", "Anchor portlashidan oldin oldiga blok qo'yadi - o'zingizga zarar kamayadi",
+        l.add(new Module("Anchor Guard", "Anchor qo'yganingizda oldiga bitta blok qo'yadi - portlash zarari kamayadi",
                 Module.Category.COMBAT, () -> AnchorGuardConfig.get().enabled, v -> AnchorGuardConfig.get().enabled = v, () -> {
             AnchorGuardConfig c = AnchorGuardConfig.get();
             return List.of(
                     key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AnchorGuardClient.keyToggle),
-                    bool("Portlatganda", "Anchor'ni bossangiz: avval blok, keyin o'sha zahoti portlaydi",
-                            () -> c.onDetonate, v -> c.onDetonate = v),
-                    bool("Proaktiv", "Yaqinda zaryadlangan anchor bo'lsa (dushmanniki ham) oldindan to'sadi",
-                            () -> c.proactive, v -> c.proactive = v),
-                    num("Radius", "Proaktiv qidiruv", 2, 8, () -> c.radius, v -> c.radius = v, v -> v + " blok"),
-                    bool("Ikki qavat", "Oyoq va bosh balandligida (zarar ancha kam)", () -> c.twoHigh,
+                    bool("Anchor qo'yganda", "Anchor qo'ysangiz o'sha zahoti oraga bitta blok (qarab qo'yadi va qaytadi)",
+                            () -> c.onPlace, v -> c.onPlace = v),
+                    bool("Ikki qavat", "Bosh balandligiga ham (odatda bitta yetadi)", () -> c.twoHigh,
                             v -> c.twoHigh = v),
+                    bool("Dushman anchor'lari", "Yaqinda zaryadlangan anchor bo'lsa oldindan to'sadi", () -> c.proactiveScan,
+                            v -> c.proactiveScan = v),
+                    num("Radius", "Dushman anchor'larini qidirish", 2, 8, () -> c.radius, v -> c.radius = v,
+                            v -> v + " blok"),
                     bool("Faqat obsidian", "OFF - istalgan to'liq blok (obsidian afzal)", () -> c.obsidianOnly,
                             v -> c.obsidianOnly = v),
                     bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan", () -> c.fromInventory,
