@@ -81,6 +81,20 @@ public abstract class Setting {
         }
     }
 
+    /** Itemlar ro'yxati (ItemPickerScreen'da tanlanadi), id'lar: "minecraft:totem_of_undying". */
+    public static final class Items extends Setting {
+        final java.util.List<String> ids;
+
+        Items(String name, String desc, java.util.List<String> ids) {
+            super(name, desc);
+            this.ids = ids;
+        }
+    }
+
+    public static Items items(String name, String desc, java.util.List<String> ids) {
+        return new Items(name, desc, ids);
+    }
+
     public static Group group(String name) { return new Group(name); }
 
     public static Bool bool(String name, String desc, BooleanSupplier get, Consumer<Boolean> set) {

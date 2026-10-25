@@ -92,6 +92,36 @@ O'ng tugmani bosib turganda vanilla bloklarni har 4 tickda qo'yadi. Fast Place b
 gacha tushadi, **Bloklar/tick** bilan bir tickda 4 tagacha blok qo'yiladi — wind charge bilan tepaga ko'tarilishda
 yoki bedwars'da ko'prik qurishda. "Faqat bloklar" yoqilgan bo'lsa ovqat, kamon va boshqalarga ta'sir qilmaydi.
 
+## Anchor Guard (Combat)
+
+Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidagi to'liq blok zararni keskin kamaytiradi.
+- **Portlatganda**: zaryadlangan anchor'ni bossangiz mod o'sha zahoti oraga (oyoq + bosh balandligi) blok qo'yadi va
+  anchor'ning ustki tomonini bosib portlatadi — portlash kechikmaydi, sizning bosishingiz ham bekor bo'lmaydi;
+- **Proaktiv**: yaqinda zaryadlangan anchor paydo bo'lsa (dushmanniki ham) oldindan to'sadi;
+- obsidian afzal (portlashda buzilmaydi), bo'lmasa istalgan to'liq blok; Nether'da ishlamaydi (u yerda portlamaydi).
+
+## Fall Combo (Combat)
+
+Tepadan o'yinchi ustiga tushayotganingizda (standart 3+ blok):
+1. hotbar'da spear bo'lsa uni olib o'ng tugmani bosib turadi — kinetik zaryad, tushish tezligi zararni oshiradi;
+2. spear tegishi bilan (yoki yetarlicha yaqinlashganda) eng yaxshi **qilich**ga, bo'lmasa **bolta**ga o'tib uradi —
+   almashtirish va zarba bir tickda, shuning uchun zarba kuchsizlanmaydi; nishon qalqon ushlasa avval bolta bilan
+   qalqonini o'chiradi;
+3. oxirida **mace**'ni qo'lga oladi (urishni o'zingiz yoki X rejimi qiladi).
+Har bir qadam, masofalar, nishonga qarash va nishon turlari sozlanadi.
+
+## Chest Stealer (World)
+
+Sandiq yoki shulker ochilganda faqat **tanlangan** itemlarni o'zi oladi (yoki hammasini / tanlanmaganlarni).
+Sozlamalarda "Itemlar" ni bosing — qidiruvli item tanlash oynasi ochiladi. Kechikish, avto yopish, Shift bosib ochsangiz
+to'xtash.
+
+## Nametags+ (Render)
+
+O'yinchi ustida: ism (do'stlar yashil), masofa, **totem pop soni** (nechta totem ishlatgani, o'lsa nolga tushadi,
+chatga xabar), zirh va qo'lidagi narsalar, har biri ustida **protection darajasi** (P4, B4, PP4; qurolda S5, D5...)
+va durability %. Health indicator modiga xalaqit bermasligi uchun balandligi sozlanadi (jon standartda o'chiq).
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:

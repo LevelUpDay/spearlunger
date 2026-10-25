@@ -143,6 +143,10 @@ public class ModuleScreen extends Screen {
             int vw = textRenderer.getWidth(val) + 8;
             ctx.fill(right - vw, y + 2, right, y + h - 2, k == listening ? Theme.accent(0x90) : Theme.WIDGET_BG);
             ctx.drawTextWithShadow(textRenderer, val, right - vw + 4, ty, k == listening ? Theme.TEXT : 0xFFE0E0E0);
+        } else if (s instanceof Setting.Items it) {
+            ctx.drawTextWithShadow(textRenderer, s.name, x + 8, ty, Theme.TEXT);
+            String val = it.ids.size() + " ta  ›";
+            ctx.drawTextWithShadow(textRenderer, val, right - textRenderer.getWidth(val), ty, Theme.accent());
         } else if (s instanceof Setting.Action) {
             ctx.fill(x + 8, y + 2, x + W - 8, y + h - 2, Theme.WIDGET_BG);
             ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(s.name), x + W / 2, ty, Theme.TEXT);
@@ -199,6 +203,8 @@ public class ModuleScreen extends Screen {
             } else if (s instanceof Setting.Key k) {
                 if (button == 1) bind(k.kb, InputUtil.UNKNOWN_KEY);
                 else listening = k;
+            } else if (s instanceof Setting.Items it) {
+                client.setScreen(new ItemPickerScreen(it.name, it.ids, this));
             } else if (s instanceof Setting.Action a) {
                 a.run.run();
             } else {
