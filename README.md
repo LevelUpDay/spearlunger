@@ -167,6 +167,25 @@ O'yinchi ustida: ism (do'stlar yashil), masofa, **totem pop soni** (nechta totem
 chatga xabar), zirh va qo'lidagi narsalar, har biri ustida **protection darajasi** (P4, B4, PP4; qurolda S5, D5...)
 va durability %. Health indicator modiga xalaqit bermasligi uchun balandligi sozlanadi (jon standartda o'chiq).
 
+## NoRender (Render)
+
+- **Olov**: ekrandagi olov past (kichik) qilib ko'rsatiladi yoki umuman yo'q — crystal/anchor PvP'da ko'rish uchun;
+- **Suv/lava ichi tiniq**: tuman ko'rish masofasigacha uzoqlashtiriladi, suv ostidagi ko'k qatlam yo'q;
+- blindness/darkness va powder snow tumani, blok ichidagi qora ekran, qovoq qatlami, vignette;
+- zarba yeganda kamera silkinishi, totem animatsiyasi, portal/nausea, portlash zarrachalari, yomg'ir/qor.
+Har biri alohida yoqiladi/o'chiriladi.
+
+## Pearl Tracker (Render)
+
+Dushman otgan ender pearl'ning uchish yo'li hisoblanadi (gravitatsiya, havo qarshiligi, bloklar) va **tushadigan joy
+atrofi qip-qizil** doira bilan ajratiladi; ustida kimniki, necha soniyada tushishi va masofa — o'sha yerga borib
+mace bilan kutib olasiz.
+
+## Arraylist (Render)
+
+Meteor kabi ekran chetida yoqilgan modullar ro'yxati — uzunidan qisqasiga, asosiy rangda yoki kamalak. Joyi: yuqori
+chap, yuqori o'ng yoki pastki o'ng.
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:
