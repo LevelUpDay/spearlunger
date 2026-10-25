@@ -24,6 +24,8 @@ import uz.cheststealer.ChestStealerClient;
 import uz.cheststealer.StealerConfig;
 import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
+import uz.pearlclutch.PearlClutchClient;
+import uz.pearlclutch.PearlConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
@@ -68,6 +70,7 @@ public final class Modules {
         StealerConfig.save();
         NametagsConfig.save();
         FallComboConfig.save();
+        PearlConfig.save();
     }
 
     private static List<Module> build() {
@@ -373,6 +376,26 @@ public final class Modules {
                     group("Boshqa"),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
                     bool("HUD", "Uchayotganda elytra durability'si va firework soni", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Pearl Clutch", "Ender pearl: harakatingizni hisoblab aniq otadi, yiqilayotganda o'zi clutch qiladi",
+                Module.Category.MOVEMENT, () -> PearlConfig.get().enabled, v -> PearlConfig.get().enabled = v, () -> {
+            PearlConfig c = PearlConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)",
+                            PearlClutchClient.keyToggle),
+                    bool("Aim tuzatish", "O'zingiz otganda: yugurib/sakrab/uchib otsangiz ham qaragan joyingizga tushadi",
+                            () -> c.aimAssist, v -> c.aimAssist = v),
+                    bool("Avto clutch", "Baland joydan yiqilayotganda o'zi xavfsiz blokka otadi", () -> c.autoClutch,
+                            v -> c.autoClutch = v),
+                    bool("Void clutch", "Ostida blok yo'q bo'lsa (void) ham", () -> c.voidClutch, v -> c.voidClutch = v),
+                    num("Min yiqilish", "Jami yiqilish shundan ko'p bo'lsa clutch", 4, 40, () -> c.minFall,
+                            v -> c.minFall = v, v -> v + " blok"),
+                    num("Qidiruv radiusi", "Qo'nadigan blokni shu radiusda qidiradi", 3, 16, () -> c.radius,
+                            v -> c.radius = v, v -> v + " blok"),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
 
         l.add(new Module("Auto TNT Cart", "Kamon/arbalet o'qi tushadigan joyga yoki qo'ygan railingizga TNT minecart",

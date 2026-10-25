@@ -117,6 +117,16 @@ Tepadan o'yinchi ustiga tushayotganingizda (standart 3+ blok):
 3. oxirida **mace**'ni qo'lga oladi (urishni o'zingiz yoki X rejimi qiladi).
 Har bir qadam, masofalar, nishonga qarash va nishon turlari sozlanadi.
 
+## Pearl Clutch (Movement)
+
+Ender pearl otilganda o'yinchining tezligini (yurish, yugurish, sakrash, yiqilish) o'ziga oladi — shuning uchun
+qimirlab otsangiz pearl boshqa joyga tushadi. Modul gravitatsiya, havo qarshiligi va o'z tezligingizni hisoblab
+yo'nalishni topadi (yo'nalish faqat otish paketiga yoziladi, kamera qimirlamaydi):
+- **Aim tuzatish**: o'zingiz otsangiz — turib otgandagi joyga (qaragan joyingizga) tushadi;
+- **Avto clutch**: baland joydan (standart 10+ blok) yoki void'ga yiqilayotganda yaqindagi xavfsiz blokka
+  (tepasi qattiq, ustida 2 bo'sh joy, lava/kaktus emas) o'zi otadi; pearl sizdan oldin yetib boradigan yo'l tanlanadi,
+  bloklarga urilmasligi tekshiriladi. Suv, slime, pichan ustiga tushayotgan bo'lsangiz otmaydi.
+
 ## Chest Stealer (World)
 
 Sandiq yoki shulker ochilganda faqat **tanlangan** itemlarni o'zi oladi (yoki hammasini / tanlanmaganlarni).

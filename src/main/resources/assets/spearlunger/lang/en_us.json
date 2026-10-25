@@ -32,5 +32,7 @@
   "key.category.nametags.main": "Nametags+",
   "key.nametags.toggle": "Nametags+ on/off",
   "key.category.fallcombo.main": "Fall Combo",
-  "key.fallcombo.toggle": "Fall Combo on/off"
+  "key.fallcombo.toggle": "Fall Combo on/off",
+  "key.category.pearlclutch.main": "Pearl Clutch",
+  "key.pearlclutch.toggle": "Pearl Clutch on/off"
 }
