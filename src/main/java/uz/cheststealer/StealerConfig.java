@@ -24,6 +24,11 @@ public class StealerConfig {
     public int openDelay = 2;
     /** Tugagach sandiqni yopadi. */
     public boolean autoClose = false;
+    /**
+     * Faqat haqiqiy sandiqlar: oyna siz sandiq/barrel/shulker blokini bosganingizdan keyin ochilgan bo'lsa.
+     * Serverlarning menyulari ham sandiq oynasi ko'rinishida ochiladi - ulardan olmaydi.
+     */
+    public boolean realOnly = true;
     /** Shulker box'dan ham. */
     public boolean shulkers = true;
     /** Shift bosib ochsangiz ishlamaydi (o'zingiz olmoqchi bo'lsangiz). */

@@ -3,6 +3,11 @@ package uz.cheststealer;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
+import net.minecraft.block.AbstractChestBlock;
+import net.minecraft.block.BarrelBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -17,6 +22,9 @@ import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
@@ -24,7 +32,13 @@ import org.lwjgl.glfw.GLFW;
 public class ChestStealerClient implements ClientModInitializer {
     public static KeyBinding keyToggle;
 
+    /** Sandiq bosilgandan keyin oyna shuncha tick ichida ochilsa haqiqiy sandiq. */
+    private static final int OPEN_WINDOW = 40;
+
     private static Screen current = null;
+    private static long ticks = 0;
+    private static long lastContainerUse = Long.MIN_VALUE / 2;
+    private static BlockPos lastContainerPos = null;
     private static int timer = 0;
     private static boolean paused = false;
 
@@ -35,6 +49,13 @@ public class ChestStealerClient implements ClientModInitializer {
         keyToggle = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.cheststealer.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
         ClientTickEvents.END_CLIENT_TICK.register(ChestStealerClient::tick);
+        UseBlockCallback.EVENT.register((player, world, hand, hit) -> {
+            if (player instanceof ClientPlayerEntity && isContainer(world.getBlockState(hit.getBlockPos()).getBlock())) {
+                lastContainerUse = ticks;
+                lastContainerPos = hit.getBlockPos();
+            }
+            return ActionResult.PASS;
+        });
     }
 
     public static boolean matches(ItemStack s) {
@@ -46,7 +67,18 @@ public class ChestStealerClient implements ClientModInitializer {
         return mode == 0 ? listed : !listed;
     }
 
+    private static boolean isContainer(Block b) {
+        return b instanceof AbstractChestBlock || b instanceof BarrelBlock || b instanceof ShulkerBoxBlock;
+    }
+
+    /** Oyna haqiqiy sandiqdanmi: yaqinda sandiq bloki bosilgan va u hali yonimizda. */
+    private static boolean fromRealContainer(ClientPlayerEntity p) {
+        return lastContainerPos != null && ticks - lastContainerUse <= OPEN_WINDOW
+                && p.squaredDistanceTo(Vec3d.ofCenter(lastContainerPos)) <= 8 * 8;
+    }
+
     private static void tick(MinecraftClient c) {
+        ticks++;
         ClientPlayerEntity p = c.player;
         if (p == null || c.interactionManager == null) return;
         StealerConfig cfg = StealerConfig.get();
@@ -63,10 +95,12 @@ public class ChestStealerClient implements ClientModInitializer {
         boolean chest = h instanceof GenericContainerScreenHandler || (cfg.shulkers && h instanceof ShulkerBoxScreenHandler);
         if (!chest) return;
         if (current != hs) {
-            // yangi sandiq
+            // yangi oyna: server menyusi bo'lsa (sandiq bosilmagan) tegmaymiz
             current = hs;
             timer = Math.max(0, cfg.openDelay);
-            paused = cfg.shiftPause && InputUtil.isKeyPressed(c.getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT);
+            paused = (cfg.shiftPause && InputUtil.isKeyPressed(c.getWindow(), GLFW.GLFW_KEY_LEFT_SHIFT))
+                    || (cfg.realOnly && !fromRealContainer(p));
+            lastContainerPos = null;   // bitta bosish - bitta oyna
         }
         if (paused) return;
         if (timer > 0) {

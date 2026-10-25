@@ -452,6 +452,8 @@ public final class Modules {
                     num("Ochilgach kutish", "Birinchi itemdan oldin", 0, 20, () -> c.openDelay, v -> c.openDelay = v,
                             v -> v + " tick"),
                     bool("Avto yopish", "Tugagach sandiqni yopadi", () -> c.autoClose, v -> c.autoClose = v),
+                    bool("Faqat haqiqiy sandiq", "Server menyulari (sandiqqa o'xshash oynalar) dan olmaydi",
+                            () -> c.realOnly, v -> c.realOnly = v),
                     bool("Shulker ham", "Shulker box'dan ham oladi", () -> c.shulkers, v -> c.shulkers = v),
                     bool("Shift - to'xtatish", "Shift bosib ochsangiz ishlamaydi", () -> c.shiftPause,
                             v -> c.shiftPause = v));

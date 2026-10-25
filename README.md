@@ -117,6 +117,7 @@ Har bir qadam, masofalar, nishonga qarash va nishon turlari sozlanadi.
 ## Chest Stealer (World)
 
 Sandiq yoki shulker ochilganda faqat **tanlangan** itemlarni o'zi oladi (yoki hammasini / tanlanmaganlarni).
+Server menyulari (sandiq ko'rinishidagi oynalar) dan olmaydi — faqat siz sandiq/barrel/shulker blokini bosib ochgan oynadan.
 Sozlamalarda "Itemlar" ni bosing — qidiruvli item tanlash oynasi ochiladi. Kechikish, avto yopish, Shift bosib ochsangiz
 to'xtash.
 
