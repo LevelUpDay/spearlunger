@@ -7,16 +7,21 @@ Kerakli modlar: Fabric Loader, Fabric API.
 
 | Tugma | Vazifa |
 |---|---|
-| **R** | Auto Lunge: Lunge enchantli nayza bilan cooldown to'lishi bilan avtomatik jab (bosib turish yoki bir bosib yoqish) |
+| **R** | Auto Lunge: Lunge enchantli nayza bilan cooldown to'lishi bilan avtomatik jab. Bir bossangiz yoqiladi (yana bossangiz o'chadi), bosib tursangiz qo'yib yuborguncha ishlaydi |
 | **X** | Nishonga lunge qilib uchish, yaqinlashganda mace bilan urish (yerda bo'lsangiz wind charge bilan sakraydi). Yana bossangiz bekor bo'ladi |
 | **O** | ClickGUI menyusi (Meteor uslubida) |
 | **B** | Kamon auto-TNT yoqish/o'chirish |
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **K** | Auto PvP yoqish/o'chirish |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
 
 ## ClickGUI (O)
+
+Har bir modulning sozlamalarida birinchi qator — **Yoqish/o'chirish** tugmasi: bosing va klaviaturadan harf tanlang.
+ClickGUI'da modul ustida **o'rta tugma** (g'ildirak) bosilsa ham darhol tugma tanlash boshlanadi; bog'langan tugma
+modul nomi yonida `[G]` kabi ko'rinadi.
 
 Kategoriyalar alohida panellarda: Combat, Movement, World, Client. Panel sarlavhasini sudrab joyini o'zgartirish mumkin.
 - modul ustida **chap tugma** — yoqish/o'chirish;
@@ -40,9 +45,25 @@ Kamon yoki o'q bo'lmasa cartni flint bilan yoqadi. O'ng tugmani bosib turmang �
 
 Firework'ni bosing: mod hotbar'dan (yoki inventardan) eng yaxshi elytra'ni topib kiyadi, yerda bo'lsangiz sakraydi,
 elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'shimcha:
+- kiyish ko'rinadigan qadamlar bilan: elytra slotini tanlaydi → o'ng tugma (kiyadi) → firework slotiga qaytadi;
+- **Dushman oldida yechish** (mace uchun): uchib dushman ustiga (standart 8 blok ichida, kamida 2 blok baland)
+  kelganingizda elytra'ni yechadi — eng yaxshi nagrudnikni kiyadi (bo'lmasa elytra inventarga olinadi), siz pastga
+  tushasiz va mace qo'lga olinadi; bitta uchishda bir marta;
 - qo'nganda avvalgi nagrudnikni qaytarib kiyadi;
 - uchayotganda elytra sinay desa boshqa elytra'ga almashtiradi, durability kam qolsa ogohlantiradi;
 - HUD: elytra durability'si va firework soni.
+
+## Auto PvP (Combat)
+
+**K** bilan yoqiladi va o'chirguningizcha eng yaqin dushman bilan o'zi jang qiladi — siz faqat yurasiz:
+- **uzoqda**: Lunge nayza bilan uchib boradi — nayza cooldown'i to'lishi bilan darhol (vanilla Lunge bundan tez
+  ruxsat bermaydi: nayzada jab faqat 100% cooldown'da ishlaydi); yerda bo'lsangiz **wind charge** bilan sakraydi
+  (nayza cooldown'i yo'qolmasligi uchun bir tickda almashtirib-qaytarib); juda uzoq bo'lsa nishon oldiga
+  **ender pearl** otadi (harakatingiz hisoblanadi);
+- **yaqinda**: qilich (bo'lmasa bolta, oxiri nayza) bilan cooldown to'lganda uradi; nishon qalqon ushlasa bolta
+  bilan o'chiradi;
+- **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
+HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
 
 ## Auto Cobweb
 
@@ -50,8 +71,18 @@ Hotbar (yoki inventar) dagi cobweb'ni o'zi qo'yadi:
 - **Turgan dushman**: joyida turgan yoki devorga tiqilib qolgan dushman oyog'iga;
 - **Kelayotgan dushman**: yugurib yoki sakrab oldingizga kelayotgan dushman tushadigan joyga (oldindan hisoblaydi);
 - **Anti-mace**: ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga — u ipga ilinib, mace zarbasi bo'lmaydi;
-- **MLG**: baland joydan yiqilayotganda tagingizga — fall damage bo'lmaydi;
-- ikki qavat (oyoq + bosh), do'stlarga qo'ymaslik, masofa, kechikish, avval qarab qo'yish.
+- suvga va suvdagi dushmanga qo'ymaydi; o'zingizning tagingiz, oyog'ingiz, boshingiz va yoningizga qo'ymaydi;
+- **Anti-web**: o'zingiz ipga ilinib qolsangiz suv paqirini tanlab ipga suv quyadi (ip yo'q bo'ladi), keyingi tickda
+  suvni qaytarib oladi va eski slotga qaytadi; suv bo'lmasa (yoki Nether'da) qaychi/qilich bilan kesadi.
+
+Yiqilganda tagingizga qo'yish (MLG) endi **Auto Clutch** modulida.
+
+## Auto Clutch (Movement)
+
+Baland joydan yiqilayotganda yerga tegishdan oldin tagingizga yiqilish zararini yo'q qiladigan narsani qo'yadi —
+hotbar yoki inventarda nima bo'lsa (ustuvorlik): suv paqiri, powder snow, slime, cobweb, scaffolding, pichan.
+Suvni qo'ngach paqirga qaytarib oladi va eski slotga qaytadi. Nether'da suv ishlatilmaydi, suv/slime ustiga
+tushayotgan bo'lsangiz hech narsa qilmaydi. Void'ga yiqilishni Pearl Clutch qiladi.
 
 ## Auto Shield
 
@@ -62,7 +93,7 @@ shuning uchun xavf zarbadan **oldin** aniqlanadi:
 - yaqindagi dushman mob, portlay deb turgan creeper, sizga qarab uchayotgan o'q/fireball;
 - zarba yesangiz darhol ko'taradi.
 
-Hujumchi orqada bo'lsa unga buriladi, chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. Bolta bilan
+Qalqon doim ko'tarilib turmaydi: xavf paydo bo'lganda qisqa vaqtga (standart eng ko'pi 12 tick) ko'tariladi, keyin tushadi va biroz kutadi — zarba yoki o'q kelsa darhol. Hujumchi orqada bo'lsa unga buriladi, chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. Bolta bilan
 o'chirilgan qalqonni ko'tarmaydi. Har bir tur alohida yoqiladi/o'chiriladi.
 
 ## Auto Potion
@@ -94,11 +125,14 @@ yoki bedwars'da ko'prik qurishda. "Faqat bloklar" yoqilgan bo'lsa ovqat, kamon v
 
 ## Anchor Guard (Combat)
 
-Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidagi to'liq blok zararni keskin kamaytiradi.
-- **Portlatganda**: zaryadlangan anchor'ni bossangiz mod o'sha zahoti oraga (oyoq + bosh balandligi) blok qo'yadi va
-  anchor'ning ustki tomonini bosib portlatadi — portlash kechikmaydi, sizning bosishingiz ham bekor bo'lmaydi;
-- **Proaktiv**: yaqinda zaryadlangan anchor paydo bo'lsa (dushmanniki ham) oldindan to'sadi;
-- obsidian afzal (portlashda buzilmaydi), bo'lmasa istalgan to'liq blok; Nether'da ishlamaydi (u yerda portlamaydi).
+Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidagi to'liq blok zararni sezilarli kamaytiradi.
+- **Anchor qo'yganda**: anchor qo'ysangiz o'sha bosishning o'zida (anchor'dan oldin) u bilan siz orangizga **bitta**
+  blok qo'yadi — o'sha joyga qaraydi, qo'yadi va qarashni darhol qaytaradi. Zaryadlash va portlatishga tegmaydi,
+  shuning uchun auto-anchor modlari bilan birga ishlaydi va portlash kechikmaydi;
+- mos bo'lmagan holatda qo'ymaydi: anchor boshingizdan baland (pastdan tepaga) yoki juda past bo'lsa, ustingizda
+  bo'lsa, joy band bo'lsa;
+- istalgan to'liq blok (obsidian afzal), xohlasangiz ikki qavat; **Dushman anchor'lari** (standart o'chiq) — yaqindagi
+  zaryadlangan anchor'larni oldindan to'sadi; Nether'da ishlamaydi (u yerda anchor portlamaydi).
 
 ## Fall Combo (Combat)
 
@@ -110,9 +144,20 @@ Tepadan o'yinchi ustiga tushayotganingizda (standart 3+ blok):
 3. oxirida **mace**'ni qo'lga oladi (urishni o'zingiz yoki X rejimi qiladi).
 Har bir qadam, masofalar, nishonga qarash va nishon turlari sozlanadi.
 
+## Pearl Clutch (Movement)
+
+Ender pearl otilganda o'yinchining tezligini (yurish, yugurish, sakrash, yiqilish) o'ziga oladi — shuning uchun
+qimirlab otsangiz pearl boshqa joyga tushadi. Modul gravitatsiya, havo qarshiligi va o'z tezligingizni hisoblab
+yo'nalishni topadi (yo'nalish faqat otish paketiga yoziladi, kamera qimirlamaydi):
+- **Aim tuzatish**: o'zingiz otsangiz — turib otgandagi joyga (qaragan joyingizga) tushadi;
+- **Avto clutch**: baland joydan (standart 10+ blok) yoki void'ga yiqilayotganda yaqindagi xavfsiz blokka
+  (tepasi qattiq, ustida 2 bo'sh joy, lava/kaktus emas) o'zi otadi; pearl sizdan oldin yetib boradigan yo'l tanlanadi,
+  bloklarga urilmasligi tekshiriladi. Suv, slime, pichan ustiga tushayotgan bo'lsangiz otmaydi.
+
 ## Chest Stealer (World)
 
 Sandiq yoki shulker ochilganda faqat **tanlangan** itemlarni o'zi oladi (yoki hammasini / tanlanmaganlarni).
+Server menyulari (sandiq ko'rinishidagi oynalar) dan olmaydi — faqat siz sandiq/barrel/shulker blokini bosib ochgan oynadan.
 Sozlamalarda "Itemlar" ni bosing — qidiruvli item tanlash oynasi ochiladi. Kechikish, avto yopish, Shift bosib ochsangiz
 to'xtash.
 
@@ -152,6 +197,11 @@ O → Anti-cheat oynasida:
 - **Mace: qarab urish**: mace faqat nishonga haqiqatan qarab turganda uradi.
 - **Mace: 1 tick swap**: almashtirish va urish bir tickda bo'ladi (OFF bo'lsa zarba juda kuchsiz).
 - **TNT: blokka qarash / kamerani qaytarish**: TNT rail/minecart qo'yishdan oldin o'sha joyga qaraydi.
+
+- **Inventarni ochib olish**: modullar inventardan hotbar'ga narsa olganda (TNT cart, damlama, cobweb, elytra,
+  obsidian...) vanilla'dagidek inventar ochilib (E), almashtirilib, yopiladi — ko'p serverlar ochmasdan qilingan
+  bosishlarni qaytaradi.
+- **Joyiga qaytarish**: olingan narsa ishlatilgach eski joyiga qaytadi, hotbar'dagi narsangiz ham o'z slotiga.
 
 Diqqat: bu sozlamalar aniqlanish xavfini kamaytiradi, lekin yo'q qilmaydi. Serverda ishlatish o'sha
 server qoidalariga bog'liq.

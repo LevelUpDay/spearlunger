@@ -2,18 +2,22 @@ package uz.autoelytra;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.EquippableComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.registry.Registries;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.world.World;
+import uz.autotnt.AutoTntConfig;
+import uz.spearlunger.InvHelper;
 
 import java.util.ArrayDeque;
 
@@ -30,6 +34,7 @@ public class ElytraController {
     private Item savedChest = null;
     private int groundTicks = 0;
     private boolean warned = false;
+    private boolean unequippedThisFlight = false;
 
     // ------------------------------------------------------------ firework bosilganda
     public ActionResult onUseItem(PlayerEntity player, World world, Hand hand) {
@@ -110,20 +115,20 @@ public class ElytraController {
                 cooldown--;
                 return;
             }
-            int n = 0;
-            while (!steps.isEmpty() && n++ < 20) {
-                if (!steps.peek().run()) return;
+            // har tickda bitta qadam: tanlash, kiyish, qaytish ko'rinib turadi
+            if (steps.peek().run()) {
                 steps.poll();
                 cooldown = Math.max(0, cfg.delayTicks);
-                if (cooldown > 0) return;
             }
             return;
         }
         if (!cfg.enabled || c.currentScreen != null) return;
 
         ItemStack chest = p.getEquippedStack(EquipmentSlot.CHEST);
+        if (p.isOnGround() || p.isTouchingWater()) unequippedThisFlight = false;
         if (p.isGliding()) {
             groundTicks = 0;
+            if (chest.isOf(Items.ELYTRA) && tryUnequip(c, p, cfg)) return;
             if (chest.isOf(Items.ELYTRA)) {
                 int left = chest.getMaxDamage() - chest.getDamage();
                 if (cfg.autoReplace && left <= Math.max(2, cfg.minDurability)) {
@@ -167,24 +172,96 @@ public class ElytraController {
      */
     private void addEquip(MinecraftClient c, ClientPlayerEntity p, int hotbar, int invSlot, int original,
                           boolean rememberChest) {
+        // 1-tick: (kerak bo'lsa inventardan olib kelib) elytra slotini tanlaymiz
+        steps.add(() -> {
+            if (invSlot >= 9) InvHelper.swap(c, p, invSlot, hotbar);
+            p.getInventory().setSelectedSlot(hotbar);
+            return true;
+        });
+        // 2-tick: o'ng tugma - kiyamiz
         steps.add(() -> {
             ItemStack before = p.getEquippedStack(EquipmentSlot.CHEST);
-            if (invSlot >= 9) {
-                c.interactionManager.clickSlot(p.playerScreenHandler.syncId, invSlot, hotbar, SlotActionType.SWAP, p);
-            }
             Item prev = before.isEmpty() ? null : before.getItem();
             p.getInventory().setSelectedSlot(hotbar);
             c.interactionManager.interactItem(p, Hand.MAIN_HAND);
-            if (invSlot >= 9) {
-                c.interactionManager.clickSlot(p.playerScreenHandler.syncId, invSlot, hotbar, SlotActionType.SWAP, p);
-            }
-            p.getInventory().setSelectedSlot(original);
+            p.swingHand(Hand.MAIN_HAND);
             if (rememberChest && ElytraConfig.get().restoreChest && prev != null && prev != Items.ELYTRA) {
                 savedChest = prev;
                 groundTicks = 0;
             }
             return true;
         });
+        // 3-tick: yechilgan narsani joyiga, o'zimiz eski slotga (firework)
+        steps.add(() -> {
+            if (invSlot >= 9) InvHelper.swap(c, p, invSlot, hotbar);
+            p.getInventory().setSelectedSlot(original);
+            return true;
+        });
+    }
+
+    // ------------------------------------------------------------ dushman oldida yechish (mace)
+    /** Uchib kelib dushman ustiga yetganda elytra'ni yechadi (nagrudnik kiyadi), pastga tushasiz va mace qo'lda. */
+    private boolean tryUnequip(MinecraftClient c, ClientPlayerEntity p, ElytraConfig cfg) {
+        if (!cfg.unequipNearEnemy || unequippedThisFlight) return false;
+        PlayerEntity enemy = null;
+        double best = cfg.unequipDist;
+        for (PlayerEntity e : c.world.getPlayers()) {
+            if (e == p || !e.isAlive() || e.isSpectator() || e.isCreative() || isFriend(e)) continue;
+            double d = p.distanceTo(e);
+            if (d <= best && p.getY() - e.getY() >= cfg.unequipMinAbove) {
+                best = d;
+                enemy = e;
+            }
+        }
+        if (enemy == null) return false;
+        unequippedThisFlight = true;
+        int original = p.getInventory().getSelectedSlot();
+        int[] plate = findChestplate(p, cfg.fromInventory);
+        if (plate != null) {
+            addEquip(c, p, plate[0], plate[1], original, false);
+        } else {
+            // nagrudnik yo'q: elytra'ni inventarga olamiz (zirh sloti 6 = ko'krak)
+            steps.add(() -> {
+                InvHelper.quickMove(c, p, 6);
+                return true;
+            });
+        }
+        if (cfg.unequipToMace) {
+            steps.add(() -> {
+                int mace = -1;
+                for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(Items.MACE)) { mace = i; break; }
+                if (mace >= 0) p.getInventory().setSelectedSlot(mace);
+                return true;
+            });
+        }
+        say(p, "§cAuto Elytra: " + enemy.getName().getString() + " - elytra yechildi");
+        return true;
+    }
+
+    /** Eng yaxshi nagrudnik (elytra emas): {hotbar slot, inventar slot yoki -1}. */
+    private int[] findChestplate(ClientPlayerEntity p, boolean fromInventory) {
+        int best = -1, bestRank = -1;
+        int limit = fromInventory ? 36 : 9;
+        for (int i = 0; i < limit; i++) {
+            ItemStack s = p.getInventory().getStack(i);
+            if (s.isEmpty() || s.isOf(Items.ELYTRA)) continue;
+            EquippableComponent eq = s.get(DataComponentTypes.EQUIPPABLE);
+            if (eq == null || eq.slot() != EquipmentSlot.CHEST) continue;
+            String path = Registries.ITEM.getId(s.getItem()).getPath();
+            int r = path.startsWith("netherite") ? 6 : path.startsWith("diamond") ? 5 : path.startsWith("iron") ? 4
+                    : path.startsWith("copper") ? 3 : path.startsWith("chainmail") ? 2 : 1;
+            if (i < 9) r += 10;   // hotbar'dagi tezroq
+            if (r > bestRank) { bestRank = r; best = i; }
+        }
+        if (best < 0) return null;
+        if (best < 9) return new int[] { best, -1 };
+        return new int[] { freeHotbar(p), best };
+    }
+
+    private static boolean isFriend(PlayerEntity t) {
+        String name = t.getName().getString();
+        for (String f : AutoTntConfig.get().friends) if (f.equalsIgnoreCase(name)) return true;
+        return false;
     }
 
     private interface Match { boolean test(ItemStack s); }

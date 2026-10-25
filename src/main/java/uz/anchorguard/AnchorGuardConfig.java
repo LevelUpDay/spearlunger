@@ -9,19 +9,19 @@ import java.nio.file.Path;
 
 public class AnchorGuardConfig {
     public boolean enabled = true;
-    /** Siz anchor'ni portlatganda: avval blok qo'yadi, keyin portlatadi. */
-    public boolean onDetonate = true;
-    /** Yaqinda zaryadlangan anchor paydo bo'lsa (dushmanniki ham) oldindan blok qo'yadi. */
-    public boolean proactive = true;
+    /** Anchor qo'yganingizda u bilan siz orangizga bitta blok qo'yadi (portlatishga tegmaydi). */
+    public boolean onPlace = true;
+    /** Ikki qavat (oyoq + bosh balandligi). Odatda bitta yetadi. */
+    public boolean twoHigh = false;
+    /** Yaqinda zaryadlangan anchor bo'lsa (dushmanniki) oldindan to'sadi. */
+    public boolean proactiveScan = false;
     /** Proaktiv qidiruv radiusi (blok). */
     public int radius = 6;
-    /** Ikki qavat (oyoq + bosh balandligi) - zarar ancha kam. */
-    public boolean twoHigh = true;
-    /** Faqat obsidian / crying obsidian (OFF - istalgan to'liq blok). */
+    /** Faqat obsidian / crying obsidian (OFF - istalgan to'liq blok, obsidian afzal). */
     public boolean obsidianOnly = false;
     /** Hotbar'da bo'lmasa inventardan olib keladi. */
     public boolean fromInventory = true;
-    public boolean messages = true;
+    public boolean messages = false;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static AnchorGuardConfig instance = new AnchorGuardConfig();

@@ -10,6 +10,9 @@ import java.util.function.IntSupplier;
 
 /** Modul sozlamasi (ModuleScreen chizadi). */
 public abstract class Setting {
+    /** Modulni yoqib-o'chiradigan tugma qatorining nomi (ClickGUI shu bo'yicha topadi). */
+    public static final String TOGGLE_KEY = "Yoqish/o'chirish";
+
     public final String name;
     public final String desc;
 

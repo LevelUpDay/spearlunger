@@ -34,9 +34,15 @@ public class ModuleScreen extends Screen {
     private int bodyTop, bodyBottom;
 
     public ModuleScreen(Module module, Screen parent) {
+        this(module, parent, false);
+    }
+
+    /** bindNow = true: ochilishi bilan yoqish/o'chirish tugmasini kutadi (ClickGUI'da o'rta tugma). */
+    public ModuleScreen(Module module, Screen parent, boolean bindNow) {
         super(Text.literal(module.name));
         this.module = module;
         this.parent = parent;
+        if (bindNow) listening = module.toggleKey();
     }
 
     private int left() { return (width - W) / 2; }

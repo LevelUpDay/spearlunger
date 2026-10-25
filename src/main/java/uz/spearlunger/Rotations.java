@@ -2,6 +2,7 @@ package uz.spearlunger;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
@@ -50,6 +51,17 @@ public final class Rotations {
         p.setYaw(p.getYaw() + dy);
         p.setPitch(MathHelper.clamp(p.getPitch() + dp, -90.0f, 90.0f));
         return isAimed(p, yaw, pitch, Math.max(tolerance, 0.5f));
+    }
+
+    /**
+     * Qarashni darhol o'zgartirib serverga yuboradi (look paketi). Blok qo'yish/qazish oldidan "o'sha joyga qaradi"
+     * bo'lishi uchun; keyin xuddi shunday eski qarashni qaytarish kerak.
+     */
+    public static void sendLook(ClientPlayerEntity p, float yaw, float pitch) {
+        p.setYaw(yaw);
+        p.setPitch(MathHelper.clamp(pitch, -90.0f, 90.0f));
+        p.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(p.getYaw(), p.getPitch(), p.isOnGround(),
+                p.horizontalCollision));
     }
 
     public static boolean isAimed(ClientPlayerEntity p, float yaw, float pitch, float tolerance) {

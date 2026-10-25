@@ -2,10 +2,14 @@ package uz.spearlunger.gui;
 
 import uz.anchorguard.AnchorGuardClient;
 import uz.anchorguard.AnchorGuardConfig;
+import uz.autoclutch.AutoClutchClient;
+import uz.autoclutch.ClutchConfig;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
 import uz.autopotion.AutoPotionClient;
+import uz.autopvp.AutoPvpClient;
+import uz.autopvp.PvpConfig;
 import uz.autopotion.PotionConfig;
 import uz.autoshield.AutoShieldClient;
 import uz.autoshield.ShieldConfig;
@@ -24,6 +28,8 @@ import uz.cheststealer.ChestStealerClient;
 import uz.cheststealer.StealerConfig;
 import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
+import uz.pearlclutch.PearlClutchClient;
+import uz.pearlclutch.PearlConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
@@ -68,6 +74,9 @@ public final class Modules {
         StealerConfig.save();
         NametagsConfig.save();
         FallComboConfig.save();
+        PearlConfig.save();
+        ClutchConfig.save();
+        PvpConfig.save();
     }
 
     private static List<Module> build() {
@@ -78,12 +87,12 @@ public final class Modules {
             Config c = Config.get();
             return List.of(
                     group("Tugmalar"),
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", SpearLungerClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", SpearLungerClient.keyToggle),
                     key("Auto Lunge", "Bosib turing (yoki bir bosib yoqing) - avto jab", SpearLungerClient.keyHold),
                     key("Nishonga lunge", "Eng yaqin o'yinchiga uchib mace bilan uradi", SpearLungerClient.keyTarget),
-                    choice("R rejimi", "Bosib turish yoki bir bosib yoqish/o'chirish",
-                            new String[] {"Bosib turish", "Bosib yoqish"},
-                            () -> c.holdToggle ? 1 : 0, v -> c.holdToggle = v == 1),
+                    choice("R rejimi", "Avto: bir bossangiz yoqiladi (yana bossangiz o'chadi), bosib tursangiz qo'yib yuborguncha",
+                            new String[] {"Avto", "Bosib turish", "Bosib yoqish"},
+                            () -> Math.floorMod(c.rMode, 3), v -> c.rMode = v),
                     group("Lunge"),
                     num("Qo'shimcha kechikish", "Cooldown to'lgach yana kutish", 0, 40,
                             () -> c.extraDelayTicks, v -> c.extraDelayTicks = v, v -> v + " tick"),
@@ -114,11 +123,53 @@ public final class Modules {
                             () -> c.targetTimeoutTicks, v -> c.targetTimeoutTicks = v, v -> v + " tick"));
         }));
 
+        l.add(new Module("Auto PvP", "K bilan yoqing: eng yaqin dushman bilan o'zi jang qiladi (lunge, qilich, mace, wind charge, pearl)",
+                Module.Category.COMBAT, () -> PvpConfig.get().enabled, v -> PvpConfig.get().enabled = v, () -> {
+            PvpConfig c = PvpConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (standart K)",
+                            AutoPvpClient.keyToggle),
+                    num("Nishon masofasi", "Eng yaqin dushmanni shu masofada qidiradi", 8, 64, () -> c.range,
+                            v -> c.range = v, v -> v + " blok"),
+                    group("Yaqinlashish"),
+                    bool("Lunge", "Uzoqda Lunge nayza bilan uchib boradi (cooldown to'lishi bilan)", () -> c.lunge,
+                            v -> c.lunge = v),
+                    bool("Gorizontal lunge", "Uzoqda pitch 0 - impuls to'liq oldinga", () -> c.flatten,
+                            v -> c.flatten = v),
+                    bool("Wind charge sakrash", "Yerda bo'lsangiz wind charge bilan sakraydi", () -> c.windJump,
+                            v -> c.windJump = v),
+                    num("Wind charge masofasi", "Shundan uzoqda sakraydi", 2, 20, () -> c.windMinDist,
+                            v -> c.windMinDist = v, v -> v + " blok"),
+                    bool("Ender pearl", "Juda uzoq bo'lsa nishon oldiga pearl (harakatni hisoblab)", () -> c.pearl,
+                            v -> c.pearl = v),
+                    num("Pearl masofasi", "Shundan uzoqda pearl", 8, 60, () -> c.pearlDist, v -> c.pearlDist = v,
+                            v -> v + " blok"),
+                    num("Min ochlik", "Lunge ochlik yeydi: shundan kam bo'lsa lunge qilmaydi", 0, 20, () -> c.minFood,
+                            v -> c.minFood = v),
+                    group("Urish"),
+                    bool("Qilich/bolta", "Yaqinda qilich (bo'lmasa bolta, oxiri nayza) bilan uradi", () -> c.melee,
+                            v -> c.melee = v),
+                    num("Urish masofasi", "Qilich bilan urish masofasi", 20, 45, () -> c.meleeTenths,
+                            v -> c.meleeTenths = v, v -> (v / 10.0) + " blok"),
+                    bool("Qalqonni sindirish", "Nishon qalqon ushlasa bolta bilan o'chiradi", () -> c.axeShield,
+                            v -> c.axeShield = v),
+                    bool("Mace", "Tushayotganda mace: zirhli nishonga Breach, aks holda Density", () -> c.mace,
+                            v -> c.mace = v),
+                    num("Mace balandligi", "Kamida shuncha tushganda", 1, 20, () -> c.maceMinFall,
+                            v -> c.maceMinFall = v, v -> v + " blok"),
+                    group("Nishon"),
+                    bool("O'yinchilar", "O'yinchilarga", () -> c.players, v -> c.players = v),
+                    bool("Moblar", "Dushman moblarga ham", () -> c.mobs, v -> c.mobs = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
+        }));
+
         l.add(new Module("Auto Totem", "Chap qo'lda totem bo'lmasa inventardan qo'yadi",
                 Module.Category.COMBAT, () -> TotemConfig.get().enabled, v -> TotemConfig.get().enabled = v, () -> {
             TotemConfig c = TotemConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoTotemClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoTotemClient.keyToggle),
                     choice("Turi", "Inventar: E + sichqoncha + F. Tezkor: inventar ochilmaydi. Hotbar: F",
                             new String[] {"Inventar (E + F)", "Tezkor", "Hotbar (F)"},
                             () -> Math.floorMod(c.mode, 3), v -> c.mode = v),
@@ -145,7 +196,7 @@ public final class Modules {
                 Module.Category.COMBAT, () -> CobwebConfig.get().enabled, v -> CobwebConfig.get().enabled = v, () -> {
             CobwebConfig c = CobwebConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoCobwebClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoCobwebClient.keyToggle),
                     group("Dushmanga"),
                     bool("Turgan dushman", "Joyida turgan / devorga tiqilgan dushman oyog'iga", () -> c.trapStill,
                             v -> c.trapStill = v),
@@ -165,10 +216,10 @@ public final class Modules {
                     group("Himoya"),
                     bool("Anti-mace", "Ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga", () -> c.antiMace,
                             v -> c.antiMace = v),
-                    bool("MLG", "Baland joydan yiqilayotganda tagingizga (fall damage yo'q)", () -> c.selfMlg,
-                            v -> c.selfMlg = v),
-                    num("MLG balandligi", "Shundan baland yiqilganda", 3, 30, () -> c.minFall, v -> c.minFall = v,
-                            v -> v + " blok"),
+                    bool("Anti-web", "Ipga ilinsangiz: suv paqiri bilan ipni yo'q qiladi, suvni qaytarib oladi",
+                            () -> c.antiWeb, v -> c.antiWeb = v),
+                    bool("Anti-web: kesish", "Suv bo'lmasa (yoki Nether'da) qaychi/qilich bilan kesadi", () -> c.antiWebCut,
+                            v -> c.antiWebCut = v),
                     group("Qo'yish"),
                     num("Masofa", "Qo'yish masofasi", 30, 60, () -> c.reachTenths, v -> c.reachTenths = v,
                             v -> (v / 10.0) + " blok"),
@@ -187,12 +238,12 @@ public final class Modules {
                 Module.Category.COMBAT, () -> ShieldConfig.get().enabled, v -> ShieldConfig.get().enabled = v, () -> {
             ShieldConfig c = ShieldConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoShieldClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoShieldClient.keyToggle),
                     group("O'yinchilar"),
                     bool("O'yinchilar", "Yaqinda sizga qarab turgan / yugurib kelayotgan o'yinchi", () -> c.players,
                             v -> c.players = v),
-                    num("Masofa", "Shu masofada xavf deb hisoblanadi", 25, 80, () -> c.playerRangeTenths,
-                            v -> c.playerRangeTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Masofa", "Shu masofada xavf deb hisoblanadi", 25, 80, () -> c.playerRange,
+                            v -> c.playerRange = v, v -> (v / 10.0) + " blok"),
                     num("Qarash burchagi", "Sizga shuncha gradus ichida qarab tursa", 10, 90, () -> c.faceAngle,
                             v -> c.faceAngle = v, v -> v + "°"),
                     bool("Kamon/arbalet", "Sizni kamon, arbalet yoki trident bilan nishonga olsa", () -> c.playerRanged,
@@ -209,8 +260,12 @@ public final class Modules {
                     bool("O'qlar", "Sizga qarab uchayotgan o'q, trident, fireball", () -> c.projectiles,
                             v -> c.projectiles = v),
                     bool("Zarba yeganda", "Urishsa darhol ko'taradi", () -> c.onHurt, v -> c.onHurt = v),
-                    num("Ushlab turish", "Xavf o'tgach yana shuncha tick", 0, 30, () -> c.holdTicks,
-                            v -> c.holdTicks = v, v -> v + " tick"),
+                    num("Ushlab turish", "Xavf o'tgach yana shuncha tick", 0, 20, () -> c.holdAfterTicks,
+                            v -> c.holdAfterTicks = v, v -> v + " tick"),
+                    num("Eng uzoq", "Qalqon eng ko'pi bilan shuncha tick ko'tariladi, keyin tushadi", 5, 60,
+                            () -> c.maxUpTicks, v -> c.maxUpTicks = v, v -> v + " tick"),
+                    num("Qayta ko'tarish", "Tushgach shuncha tick kutadi (zarba/o'qda darhol)", 0, 40,
+                            () -> c.rearmTicks, v -> c.rearmTicks = v, v -> v + " tick"),
                     bool("Hujumchiga burilish", "Orqangizdan kelsa unga buriladi (qalqon faqat oldni to'sadi)",
                             () -> c.autoFace, v -> c.autoFace = v),
                     bool("Urish uchun tushirish", "Chap tugmani bossangiz qalqon tushadi va urasiz", () -> c.lowerToAttack,
@@ -224,7 +279,7 @@ public final class Modules {
                 Module.Category.COMBAT, () -> PotionConfig.get().enabled, v -> PotionConfig.get().enabled = v, () -> {
             PotionConfig c = PotionConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoPotionClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoPotionClient.keyToggle),
                     group("Davolash"),
                     num("Jon", "Shundan kam yoki teng bo'lsa otadi", 1, 19, () -> c.health, v -> c.health = v,
                             v -> (v / 2.0) + " yurak"),
@@ -257,7 +312,7 @@ public final class Modules {
                 Module.Category.COMBAT, () -> BowAimConfig.get().enabled, v -> BowAimConfig.get().enabled = v, () -> {
             BowAimConfig c = BowAimConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", BowAimClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", BowAimClient.keyToggle),
                     group("Nishon"),
                     num("FOV", "Pritseldan shuncha gradus ichidagi eng yaqini", 5, 180, () -> c.fov, v -> c.fov = v,
                             v -> v + "°"),
@@ -290,18 +345,19 @@ public final class Modules {
                     bool("HUD", "Ekranda nishon va masofa", () -> c.hud, v -> c.hud = v));
         }));
 
-        l.add(new Module("Anchor Guard", "Anchor portlashidan oldin oldiga blok qo'yadi - o'zingizga zarar kamayadi",
+        l.add(new Module("Anchor Guard", "Anchor qo'yganingizda oldiga bitta blok qo'yadi - portlash zarari kamayadi",
                 Module.Category.COMBAT, () -> AnchorGuardConfig.get().enabled, v -> AnchorGuardConfig.get().enabled = v, () -> {
             AnchorGuardConfig c = AnchorGuardConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AnchorGuardClient.keyToggle),
-                    bool("Portlatganda", "Anchor'ni bossangiz: avval blok, keyin o'sha zahoti portlaydi",
-                            () -> c.onDetonate, v -> c.onDetonate = v),
-                    bool("Proaktiv", "Yaqinda zaryadlangan anchor bo'lsa (dushmanniki ham) oldindan to'sadi",
-                            () -> c.proactive, v -> c.proactive = v),
-                    num("Radius", "Proaktiv qidiruv", 2, 8, () -> c.radius, v -> c.radius = v, v -> v + " blok"),
-                    bool("Ikki qavat", "Oyoq va bosh balandligida (zarar ancha kam)", () -> c.twoHigh,
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AnchorGuardClient.keyToggle),
+                    bool("Anchor qo'yganda", "Anchor qo'ysangiz o'sha zahoti oraga bitta blok (qarab qo'yadi va qaytadi)",
+                            () -> c.onPlace, v -> c.onPlace = v),
+                    bool("Ikki qavat", "Bosh balandligiga ham (odatda bitta yetadi)", () -> c.twoHigh,
                             v -> c.twoHigh = v),
+                    bool("Dushman anchor'lari", "Yaqinda zaryadlangan anchor bo'lsa oldindan to'sadi", () -> c.proactiveScan,
+                            v -> c.proactiveScan = v),
+                    num("Radius", "Dushman anchor'larini qidirish", 2, 8, () -> c.radius, v -> c.radius = v,
+                            v -> v + " blok"),
                     bool("Faqat obsidian", "OFF - istalgan to'liq blok (obsidian afzal)", () -> c.obsidianOnly,
                             v -> c.obsidianOnly = v),
                     bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan", () -> c.fromInventory,
@@ -313,7 +369,7 @@ public final class Modules {
                 Module.Category.COMBAT, () -> FallComboConfig.get().enabled, v -> FallComboConfig.get().enabled = v, () -> {
             FallComboConfig c = FallComboConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", FallComboClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", FallComboClient.keyToggle),
                     group("Kombinatsiya"),
                     bool("Spear zaryadi", "Avval spear bilan o'ng tugma (tushish tezligi zararni oshiradi)",
                             () -> c.useSpear, v -> c.useSpear = v),
@@ -347,7 +403,7 @@ public final class Modules {
                 Module.Category.MOVEMENT, () -> ElytraConfig.get().enabled, v -> ElytraConfig.get().enabled = v, () -> {
             ElytraConfig c = ElytraConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoElytraClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoElytraClient.keyToggle),
                     group("Uchish"),
                     bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan qidiradi", () -> c.fromInventory,
                             v -> c.fromInventory = v),
@@ -357,6 +413,15 @@ public final class Modules {
                             v -> c.autoFirework = v),
                     num("Kechikish", "Amallar orasida kutish", 0, 10, () -> c.delayTicks, v -> c.delayTicks = v,
                             v -> v + " tick"),
+                    group("Mace (dushman ustida yechish)"),
+                    bool("Dushman oldida yechish", "Uchib dushman ustiga kelganda elytra yechiladi, pastga tushasiz",
+                            () -> c.unequipNearEnemy, v -> c.unequipNearEnemy = v),
+                    num("Masofa", "Dushmangacha shu masofada", 3, 20, () -> c.unequipDist, v -> c.unequipDist = v,
+                            v -> v + " blok"),
+                    num("Balandlik", "Dushmandan kamida shuncha baland bo'lsangiz", 0, 20, () -> c.unequipMinAbove,
+                            v -> c.unequipMinAbove = v, v -> v + " blok"),
+                    bool("Mace'ni olish", "Yechgach mace'ni qo'lga oladi", () -> c.unequipToMace,
+                            v -> c.unequipToMace = v),
                     group("Qo'nish"),
                     bool("Nagrudnikni qaytarish", "Qo'nganda avvalgi nagrudnikni kiyadi", () -> c.restoreChest,
                             v -> c.restoreChest = v),
@@ -374,13 +439,56 @@ public final class Modules {
                     bool("HUD", "Uchayotganda elytra durability'si va firework soni", () -> c.hud, v -> c.hud = v));
         }));
 
+        l.add(new Module("Auto Clutch", "Yiqilayotganda tagingizga suv/powder snow/slime/cobweb... qo'yadi (MLG)",
+                Module.Category.MOVEMENT, () -> ClutchConfig.get().enabled, v -> ClutchConfig.get().enabled = v, () -> {
+            ClutchConfig c = ClutchConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)",
+                            AutoClutchClient.keyToggle),
+                    num("Min yiqilish", "Jami yiqilish shundan ko'p bo'lsa (3 blokdan ko'pi zarar)", 4, 40,
+                            () -> c.minFall, v -> c.minFall = v, v -> v + " blok"),
+                    group("Nimalar (ustuvorlik tartibida)"),
+                    bool("Suv paqiri", "Nether'da ishlatilmaydi", () -> c.water, v -> c.water = v),
+                    bool("Powder snow", "Powder snow paqiri", () -> c.powderSnow, v -> c.powderSnow = v),
+                    bool("Slime", "Slime block", () -> c.slime, v -> c.slime = v),
+                    bool("Cobweb", "Cobweb", () -> c.cobweb, v -> c.cobweb = v),
+                    bool("Scaffolding", "Scaffolding", () -> c.scaffolding, v -> c.scaffolding = v),
+                    bool("Pichan", "Hay bale (zararni 80% kamaytiradi)", () -> c.hay, v -> c.hay = v),
+                    group("Boshqa"),
+                    bool("Suvni qaytarib olish", "Qo'ngach suvni paqirga oladi", () -> c.pickupWater,
+                            v -> c.pickupWater = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
+        l.add(new Module("Pearl Clutch", "Ender pearl: harakatingizni hisoblab aniq otadi, yiqilayotganda o'zi clutch qiladi",
+                Module.Category.MOVEMENT, () -> PearlConfig.get().enabled, v -> PearlConfig.get().enabled = v, () -> {
+            PearlConfig c = PearlConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)",
+                            PearlClutchClient.keyToggle),
+                    bool("Aim tuzatish", "O'zingiz otganda: yugurib/sakrab/uchib otsangiz ham qaragan joyingizga tushadi",
+                            () -> c.aimAssist, v -> c.aimAssist = v),
+                    bool("Avto clutch", "Baland joydan yiqilayotganda o'zi xavfsiz blokka otadi", () -> c.autoClutch,
+                            v -> c.autoClutch = v),
+                    bool("Void clutch", "Ostida blok yo'q bo'lsa (void) ham", () -> c.voidClutch, v -> c.voidClutch = v),
+                    num("Min yiqilish", "Jami yiqilish shundan ko'p bo'lsa clutch", 4, 40, () -> c.minFall,
+                            v -> c.minFall = v, v -> v + " blok"),
+                    num("Qidiruv radiusi", "Qo'nadigan blokni shu radiusda qidiradi", 3, 16, () -> c.radius,
+                            v -> c.radius = v, v -> v + " blok"),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
         l.add(new Module("Auto TNT Cart", "Kamon/arbalet o'qi tushadigan joyga yoki qo'ygan railingizga TNT minecart",
                 Module.Category.WORLD, () -> AutoTntConfig.get().enabled, v -> AutoTntConfig.get().enabled = v, () -> {
             AutoTntConfig c = AutoTntConfig.get();
             AutoTntConfig.Profile p = c.p();
             return List.of(
                     group("Tugmalar"),
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoTntClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoTntClient.keyToggle),
                     key("Kamon rejimi", "Kamon auto-TNT yoqish/o'chirish", AutoTntClient.keyBow),
                     key("Arbalet", "Arbalet auto-TNT (bir marta)", AutoTntClient.keyCrossbow),
                     key("Rail rejimi", "Rail qo'yganda auto-TNT yoqish/o'chirish", AutoTntClient.keyRail),
@@ -429,7 +537,7 @@ public final class Modules {
                 Module.Category.WORLD, () -> FastPlaceConfig.get().enabled, v -> FastPlaceConfig.get().enabled = v, () -> {
             FastPlaceConfig c = FastPlaceConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", FastPlaceClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", FastPlaceClient.keyToggle),
                     num("Kechikish", "Qo'yishlar orasida (vanilla 4, eng tezi 1)", 1, 4, () -> c.delay, v -> c.delay = v,
                             v -> v == 4 ? "4 tick (vanilla)" : v + " tick"),
                     num("Bloklar/tick", "Bir tickda nechta blok (tepaga ko'tarilish, ko'prik)", 1, 4, () -> c.perTick,
@@ -442,7 +550,7 @@ public final class Modules {
                 Module.Category.WORLD, () -> StealerConfig.get().enabled, v -> StealerConfig.get().enabled = v, () -> {
             StealerConfig c = StealerConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", ChestStealerClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", ChestStealerClient.keyToggle),
                     choice("Nima olinadi", "Tanlanganlar / hammasi / tanlanganlardan tashqari",
                             new String[] {"Tanlanganlar", "Hammasi", "Tanlanmaganlar"},
                             () -> Math.floorMod(c.mode, 3), v -> c.mode = v),
@@ -452,6 +560,8 @@ public final class Modules {
                     num("Ochilgach kutish", "Birinchi itemdan oldin", 0, 20, () -> c.openDelay, v -> c.openDelay = v,
                             v -> v + " tick"),
                     bool("Avto yopish", "Tugagach sandiqni yopadi", () -> c.autoClose, v -> c.autoClose = v),
+                    bool("Faqat haqiqiy sandiq", "Server menyulari (sandiqqa o'xshash oynalar) dan olmaydi",
+                            () -> c.realOnly, v -> c.realOnly = v),
                     bool("Shulker ham", "Shulker box'dan ham oladi", () -> c.shulkers, v -> c.shulkers = v),
                     bool("Shift - to'xtatish", "Shift bosib ochsangiz ishlamaydi", () -> c.shiftPause,
                             v -> c.shiftPause = v));
@@ -461,7 +571,7 @@ public final class Modules {
                 Module.Category.RENDER, () -> NametagsConfig.get().enabled, v -> NametagsConfig.get().enabled = v, () -> {
             NametagsConfig c = NametagsConfig.get();
             return List.of(
-                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", NametagsClient.keyToggle),
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", NametagsClient.keyToggle),
                     group("Matn"),
                     bool("Ism", "O'yinchi nicki (do'stlar yashil)", () -> c.name, v -> c.name = v),
                     bool("Jon", "Health indicator modingiz bo'lsa o'chiq qoldiring", () -> c.health,
@@ -508,6 +618,11 @@ public final class Modules {
                             v -> ac.requireLookAt = v),
                     bool("1 tick swap", "Almashtirish va urish bir tickda (OFF - zarba kuchsiz)", () -> ac.sameTickSwap,
                             v -> ac.sameTickSwap = v),
+                    group("Inventar"),
+                    bool("Inventarni ochib olish", "Inventardan hotbar'ga olishda E ochilib-yopiladi (serverlar uchun)",
+                            () -> ac.openInventory, v -> ac.openInventory = v),
+                    bool("Joyiga qaytarish", "Olingan narsa ishlatilgach eski joyiga qaytadi, hotbar'dagi narsa o'z joyida",
+                            () -> ac.returnItems, v -> ac.returnItems = v),
                     group("TNT"),
                     bool("Blokka qarash", "Rail/minecart qo'yishdan oldin o'sha joyga qaraydi", () -> ac.rotateToBlocks,
                             v -> ac.rotateToBlocks = v),

@@ -10,10 +10,10 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
+import uz.spearlunger.InvHelper;
 
 /**
  * Jon kam qolganda hotbar'dagi Healing splash damlamasini oyoq ostiga otadi va darhol eski slot/qarashga qaytadi.
@@ -26,6 +26,8 @@ public class PotionController {
     private int pendingSlot = -1;
     private float savedPitch;
     private boolean warned = false;
+    /** Inventardan vaqtincha olib kelingan: {inventar slot, hotbar slot}; otilgach joyiga qaytadi. */
+    private int[] borrowed = null;
 
     public void tick(MinecraftClient c) {
         ClientPlayerEntity p = c.player;
@@ -122,6 +124,13 @@ public class PotionController {
         c.interactionManager.interactItem(p, Hand.MAIN_HAND);
         p.getInventory().setSelectedSlot(original);
         cooldown = Math.max(1, cfg.cooldownTicks);
+        if (borrowed != null && borrowed[1] == slot && InvHelper.returnItems()) {
+            // eski joyiga: qolgan damlamalar inventarga, hotbar'dagi narsa o'z slotiga
+            InvHelper.swap(c, p, borrowed[0], borrowed[1]);
+            borrowed = null;
+            return;
+        }
+        borrowed = null;
         if (cfg.refill && kind != null && p.getInventory().getStack(slot).isEmpty()) refill(c, p, slot, kind, cfg);
     }
 
@@ -136,7 +145,8 @@ public class PotionController {
             ItemStack s = p.getInventory().getStack(i);
             if (!isThrowable(s, cfg) || !has(s, eff)) continue;
             int target = freeHotbar(p);
-            c.interactionManager.clickSlot(p.playerScreenHandler.syncId, i, target, SlotActionType.SWAP, p);
+            InvHelper.swap(c, p, i, target);
+            borrowed = new int[] { i, target };
             return target;
         }
         return -1;
@@ -146,7 +156,7 @@ public class PotionController {
         for (int i = 9; i < 36; i++) {
             ItemStack s = p.getInventory().getStack(i);
             if (isThrowable(s, cfg) && has(s, eff)) {
-                c.interactionManager.clickSlot(p.playerScreenHandler.syncId, i, slot, SlotActionType.SWAP, p);
+                InvHelper.swap(c, p, i, slot);
                 return;
             }
         }

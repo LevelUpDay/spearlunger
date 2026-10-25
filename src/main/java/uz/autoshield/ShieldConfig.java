@@ -13,7 +13,7 @@ public class ShieldConfig {
     /** O'yinchilar: yaqinda sizga qarab turgan / yugurib kelayotgan bo'lsa (zarbadan oldin). */
     public boolean players = true;
     /** O'yinchi xavf masofasi (0.1 blok). */
-    public int playerRangeTenths = 45;
+    public int playerRange = 38;
     /** Sizga shuncha gradus ichida qarab turgan bo'lsa "urmoqchi" deb hisoblanadi. */
     public int faceAngle = 40;
     /** Kamon/arbalet/trident bilan sizni nishonga olgan o'yinchilar. */
@@ -36,7 +36,11 @@ public class ShieldConfig {
     public boolean onHurt = true;
 
     /** Xavf o'tgach yana shuncha tick ushlab turadi. */
-    public int holdTicks = 6;
+    public int holdAfterTicks = 2;
+    /** Qalqon eng ko'pi bilan shuncha tick ko'tarilib turadi, keyin tushiriladi (doim ko'tarilib qolmasin). */
+    public int maxUpTicks = 12;
+    /** Tushirilgach shuncha tick qayta ko'tarilmaydi (zarba/o'q bundan mustasno). */
+    public int rearmTicks = 8;
     /** Hujumchi orqangizda bo'lsa unga buriladi (qalqon faqat old tomondan to'sadi). */
     public boolean autoFace = true;
     /** Chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. */

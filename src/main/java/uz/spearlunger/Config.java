@@ -32,6 +32,10 @@ public class Config {
         public boolean rotateToBlocks = true;
         /** TNT: tugagach kamerani avvalgi holatiga qaytarish. */
         public boolean restoreView = true;
+        /** Inventardan hotbar'ga olishda inventarni ochib-yopadi (E), aks holda ochmasdan. */
+        public boolean openInventory = true;
+        /** Inventardan olingan narsa ishlatilgach eski joyiga qaytariladi (hotbar'da o'zi qolmaydi). */
+        public boolean returnItems = true;
     }
 
     /**
@@ -49,8 +53,10 @@ public class Config {
     public boolean eatGoldenApples = false;
     /** Nayza durability'si shundan kam qolsa ishlatmaydi (0 = o'chiq). */
     public int minDurability = 10;
-    /** R: false = bosib turish, true = bir bosib yoqish/o'chirish. */
+    /** Eski sozlama (rMode'ga almashdi), faylni buzmaslik uchun qoldirilgan. */
     public boolean holdToggle = false;
+    /** R: 0 = avto (bir bosish yoqadi/o'chiradi, bosib turish - qo'yib yuborguncha), 1 = bosib turish, 2 = bosib yoqish. */
+    public int rMode = 0;
     /** Ekranda lunge holati (cooldown, ochlik). */
     public boolean hud = true;
 
