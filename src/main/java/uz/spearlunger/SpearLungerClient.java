@@ -13,7 +13,8 @@ import org.lwjgl.glfw.GLFW;
 public class SpearLungerClient implements ClientModInitializer {
     public static KeyBinding keyHold;      // R - auto lunge (bosib turish yoki yoqish/o'chirish)
     public static KeyBinding keyTarget;    // X - eng yaqin o'yinchiga lunge + mace
-    public static KeyBinding keySettings;  // O - umumiy sozlamalar menyusi
+    public static KeyBinding keySettings;  // O - ClickGUI menyusi
+    public static KeyBinding keyToggle;    // modulni yoqish/o'chirish (tugma berilmagan)
     public static final LungeController CONTROLLER = new LungeController();
 
     @Override
@@ -26,6 +27,8 @@ public class SpearLungerClient implements ClientModInitializer {
                 new KeyBinding("key.spearlunger.target", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_X, cat));
         keySettings = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.spearlunger.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_O, cat));
+        keyToggle = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding("key.spearlunger.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 Identifier.of("spearlunger", "status"), SpearHud::render);

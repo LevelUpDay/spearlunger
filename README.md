@@ -9,13 +9,20 @@ Kerakli modlar: Fabric Loader, Fabric API.
 |---|---|
 | **R** | Auto Lunge: Lunge enchantli nayza bilan cooldown to'lishi bilan avtomatik jab (bosib turish yoki bir bosib yoqish) |
 | **X** | Nishonga lunge qilib uchish, yaqinlashganda mace bilan urish (yerda bo'lsangiz wind charge bilan sakraydi). Yana bossangiz bekor bo'ladi |
-| **O** | Umumiy menyu: Spear Lunger, Auto TNT, Auto Elytra, Auto Totem, Anti-cheat |
+| **O** | ClickGUI menyusi (Meteor uslubida) |
 | **B** | Kamon auto-TNT yoqish/o'chirish |
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
-| — | Auto Elytra / Auto Totem yoqish/o'chirish (Controls'da tugma bering) |
+
+## ClickGUI (O)
+
+Kategoriyalar alohida panellarda: Combat, Movement, World, Client. Panel sarlavhasini sudrab joyini o'zgartirish mumkin.
+- modul ustida **chap tugma** — yoqish/o'chirish;
+- **o'ng tugma** — sozlamalar oynasi: modulni yoqish tugmasi (bind), boshqa tugmalar va barcha sozlamalar.
+  Tugmani bosing va klaviaturadan harf tanlang (Esc — bekor, Backspace yoki o'ng tugma — tugmani o'chirish).
+- Client → ClickGUI: menyu tugmasi va rangi.
 
 `/tntfriend add|remove|list <ism>`: do'stlar ro'yxati. Ularni X nishonga olmaydi, TNT esa ular yonida portlamaydi.
 

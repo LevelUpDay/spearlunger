@@ -34,6 +34,9 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import uz.spearlunger.Config;
 import uz.spearlunger.Rotations;
+import uz.spearlunger.gui.Module;
+import uz.spearlunger.gui.ModuleScreen;
+import uz.spearlunger.gui.Modules;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -108,7 +111,17 @@ public class TntController {
         boolean crossPressed = false;
         while (AutoTntClient.keyCrossbow.wasPressed()) crossPressed = true;
         while (AutoTntClient.keySettings.wasPressed()) {
-            if (client.currentScreen == null) client.setScreen(new TntSettingsScreen(null));
+            Module m = Modules.byName("Auto TNT Cart");
+            if (client.currentScreen == null && m != null) client.setScreen(new ModuleScreen(m, null));
+        }
+        while (AutoTntClient.keyToggle.wasPressed()) {
+            cfg.enabled = !cfg.enabled;
+            AutoTntConfig.save();
+            say(p, cfg.enabled ? "§aAuto TNT Cart: ON" : "§cAuto TNT Cart: OFF", true);
+        }
+        if (!cfg.enabled) {
+            pendingRail = null;
+            crossPressed = false;
         }
 
         if (pendingRail != null && steps.isEmpty()) {
@@ -135,7 +148,7 @@ public class TntController {
             lastLook = p.getRotationVec(1.0f);
         } else if (wasUsingBow && ignoreRelease) {
             ignoreRelease = false;
-        } else if (wasUsingBow && cfg.bowMode && steps.isEmpty()) {
+        } else if (wasUsingBow && cfg.enabled && cfg.bowMode && steps.isEmpty()) {
             onBowRelease(client, p);
         }
         wasUsingBow = usingBow;
@@ -176,7 +189,8 @@ public class TntController {
     /** O'yinchi o'zi rail qo'yganda (UseBlockCallback). Rail haqiqatan paydo bo'lgach tick() ishga tushiradi. */
     public ActionResult onUseBlock(PlayerEntity player, World world, Hand hand, BlockHitResult hit) {
         if (internal || !(player instanceof ClientPlayerEntity p)) return ActionResult.PASS;
-        if (!AutoTntConfig.get().railTrigger || !steps.isEmpty()) return ActionResult.PASS;
+        AutoTntConfig cfg = AutoTntConfig.get();
+        if (!cfg.enabled || !cfg.railTrigger || !steps.isEmpty()) return ActionResult.PASS;
         if (!p.getStackInHand(hand).isIn(ItemTags.RAILS)) return ActionResult.PASS;
         BlockPos pos = hit.getBlockPos();
         if (!world.getBlockState(pos).isReplaceable()) pos = pos.offset(hit.getSide());

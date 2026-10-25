@@ -2,7 +2,7 @@
   "key.category.spearlunger.main": "Spear Lunger",
   "key.spearlunger.hold": "Auto Lunge (bosib turish / yoqish)",
   "key.spearlunger.target": "Nishonga lunge + mace",
-  "key.spearlunger.settings": "Sozlamalar menyusi",
+  "key.spearlunger.settings": "ClickGUI menyusi",
   "key.category.autotnt.main": "Auto TNT Cart",
   "key.autotnt.bow": "Kamon auto-TNT yoqish/o'chirish",
   "key.autotnt.crossbow": "Arbalet auto-TNT (bir marta)",
@@ -12,5 +12,7 @@
   "key.autoelytra.toggle": "Auto Elytra yoqish/o'chirish",
   "key.category.autototem.main": "Auto Totem",
   "key.autototem.toggle": "Auto Totem yoqish/o'chirish",
-  "key.autotnt.rail": "Rail auto-TNT yoqish/o'chirish"
+  "key.autotnt.rail": "Rail auto-TNT yoqish/o'chirish",
+  "key.spearlunger.toggle": "Spear Lunger yoqish/o'chirish",
+  "key.autotnt.toggle": "Auto TNT Cart yoqish/o'chirish"
 }

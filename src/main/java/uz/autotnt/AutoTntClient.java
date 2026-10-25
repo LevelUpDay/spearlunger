@@ -21,6 +21,7 @@ public class AutoTntClient implements ClientModInitializer {
     public static KeyBinding keySettings;  // P - sozlamalar
     public static KeyBinding keyProfile;   // V - profilni almashtirish
     public static KeyBinding keyRail;      // G - rail qo'yganda auto-TNT on/off
+    public static KeyBinding keyToggle;    // modulni yoqish/o'chirish (tugma berilmagan)
     public static final TntController CONTROLLER = new TntController();
 
     @Override
@@ -37,6 +38,8 @@ public class AutoTntClient implements ClientModInitializer {
                 new KeyBinding("key.autotnt.profile", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, cat));
         keyRail = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.autotnt.rail", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, cat));
+        keyToggle = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding("key.autotnt.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
 
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
         UseBlockCallback.EVENT.register(CONTROLLER::onUseBlock);

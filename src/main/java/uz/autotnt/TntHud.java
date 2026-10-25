@@ -16,7 +16,7 @@ public class TntHud {
         MinecraftClient c = MinecraftClient.getInstance();
         ClientPlayerEntity p = c.player;
         AutoTntConfig cfg = AutoTntConfig.get();
-        if (p == null || c.options.hudHidden || !cfg.hud) return;
+        if (p == null || c.options.hudHidden || !cfg.hud || !cfg.enabled) return;
         AutoTntConfig.Profile cf = cfg.p();
 
         String[] ign = {"Auto", "Flint->cart", "Fire charge", "Activator"};

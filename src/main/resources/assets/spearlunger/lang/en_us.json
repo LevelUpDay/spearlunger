@@ -2,7 +2,7 @@
   "key.category.spearlunger.main": "Spear Lunger",
   "key.spearlunger.hold": "Auto Lunge (hold / toggle)",
   "key.spearlunger.target": "Lunge to target + mace",
-  "key.spearlunger.settings": "Settings menu",
+  "key.spearlunger.settings": "ClickGUI menu",
   "key.category.autotnt.main": "Auto TNT Cart",
   "key.autotnt.bow": "Bow auto-TNT on/off",
   "key.autotnt.crossbow": "Crossbow auto-TNT (one shot)",
@@ -12,5 +12,7 @@
   "key.autoelytra.toggle": "Auto Elytra on/off",
   "key.category.autototem.main": "Auto Totem",
   "key.autototem.toggle": "Auto Totem on/off",
-  "key.autotnt.rail": "Rail auto-TNT on/off"
+  "key.autotnt.rail": "Rail auto-TNT on/off",
+  "key.spearlunger.toggle": "Spear Lunger on/off",
+  "key.autotnt.toggle": "Auto TNT Cart on/off"
 }

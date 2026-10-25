@@ -23,6 +23,8 @@ public class AutoTntConfig {
         public int friendRadius = 6;      // do'st shu radiusda bo'lsa ishlamaydi (0 = o'chiq)
     }
 
+    /** Modul yoqilganmi (ClickGUI'da chap tugma). */
+    public boolean enabled = true;
     public boolean bowMode = false;
     public boolean sounds = true;
     public boolean messages = true;
