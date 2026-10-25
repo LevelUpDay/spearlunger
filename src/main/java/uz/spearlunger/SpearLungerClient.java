@@ -9,6 +9,7 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
+import uz.spearlunger.gui.ArrayListHud;
 
 public class SpearLungerClient implements ClientModInitializer {
     public static KeyBinding keyHold;      // R - auto lunge (bosib turish yoki yoqish/o'chirish)
@@ -32,5 +33,7 @@ public class SpearLungerClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 Identifier.of("spearlunger", "status"), SpearHud::render);
+        HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
+                Identifier.of("spearlunger", "arraylist"), ArrayListHud::render);
     }
 }

@@ -28,7 +28,11 @@ import uz.cheststealer.ChestStealerClient;
 import uz.cheststealer.StealerConfig;
 import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
+import uz.norender.NoRenderClient;
+import uz.norender.NoRenderConfig;
 import uz.pearlclutch.PearlClutchClient;
+import uz.pearltracker.PearlTrackerClient;
+import uz.pearltracker.PearlTrackerConfig;
 import uz.pearlclutch.PearlConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
@@ -77,6 +81,8 @@ public final class Modules {
         PearlConfig.save();
         ClutchConfig.save();
         PvpConfig.save();
+        NoRenderConfig.save();
+        PearlTrackerConfig.save();
     }
 
     private static List<Module> build() {
@@ -594,6 +600,62 @@ public final class Modules {
                             v -> c.range = v, v -> v + " blok"),
                     bool("Ko'rinmaslar ham", "Invisibility ichgan o'yinchilar", () -> c.invisible,
                             v -> c.invisible = v));
+        }));
+
+        l.add(new Module("NoRender", "Olovni kichik, suv/lava ichini tiniq, totem/portlash/silkinish va boshqalarni o'chiradi",
+                Module.Category.RENDER, () -> NoRenderConfig.get().enabled, v -> NoRenderConfig.get().enabled = v, () -> {
+            NoRenderConfig c = NoRenderConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", NoRenderClient.keyToggle),
+                    group("Olov"),
+                    choice("Olov", "Ekrandagi olov: past (crystal PvP uchun yaxshi) yoki umuman yo'q",
+                            new String[] {"Vanilla", "Past", "Yo'q"}, () -> Math.floorMod(c.fire, 3), v -> c.fire = v),
+                    num("Qancha past", "Past olov qancha tushiriladi", 10, 80, () -> c.fireLower, v -> c.fireLower = v,
+                            v -> v + "%"),
+                    group("Tuman va qatlamlar"),
+                    bool("Suv tumani", "Suv ichida hamma narsa tiniq ko'rinadi", () -> c.waterFog, v -> c.waterFog = v),
+                    bool("Suv ostidagi qatlam", "Ko'k ekran qatlami", () -> c.underwaterOverlay,
+                            v -> c.underwaterOverlay = v),
+                    bool("Lava tumani", "Lava ichida ko'rish", () -> c.lavaFog, v -> c.lavaFog = v),
+                    bool("Blindness/Darkness", "Ko'rlik va darkness tumani", () -> c.effectFog, v -> c.effectFog = v),
+                    bool("Powder snow", "Powder snow tumani", () -> c.powderSnowFog, v -> c.powderSnowFog = v),
+                    bool("Blok ichida", "Blok ichida qolgandagi qora ekran", () -> c.inWall, v -> c.inWall = v),
+                    bool("Qovoq qatlami", "Qovoq / powder snow ekran qatlami", () -> c.pumpkin, v -> c.pumpkin = v),
+                    bool("Vignette", "Ekran chetlari qorayishi", () -> c.vignette, v -> c.vignette = v),
+                    group("Effektlar"),
+                    bool("Zarba silkinishi", "Zarba yeganda kamera silkinmaydi", () -> c.hurtCam, v -> c.hurtCam = v),
+                    bool("Totem animatsiyasi", "Ekranni yopadigan totem animatsiyasi", () -> c.totemAnimation,
+                            v -> c.totemAnimation = v),
+                    bool("Portal/nausea", "Portal va bosh aylanishi effekti", () -> c.portalNausea,
+                            v -> c.portalNausea = v),
+                    bool("Portlash zarrachalari", "Crystal/anchor/TNT portlash zarrachalari (FPS va ko'rish)",
+                            () -> c.explosions, v -> c.explosions = v),
+                    bool("Ob-havo", "Yomg'ir va qor", () -> c.weather, v -> c.weather = v));
+        }));
+
+        l.add(new Module("Pearl Tracker", "Dushman pearl'i qayerga tushishini qizil bilan ajratadi - borib kutib olasiz",
+                Module.Category.RENDER, () -> PearlTrackerConfig.get().enabled, v -> PearlTrackerConfig.get().enabled = v, () -> {
+            PearlTrackerConfig c = PearlTrackerConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", PearlTrackerClient.keyToggle),
+                    bool("Uchish yo'li", "Pearl uchadigan yo'lni nuqtalar bilan ko'rsatadi", () -> c.trajectory,
+                            v -> c.trajectory = v),
+                    num("Qizil radius", "Tushadigan joy atrofidagi qizil doira", 5, 40, () -> c.radiusTenths,
+                            v -> c.radiusTenths = v, v -> (v / 10.0) + " blok"),
+                    bool("O'zimniki ham", "O'zingiz otgan pearl'lar ham", () -> c.own, v -> c.own = v),
+                    bool("Do'stlarniki emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Chat xabari", "\"X pearl otdi: koordinata\"", () -> c.chat, v -> c.chat = v));
+        }));
+
+        l.add(new Module("Arraylist", "Ekran chetida yoqilgan modullar ro'yxati (Meteor kabi)",
+                Module.Category.RENDER, () -> Config.get().arraylist, v -> Config.get().arraylist = v, () -> {
+            Config c = Config.get();
+            return List.of(
+                    choice("Joyi", "Ekranning qaysi burchagida", ArrayListHud.POSITIONS,
+                            () -> Math.floorMod(c.arraylistPos, ArrayListHud.POSITIONS.length), v -> c.arraylistPos = v),
+                    bool("Kamalak", "Rangi kamalak bo'lib o'zgarib turadi (OFF - asosiy rang)", () -> c.arraylistRainbow,
+                            v -> c.arraylistRainbow = v));
         }));
 
         l.add(new Module("Anti-cheat", "Kamerani silliq burish va boshqa \"odamga o'xshash\" sozlamalar",

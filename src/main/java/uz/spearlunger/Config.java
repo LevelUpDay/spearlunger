@@ -83,6 +83,11 @@ public class Config {
 
     /** ClickGUI: asosiy rang (Theme.ACCENT_NAMES) va panellar joyi. */
     public int guiAccent = 0;
+    /** Arraylist HUD: yoqilgan modullar ro'yxati ekran chetida. */
+    public boolean arraylist = true;
+    /** 0 = yuqori chap, 1 = yuqori o'ng, 2 = pastki o'ng. */
+    public int arraylistPos = 2;
+    public boolean arraylistRainbow = false;
     public Map<String, int[]> guiPanels = new HashMap<>();
 
     public AntiCheat ac() {

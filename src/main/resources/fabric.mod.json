@@ -3,7 +3,7 @@
   "id": "spearlunger",
   "version": "${version}",
   "name": "Spear Lunger + Utility Pack",
-  "description": "Auto Lunge, Auto PvP, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Shield, Auto Potion, Bow Aim, Anchor Guard, Fall Combo, Fast Place, Pearl Clutch, Auto Clutch, Chest Stealer, Nametags+ va Meteor uslubidagi ClickGUI (O).",
+  "description": "Auto Lunge, Auto PvP, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Shield, Auto Potion, Bow Aim, Anchor Guard, Fall Combo, Fast Place, Pearl Clutch, Auto Clutch, Chest Stealer, Nametags+, NoRender, Pearl Tracker, Arraylist va Meteor uslubidagi ClickGUI (O).",
   "authors": [
     "LevelUpDay"
   ],
@@ -26,7 +26,9 @@
       "uz.fallcombo.FallComboClient",
       "uz.pearlclutch.PearlClutchClient",
       "uz.autoclutch.AutoClutchClient",
-      "uz.autopvp.AutoPvpClient"
+      "uz.autopvp.AutoPvpClient",
+      "uz.norender.NoRenderClient",
+      "uz.pearltracker.PearlTrackerClient"
     ]
   },
   "mixins": [

@@ -6,7 +6,17 @@
   "client": [
     "HandledScreenAccessor",
     "MinecraftClientAccessor",
-    "EntityStatusMixin"
+    "EntityStatusMixin",
+    "OverlayRendererMixin",
+    "GameRendererMixin",
+    "InGameHudMixin",
+    "WaterFogMixin",
+    "LavaFogMixin",
+    "PowderSnowFogMixin",
+    "BlindnessFogMixin",
+    "DarknessFogMixin",
+    "WeatherMixin",
+    "ParticleManagerMixin"
   ],
   "injectors": {
     "defaultRequire": 1
