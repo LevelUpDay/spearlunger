@@ -156,7 +156,7 @@ public class ShieldController {
                 if (pl.isSpectator() || (cfg.ignoreFriends && isFriend(pl))) continue;
                 why = playerThreat(pl, p, eye, d, cosFace, cfg);
             } else if (e instanceof CreeperEntity cr) {
-                if (cfg.creepers && d < 7 && (cr.getFuseSpeed() > 0 || cr.getClientFuseTime(1.0f) > 0)) why = "creeper";
+                if (cfg.creepers && d < 7 && (cr.getFuseSpeed() > 0 || cr.isIgnited() || cr.getLerpedFuseTime(1.0f) > 0)) why = "creeper";
             } else if (e instanceof Monster && cfg.mobs) {
                 boolean facing = facing(e, eye, Math.cos(Math.toRadians(50)));
                 if (d <= cfg.mobRangeTenths / 10.0 && facing) why = "mob";
