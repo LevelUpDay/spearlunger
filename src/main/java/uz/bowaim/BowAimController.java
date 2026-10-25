@@ -23,6 +23,7 @@ import uz.spearlunger.Rotations;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import uz.spearlunger.InvHelper;
 
 /**
  * Kamon/arbalet/trident bilan pritselga eng yaqin nishonni o'zi oladi.
@@ -56,7 +57,7 @@ public class BowAimController {
         trackVelocities(c.world, p, cfg);
         if (crossCooldown > 0) crossCooldown--;
 
-        if (!cfg.enabled || c.currentScreen != null || p.isSpectator()) {
+        if (!cfg.enabled || InvHelper.screenOpen(c) || p.isSpectator()) {
             target = null;
             return;
         }

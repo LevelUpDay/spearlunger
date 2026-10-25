@@ -16,6 +16,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import org.lwjgl.glfw.GLFW;
 import uz.spearlunger.mixin.MinecraftClientAccessor;
+import uz.spearlunger.InvHelper;
 
 /**
  * Fast Place: o'ng tugmani bosib turganda bloklar vanilla'dagi 4 tick o'rniga har 1..4 tickda qo'yiladi,
@@ -45,7 +46,7 @@ public class FastPlaceClient implements ClientModInitializer {
             FastPlaceConfig.save();
             p.sendMessage(Text.literal(cfg.enabled ? "§aFast Place: ON" : "§cFast Place: OFF"), true);
         }
-        if (!cfg.enabled || c.currentScreen != null || !c.options.useKey.isPressed() || p.isUsingItem()) return;
+        if (!cfg.enabled || InvHelper.screenOpen(c) || !c.options.useKey.isPressed() || p.isUsingItem()) return;
         Hand hand = blockHand(p);
         if (cfg.onlyBlocks && hand == null) return;
 

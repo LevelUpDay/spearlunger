@@ -23,6 +23,7 @@ import uz.spearlunger.Rotations;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import uz.spearlunger.InvHelper;
 
 /**
  * Qo'lda (o'ng yoki chap) qalqon bo'lsa, xavf paydo bo'lganda o'zi ko'taradi.
@@ -62,7 +63,7 @@ public class ShieldController {
         for (PlayerEntity t : c.world.getPlayers()) track(t);
 
         Hand hand = shieldHand(p);
-        if (!cfg.enabled || hand == null || c.currentScreen != null || p.isSpectator()) {
+        if (!cfg.enabled || hand == null || InvHelper.screenOpen(c) || p.isSpectator()) {
             lower(c, p);
             holdTimer = 0;
             return;

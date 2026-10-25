@@ -14,6 +14,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import uz.autotnt.AutoTntConfig;
 import uz.spearlunger.Rotations;
+import uz.spearlunger.InvHelper;
 
 /**
  * Tepadan o'yinchi ustiga tushayotganda kombinatsiya:
@@ -47,7 +48,7 @@ public class FallComboController {
             FallComboConfig.save();
             p.sendMessage(Text.literal(cfg.enabled ? "§aFall Combo: ON" : "§cFall Combo: OFF"), true);
         }
-        if (!cfg.enabled || c.currentScreen != null) {
+        if (!cfg.enabled || InvHelper.screenOpen(c)) {
             if (phase != Phase.IDLE) finish(c, p, false);
             return;
         }

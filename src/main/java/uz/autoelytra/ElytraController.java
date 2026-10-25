@@ -15,6 +15,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import uz.autotnt.AutoTntConfig;
 import uz.spearlunger.InvHelper;
@@ -35,6 +36,7 @@ public class ElytraController {
     private int groundTicks = 0;
     private boolean warned = false;
     private boolean unequippedThisFlight = false;
+    private int glideTicks = 0;
 
     // ------------------------------------------------------------ firework bosilganda
     public ActionResult onUseItem(PlayerEntity player, World world, Hand hand) {
@@ -122,10 +124,11 @@ public class ElytraController {
             }
             return;
         }
-        if (!cfg.enabled || c.currentScreen != null) return;
+        if (!cfg.enabled || InvHelper.screenOpen(c)) return;
 
         ItemStack chest = p.getEquippedStack(EquipmentSlot.CHEST);
         if (p.isOnGround() || p.isTouchingWater()) unequippedThisFlight = false;
+        glideTicks = p.isGliding() ? glideTicks + 1 : 0;
         if (p.isGliding()) {
             groundTicks = 0;
             if (chest.isOf(Items.ELYTRA) && tryUnequip(c, p, cfg)) return;
@@ -203,37 +206,43 @@ public class ElytraController {
     /** Uchib kelib dushman ustiga yetganda elytra'ni yechadi (nagrudnik kiyadi), pastga tushasiz va mace qo'lda. */
     private boolean tryUnequip(MinecraftClient c, ClientPlayerEntity p, ElytraConfig cfg) {
         if (!cfg.unequipNearEnemy || unequippedThisFlight) return false;
+        Vec3d v = p.getVelocity();
+        // endigina uchdik yoki tepaga ko'tarilyapmiz - yechmaymiz (dushman oldidan uchib ketish mumkin bo'lsin)
+        if (glideTicks < 10 || v.y > -0.05) return false;
+        double speed = Math.max(0.3, v.length());
         PlayerEntity enemy = null;
-        double best = cfg.unequipDist;
+        double bestT = Double.MAX_VALUE;
         for (PlayerEntity e : c.world.getPlayers()) {
             if (e == p || !e.isAlive() || e.isSpectator() || e.isCreative() || isFriend(e)) continue;
-            double d = p.distanceTo(e);
-            if (d <= best && p.getY() - e.getY() >= cfg.unequipMinAbove) {
-                best = d;
+            if (p.getY() - e.getY() < cfg.unequipMinAbove) continue;
+            Vec3d to = e.getEntityPos().add(0, 1, 0).subtract(p.getEntityPos());
+            if (v.normalize().dotProduct(to.normalize()) < 0.5) continue;   // unga qarab uchmayapmiz
+            // tez uchsak oldinroq: yetib borishga necha tick qoldi
+            double ticks = to.length() / speed;
+            if (ticks <= cfg.unequipLeadTicks && to.length() <= Math.max(cfg.unequipDist, speed * cfg.unequipLeadTicks + 2)
+                    && ticks < bestT) {
+                bestT = ticks;
                 enemy = e;
             }
         }
         if (enemy == null) return false;
         unequippedThisFlight = true;
         int original = p.getInventory().getSelectedSlot();
+        int mace = -1;
+        if (cfg.unequipToMace) {
+            for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(Items.MACE)) { mace = i; break; }
+        }
+        // hammasi SHU tickda (kechikmasin): nagrudnikni kiyamiz yoki elytra'ni inventarga olamiz
         int[] plate = findChestplate(p, cfg.fromInventory);
         if (plate != null) {
-            addEquip(c, p, plate[0], plate[1], original, false);
+            if (plate[1] >= 9) InvHelper.swap(c, p, plate[1], plate[0]);
+            p.getInventory().setSelectedSlot(plate[0]);
+            c.interactionManager.interactItem(p, Hand.MAIN_HAND);
+            if (plate[1] >= 9) InvHelper.swap(c, p, plate[1], plate[0]);
         } else {
-            // nagrudnik yo'q: elytra'ni inventarga olamiz (zirh sloti 6 = ko'krak)
-            steps.add(() -> {
-                InvHelper.quickMove(c, p, 6);
-                return true;
-            });
+            InvHelper.quickMove(c, p, 6);   // zirh sloti 6 = ko'krak
         }
-        if (cfg.unequipToMace) {
-            steps.add(() -> {
-                int mace = -1;
-                for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(Items.MACE)) { mace = i; break; }
-                if (mace >= 0) p.getInventory().setSelectedSlot(mace);
-                return true;
-            });
-        }
+        p.getInventory().setSelectedSlot(mace >= 0 ? mace : original);
         say(p, "§cAuto Elytra: " + enemy.getName().getString() + " - elytra yechildi");
         return true;
     }

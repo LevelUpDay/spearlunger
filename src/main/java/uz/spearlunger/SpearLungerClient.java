@@ -31,6 +31,7 @@ public class SpearLungerClient implements ClientModInitializer {
         keyToggle = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.spearlunger.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
+        ClientTickEvents.END_CLIENT_TICK.register(InvHelper::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 Identifier.of("spearlunger", "status"), SpearHud::render);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,

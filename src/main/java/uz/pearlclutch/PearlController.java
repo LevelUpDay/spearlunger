@@ -76,7 +76,7 @@ public class PearlController {
             p.sendMessage(Text.literal(cfg.enabled ? "§aPearl Clutch: ON" : "§cPearl Clutch: OFF"), true);
         }
         if (p.isOnGround() || p.isTouchingWater() || p.isClimbing() || p.fallDistance < 1) thrownThisFall = false;
-        if (!cfg.enabled || !cfg.autoClutch || thrownThisFall || c.currentScreen != null) return;
+        if (!cfg.enabled || !cfg.autoClutch || thrownThisFall || InvHelper.screenOpen(c)) return;
         if (p.isOnGround() || p.isGliding() || p.getAbilities().flying || p.isTouchingWater() || p.isSpectator()) return;
         if (p.getVelocity().y > -0.3) return;
         if (scanCooldown > 0) {
@@ -150,6 +150,29 @@ public class PearlController {
         Vec3d start = spawnPos(p), add = shooterVelocity(p);
         Aim aim = solve(start, target, add);
         if (aim == null || !verify(c.world, p, start, aim, add, target, 2.5)) return false;
+        int original = p.getInventory().getSelectedSlot();
+        p.getInventory().setSelectedSlot(slot);
+        throwPearl(c, p, Hand.MAIN_HAND, aim);
+        p.getInventory().setSelectedSlot(original);
+        return true;
+    }
+
+    /**
+     * Harakatlanayotgan nishon oldiga: pearl yetib borguncha nishon qayerga borishini (targetVel) hisoblab,
+     * o'sha nuqtani aniqlashtiradi va otadi. point - hozirgi mo'ljal (nishon oyog'i/oldi). Otilsa true.
+     */
+    public boolean throwLead(MinecraftClient c, ClientPlayerEntity p, Vec3d point, Vec3d targetVel) {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(Items.ENDER_PEARL)) { slot = i; break; }
+        if (slot < 0 || p.getItemCooldownManager().isCoolingDown(p.getInventory().getStack(slot))) return false;
+        Vec3d start = spawnPos(p), add = shooterVelocity(p);
+        Vec3d aimPoint = point;
+        Aim aim = solve(start, aimPoint, add);
+        for (int i = 0; i < 3 && aim != null; i++) {
+            aimPoint = point.add(targetVel.x * aim.ticks, 0, targetVel.z * aim.ticks);
+            aim = solve(start, aimPoint, add);
+        }
+        if (aim == null || !verify(c.world, p, start, aim, add, aimPoint, 2.5)) return false;
         int original = p.getInventory().getSelectedSlot();
         p.getInventory().setSelectedSlot(slot);
         throwPearl(c, p, Hand.MAIN_HAND, aim);

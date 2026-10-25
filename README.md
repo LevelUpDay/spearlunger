@@ -14,6 +14,7 @@ Kerakli modlar: Fabric Loader, Fabric API.
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **J** | Mace Combo: pearl → wind charge → mace (bir bosish) |
 | **K** | Auto PvP yoqish/o'chirish |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
 
@@ -64,6 +65,15 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
   bilan o'chiradi;
 - **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
 HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
+
+## Mace Combo (Combat, J)
+
+Bir bosishda bitta kombinatsiya (yana bossangiz bekor):
+1. nishon uzoq bo'lsa (standart 12+ blok) uning oldiga **ender pearl** — pearl yetib borguncha nishon qayerga yurishi
+   va o'zingizning tezligingiz (yugurish, sakrash, uchish) hisoblanadi;
+2. yaqinlashgach oyog'ingiz ostiga **wind charge** (pastga qarash faqat paketda) — tepaga uchasiz;
+3. tushishda nishonga qarab turadi va masofaga kirishi bilan **mace**'ga o'tib uradi (zirhli nishonga Breach,
+   aks holda Density) — almashtirish va zarba bir tickda.
 
 ## Auto Cobweb
 
@@ -198,6 +208,11 @@ bo'lganda ishlash va "totem ishlatildi" xabari sozlanadi.
 
 ## Nayza qanday ishlaydi (1.21.11)
 
+- R va X nayzani **jab tickining o'zida** tanlaydi (almashtirish + jab bir tickda, mace'dagi "1 tick swap" kabi):
+  shuning uchun birinchi lunge kutmasdan darhol chiqadi. Keyingi lunge'lar orasida nayzaning o'z cooldown'i
+  (~1 soniya) bor — undan tezini vanilla server qabul qilmaydi.
+- X: wind charge darhol (pastga qarash faqat paketda) otiladi va yerdan uzilishi bilan lunge boshlanadi.
+
 - Nayzada `minimum_attack_charge = 1.0` bor, ya'ni jab faqat **cooldown 100%** bo'lganda ishlaydi
   (netherite ≈ 23 tick, diamond ≈ 21 tick). Shuning uchun 1 soniyada ~1 lunge, bundan tez bo'lmaydi.
 - Qo'ldagi item almashsa cooldown 0 dan boshlanadi, shuning uchun mod nayzani qo'lda ushlab turadi.
@@ -220,6 +235,7 @@ O → Anti-cheat oynasida:
 - **Inventarni ochib olish**: modullar inventardan hotbar'ga narsa olganda (TNT cart, damlama, cobweb, elytra,
   obsidian...) vanilla'dagidek inventar ochilib (E), almashtirilib, yopiladi — ko'p serverlar ochmasdan qilingan
   bosishlarni qaytaradi.
+- **Inventar ochiq turishi**: o'zi ochgan inventar necha tick ko'rinib turadi (standart 4), keyin yopiladi.
 - **Joyiga qaytarish**: olingan narsa ishlatilgach eski joyiga qaytadi, hotbar'dagi narsangiz ham o'z slotiga.
 
 Diqqat: bu sozlamalar aniqlanish xavfini kamaytiradi, lekin yo'q qilmaydi. Serverda ishlatish o'sha

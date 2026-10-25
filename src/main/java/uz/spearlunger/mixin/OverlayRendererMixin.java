@@ -1,7 +1,5 @@
 package uz.spearlunger.mixin;
 
-import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
-import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameOverlayRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -17,21 +15,26 @@ import uz.norender.NoRenderConfig;
 /** NoRender: past olov, suv ostidagi va blok ichidagi qatlam, totem animatsiyasi. */
 @Mixin(InGameOverlayRenderer.class)
 public class OverlayRendererMixin {
-    @WrapOperation(method = "renderOverlays", require = 0, at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/client/gui/hud/InGameOverlayRenderer;renderFireOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;Lnet/minecraft/client/texture/Sprite;)V"))
-    private void spearlunger$fire(MatrixStack matrices, VertexConsumerProvider consumers, Sprite sprite,
-                                  Operation<Void> original) {
+    /** Olov chizilishidan oldin pastga suramiz (yoki umuman chizmaymiz)... */
+    @Inject(method = "renderFireOverlay", at = @At("HEAD"), cancellable = true, require = 0)
+    private static void spearlunger$fireHead(MatrixStack matrices, VertexConsumerProvider consumers, Sprite sprite,
+                                             CallbackInfo ci) {
         NoRenderConfig cfg = NoRenderConfig.get();
         int mode = cfg.enabled ? cfg.fire : 0;
-        if (mode == 2) return;
-        if (mode == 1) {
+        if (mode == 2) {
+            ci.cancel();
+        } else if (mode == 1) {
             matrices.push();
             matrices.translate(0.0f, -cfg.fireLower / 100.0f, 0.0f);
-            original.call(matrices, consumers, sprite);
-            matrices.pop();
-            return;
         }
-        original.call(matrices, consumers, sprite);
+    }
+
+    /** ...va chizib bo'lgach qaytaramiz. */
+    @Inject(method = "renderFireOverlay", at = @At("RETURN"), require = 0)
+    private static void spearlunger$fireReturn(MatrixStack matrices, VertexConsumerProvider consumers, Sprite sprite,
+                                               CallbackInfo ci) {
+        NoRenderConfig cfg = NoRenderConfig.get();
+        if (cfg.enabled && cfg.fire == 1) matrices.pop();
     }
 
     @Inject(method = "renderUnderwaterOverlay", at = @At("HEAD"), cancellable = true, require = 0)
