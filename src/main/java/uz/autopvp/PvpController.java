@@ -121,13 +121,10 @@ public class PvpController {
             state = "yaqinlashish";
             return;
         }
-        if (p.getInventory().getSelectedSlot() != spear) {
-            p.getInventory().setSelectedSlot(spear);
-            state = "nayza";
-            return;
-        }
         float pitch = cfg.flatten && reachDist > 6 ? 0.0f : Rotations.pitchTo(eye, center);
         boolean aimed = Rotations.turn(p, Rotations.yawTo(eye, center), pitch);
+        // nayzani jab tickining o'zida olamiz - cooldown nolga tushmaydi (1 tick swap)
+        if (aimed) p.getInventory().setSelectedSlot(spear);
         if (aimed && lungeReady(c, p, cfg)) {
             PiercingWeaponComponent pw = p.getMainHandStack().get(DataComponentTypes.PIERCING_WEAPON);
             c.interactionManager.attackWithPiercingWeapon(pw);
