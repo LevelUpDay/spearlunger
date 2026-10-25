@@ -1,6 +1,6 @@
-# Spear Lunger + Auto TNT Cart
+# Spear Lunger + Auto TNT Cart + Auto Elytra + Auto Totem
 
-Minecraft **1.21.11** uchun Fabric client mod. Bitta jar ichida ikki mod bor.
+Minecraft **1.21.11** uchun Fabric client mod. Bitta jar ichida to'rtta mod bor.
 Kerakli modlar: Fabric Loader, Fabric API.
 
 ## Tugmalar
@@ -9,13 +9,43 @@ Kerakli modlar: Fabric Loader, Fabric API.
 |---|---|
 | **R** | Auto Lunge: Lunge enchantli nayza bilan cooldown to'lishi bilan avtomatik jab (bosib turish yoki bir bosib yoqish) |
 | **X** | Nishonga lunge qilib uchish, yaqinlashganda mace bilan urish (yerda bo'lsangiz wind charge bilan sakraydi). Yana bossangiz bekor bo'ladi |
-| **O** | Umumiy menyu: Spear Lunger, Auto TNT, Anti-cheat |
+| **O** | Umumiy menyu: Spear Lunger, Auto TNT, Auto Elytra, Auto Totem, Anti-cheat |
 | **B** | Kamon auto-TNT yoqish/o'chirish |
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
+| — | Auto Elytra / Auto Totem yoqish/o'chirish (Controls'da tugma bering) |
 
 `/tntfriend add|remove|list <ism>`: do'stlar ro'yxati. Ularni X nishonga olmaydi, TNT esa ular yonida portlamaydi.
+
+## Auto TNT: rail rejimi (G)
+
+Rail qo'ying (oddiy, powered/qizil, detector yoki activator — hammasi ishlaydi). Mod o'zi:
+1. rail ustiga TNT minecart qo'yadi;
+2. kamonda **Flame** bo'lmasa cart oldiga (siz tomonga) flint bilan olov qo'yadi — o'q olovdan o'tib yonadi;
+3. kamonni cartga qaratib (o'q tushishini hisobga olgan holda) qisqa tortib otadi. Oxirigacha tortish shart emas
+   ("Kamon tortish" sozlamasi, 4 tick ham yetadi).
+
+Kamon yoki o'q bo'lmasa cartni flint bilan yoqadi. O'ng tugmani bosib turmang — bir marta bossangiz yetadi.
+
+## Auto Elytra
+
+Firework'ni bosing: mod hotbar'dan (yoki inventardan) eng yaxshi elytra'ni topib kiyadi, yerda bo'lsangiz sakraydi,
+elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'shimcha:
+- qo'nganda avvalgi nagrudnikni qaytarib kiyadi;
+- uchayotganda elytra sinay desa boshqa elytra'ga almashtiradi, durability kam qolsa ogohlantiradi;
+- HUD: elytra durability'si va firework soni.
+
+## Auto Totem
+
+Chap qo'lda totem bo'lmasa qo'yadi. Turlari:
+- **Inventar (E + F)**: inventarni ochadi, sichqonchani totemga olib boradi, F bosadi va yopadi;
+- **Tezkor**: inventar ochilmaydi, bir zumda;
+- **Hotbar (F)**: hotbar'dagi totemni tanlab F bosadi (hotbar'da bo'lmasa inventar usuli).
+
+Totem umuman bo'lmasa hech narsa qilmaydi (inventar ham ochilmaydi). Kechikish, sichqoncha tezligi, faqat jon kam
+bo'lganda ishlash va "totem ishlatildi" xabari sozlanadi.
 
 ## Nayza qanday ishlaydi (1.21.11)
 

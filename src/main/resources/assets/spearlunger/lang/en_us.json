@@ -7,5 +7,10 @@
   "key.autotnt.bow": "Bow auto-TNT on/off",
   "key.autotnt.crossbow": "Crossbow auto-TNT (one shot)",
   "key.autotnt.settings": "Auto TNT settings",
-  "key.autotnt.profile": "Switch profile"
+  "key.autotnt.profile": "Switch profile",
+  "key.category.autoelytra.main": "Auto Elytra",
+  "key.autoelytra.toggle": "Auto Elytra on/off",
+  "key.category.autototem.main": "Auto Totem",
+  "key.autototem.toggle": "Auto Totem on/off",
+  "key.autotnt.rail": "Rail auto-TNT on/off"
 }

@@ -7,5 +7,10 @@
   "key.autotnt.bow": "Kamon auto-TNT yoqish/o'chirish",
   "key.autotnt.crossbow": "Arbalet auto-TNT (bir marta)",
   "key.autotnt.settings": "Auto TNT sozlamalari",
-  "key.autotnt.profile": "Profilni almashtirish"
+  "key.autotnt.profile": "Profilni almashtirish",
+  "key.category.autoelytra.main": "Auto Elytra",
+  "key.autoelytra.toggle": "Auto Elytra yoqish/o'chirish",
+  "key.category.autototem.main": "Auto Totem",
+  "key.autototem.toggle": "Auto Totem yoqish/o'chirish",
+  "key.autotnt.rail": "Rail auto-TNT yoqish/o'chirish"
 }

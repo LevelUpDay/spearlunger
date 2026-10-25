@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "spearlunger",
   "version": "${version}",
-  "name": "Spear Lunger + Auto TNT Cart",
-  "description": "Auto Lunge nayza (R/X), auto TNT minecart (B/Z) va anti-cheat sozlamalari (O).",
+  "name": "Spear Lunger + Auto TNT Cart + Auto Elytra + Auto Totem",
+  "description": "Auto Lunge nayza (R/X), auto TNT minecart (B/Z), auto elytra, auto totem va anti-cheat sozlamalari (O).",
   "authors": [
     "LevelUpDay"
   ],
@@ -12,9 +12,14 @@
   "entrypoints": {
     "client": [
       "uz.spearlunger.SpearLungerClient",
-      "uz.autotnt.AutoTntClient"
+      "uz.autotnt.AutoTntClient",
+      "uz.autoelytra.AutoElytraClient",
+      "uz.autototem.AutoTotemClient"
     ]
   },
+  "mixins": [
+    "spearlunger.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.18.1",
     "minecraft": "~1.21.11",

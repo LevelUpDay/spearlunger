@@ -33,7 +33,7 @@ public class TntSettingsScreen extends Screen {
         AutoTntConfig.Profile cf = cfg.p();
         int w = 150, s = 24;
         int x1 = width / 2 - 155, x2 = width / 2 + 5;
-        int y = height / 2 - 100;
+        int y = height / 2 - 118;
 
         // chap ustun: profil sozlamalari
         addDrawableChild(btn(x1, y, w, () -> "Profil: " + (cfg.active + 1) + "/" + cfg.profiles.length, () -> {
@@ -52,6 +52,12 @@ public class TntSettingsScreen extends Screen {
                 v -> "Do'st radiusi: " + v, v -> cf.friendRadius = v));
         addDrawableChild(btn(x1, y + 6 * s, w, () -> "Inventarga qaytarish: " + onoff(cfg.restoreInventory),
                 () -> cfg.restoreInventory = !cfg.restoreInventory));
+        addDrawableChild(btn(x1, y + 7 * s, w, () -> "Rail qo'yganda TNT: " + onoff(cfg.railTrigger),
+                () -> cfg.railTrigger = !cfg.railTrigger));
+        addDrawableChild(btn(x1, y + 8 * s, w, () -> "Rail: kamon bilan otish: " + onoff(cfg.railBow),
+                () -> cfg.railBow = !cfg.railBow));
+        addDrawableChild(new IntSlider(x2, y + 8 * s, w, 20, 4, 20, cfg.bowPullTicks,
+                v -> "Kamon tortish: " + v + " tick", v -> cfg.bowPullTicks = v));
 
         // o'ng ustun
         addDrawableChild(btn(x2, y, w, () -> "Bow auto-TNT: " + onoff(cfg.bowMode), () -> cfg.bowMode = !cfg.bowMode));
@@ -67,7 +73,7 @@ public class TntSettingsScreen extends Screen {
         addDrawableChild(btn(x2, y + 7 * s, w, () -> "HUD: " + onoff(cfg.hud), () -> cfg.hud = !cfg.hud));
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Tayyor"), b -> close())
-                .dimensions(width / 2 - 100, y + 8 * s + 4, 200, 20).build());
+                .dimensions(width / 2 - 100, y + 9 * s + 4, 200, 20).build());
     }
 
     @Override
