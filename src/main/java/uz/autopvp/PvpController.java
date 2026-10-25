@@ -20,6 +20,7 @@ import net.minecraft.util.math.Vec3d;
 import uz.autotnt.AutoTntConfig;
 import uz.pearlclutch.PearlClutchClient;
 import uz.spearlunger.Rotations;
+import uz.spearlunger.InvHelper;
 
 /**
  * Auto PvP: tugma bilan yoqiladi, o'chirguningizcha eng yaqin dushman bilan o'zi jang qiladi (siz faqat yurasiz):
@@ -49,7 +50,7 @@ public class PvpController {
         }
         if (windCooldown > 0) windCooldown--;
         if (pearlCooldown > 0) pearlCooldown--;
-        if (!cfg.enabled || c.currentScreen != null || p.isSpectator() || !p.isAlive()) return;
+        if (!cfg.enabled || InvHelper.screenOpen(c) || p.isSpectator() || !p.isAlive()) return;
 
         if (!valid(p, target, cfg)) target = pick(c.world, p, cfg);
         if (target == null) {
@@ -74,10 +75,25 @@ public class PvpController {
             return;
         }
 
-        // ---- 2. yaqinda: qilich / bolta
+        // ---- 2. yaqinda: nayza jab'i (standart) yoki qilich/bolta
         if (cfg.melee && reachDist <= melee) {
             boolean aimed = Rotations.turn(p, Rotations.yawTo(eye, center), Rotations.pitchTo(eye, center));
             int axe = find(p, "_axe");
+            int sp = spearSlot(p);
+            boolean shieldUp = cfg.axeShield && target.isBlocking() && axe >= 0;
+            if (cfg.spearMelee && sp >= 0 && !shieldUp) {
+                // nayza bir tickda olinadi va jab qilinadi (cooldown yo'qolmaydi)
+                if (aimed) p.getInventory().setSelectedSlot(sp);
+                if (aimed && lungeReady(c, p, cfg)) {
+                    c.interactionManager.attackWithPiercingWeapon(
+                            p.getMainHandStack().get(DataComponentTypes.PIERCING_WEAPON));
+                    p.swingHand(Hand.MAIN_HAND);
+                    state = "nayza jab";
+                } else {
+                    state = "nayza kutish";
+                }
+                return;
+            }
             int weapon = cfg.axeShield && target.isBlocking() && axe >= 0 ? axe : find(p, "_sword");
             if (weapon < 0) weapon = axe;
             if (weapon < 0) weapon = spearSlot(p);

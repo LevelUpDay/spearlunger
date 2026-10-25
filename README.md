@@ -225,6 +225,7 @@ O → Anti-cheat oynasida:
 - **Inventarni ochib olish**: modullar inventardan hotbar'ga narsa olganda (TNT cart, damlama, cobweb, elytra,
   obsidian...) vanilla'dagidek inventar ochilib (E), almashtirilib, yopiladi — ko'p serverlar ochmasdan qilingan
   bosishlarni qaytaradi.
+- **Inventar ochiq turishi**: o'zi ochgan inventar necha tick ko'rinib turadi (standart 4), keyin yopiladi.
 - **Joyiga qaytarish**: olingan narsa ishlatilgach eski joyiga qaytadi, hotbar'dagi narsangiz ham o'z slotiga.
 
 Diqqat: bu sozlamalar aniqlanish xavfini kamaytiradi, lekin yo'q qilmaydi. Serverda ishlatish o'sha

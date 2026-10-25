@@ -27,8 +27,10 @@ public class PvpConfig {
     public boolean pearl = true;
     public int pearlDist = 18;
 
-    /** Yaqinda: qilich (bo'lmasa bolta, oxiri spear). */
+    /** Yaqinda urish. */
     public boolean melee = true;
+    /** Yaqinda ham nayza bilan (jab) uradi; OFF bo'lsa qilich (bo'lmasa bolta). */
+    public boolean spearMelee = true;
     /** Nishon qalqon ushlasa bolta bilan o'chiradi. */
     public boolean axeShield = true;
     /** Tushayotganda mace (zirhli nishonga Breach, aks holda Density). */

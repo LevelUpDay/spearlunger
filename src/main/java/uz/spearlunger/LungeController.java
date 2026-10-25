@@ -79,7 +79,7 @@ public class LungeController {
         int holdPresses = 0;
         while (SpearLungerClient.keyHold.wasPressed()) holdPresses++;
 
-        if (client.currentScreen != null) {
+        if (InvHelper.screenOpen(client)) {
             if (mode != Mode.NONE) stop(client, player, null);
             toggled = false;
             return;

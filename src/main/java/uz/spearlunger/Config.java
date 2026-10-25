@@ -34,6 +34,8 @@ public class Config {
         public boolean restoreView = true;
         /** Inventardan hotbar'ga olishda inventarni ochib-yopadi (E), aks holda ochmasdan. */
         public boolean openInventory = true;
+        /** O'zi ochgan inventar necha tick ochiq turadi (0 = darhol yopiladi, ko'rinmaydi). */
+        public int invShowTicks = 4;
         /** Inventardan olingan narsa ishlatilgach eski joyiga qaytariladi (hotbar'da o'zi qolmaydi). */
         public boolean returnItems = true;
     }

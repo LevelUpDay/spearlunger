@@ -69,7 +69,7 @@ public class CobwebController {
         }
         trackVelocities(c.world, p);
 
-        if (!cfg.enabled || c.currentScreen != null || p.isSpectator()) return;
+        if (!cfg.enabled || InvHelper.screenOpen(c) || p.isSpectator()) return;
         if (cfg.antiWeb && antiWeb.tick(c, p, cfg)) return;   // ipdan chiqyapmiz
         if (cooldown > 0) {
             cooldown--;

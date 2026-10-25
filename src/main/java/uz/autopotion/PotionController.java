@@ -48,7 +48,7 @@ public class PotionController {
             p.setPitch(savedPitch);
             return;
         }
-        if (!cfg.enabled || c.currentScreen != null || p.isSpectator() || p.getAbilities().creativeMode || !p.isAlive()) {
+        if (!cfg.enabled || InvHelper.screenOpen(c) || p.isSpectator() || p.getAbilities().creativeMode || !p.isAlive()) {
             return;
         }
         if (cooldown > 0) {

@@ -76,7 +76,7 @@ public class AnchorGuardController {
             AnchorGuardConfig.save();
             p.sendMessage(Text.literal(cfg.enabled ? "§aAnchor Guard: ON" : "§cAnchor Guard: OFF"), true);
         }
-        if (!cfg.enabled || !cfg.proactiveScan || c.currentScreen != null || p.isSpectator()) return;
+        if (!cfg.enabled || !cfg.proactiveScan || InvHelper.screenOpen(c) || p.isSpectator()) return;
         if (c.world.getRegistryKey() == World.NETHER) return;
         if (scanCooldown > 0) {
             scanCooldown--;

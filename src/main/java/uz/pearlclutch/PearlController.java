@@ -76,7 +76,7 @@ public class PearlController {
             p.sendMessage(Text.literal(cfg.enabled ? "§aPearl Clutch: ON" : "§cPearl Clutch: OFF"), true);
         }
         if (p.isOnGround() || p.isTouchingWater() || p.isClimbing() || p.fallDistance < 1) thrownThisFall = false;
-        if (!cfg.enabled || !cfg.autoClutch || thrownThisFall || c.currentScreen != null) return;
+        if (!cfg.enabled || !cfg.autoClutch || thrownThisFall || InvHelper.screenOpen(c)) return;
         if (p.isOnGround() || p.isGliding() || p.getAbilities().flying || p.isTouchingWater() || p.isSpectator()) return;
         if (p.getVelocity().y > -0.3) return;
         if (scanCooldown > 0) {

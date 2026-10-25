@@ -63,7 +63,7 @@ public class ClutchController {
             return;
         }
         if (p.isOnGround() || p.isTouchingWater() || p.isClimbing()) doneThisFall = false;
-        if (!cfg.enabled || doneThisFall || c.currentScreen != null || p.isSpectator()) return;
+        if (!cfg.enabled || doneThisFall || InvHelper.screenOpen(c) || p.isSpectator()) return;
         if (p.isOnGround() || p.isGliding() || p.getAbilities().flying || p.isTouchingWater() || p.hasVehicle()) return;
         double vy = p.getVelocity().y;
         if (vy > -0.4) return;

@@ -15,6 +15,7 @@ import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import uz.autotnt.AutoTntConfig;
 import uz.spearlunger.InvHelper;
@@ -35,6 +36,7 @@ public class ElytraController {
     private int groundTicks = 0;
     private boolean warned = false;
     private boolean unequippedThisFlight = false;
+    private int glideTicks = 0;
 
     // ------------------------------------------------------------ firework bosilganda
     public ActionResult onUseItem(PlayerEntity player, World world, Hand hand) {
@@ -122,10 +124,11 @@ public class ElytraController {
             }
             return;
         }
-        if (!cfg.enabled || c.currentScreen != null) return;
+        if (!cfg.enabled || InvHelper.screenOpen(c)) return;
 
         ItemStack chest = p.getEquippedStack(EquipmentSlot.CHEST);
         if (p.isOnGround() || p.isTouchingWater()) unequippedThisFlight = false;
+        glideTicks = p.isGliding() ? glideTicks + 1 : 0;
         if (p.isGliding()) {
             groundTicks = 0;
             if (chest.isOf(Items.ELYTRA) && tryUnequip(c, p, cfg)) return;
@@ -203,12 +206,18 @@ public class ElytraController {
     /** Uchib kelib dushman ustiga yetganda elytra'ni yechadi (nagrudnik kiyadi), pastga tushasiz va mace qo'lda. */
     private boolean tryUnequip(MinecraftClient c, ClientPlayerEntity p, ElytraConfig cfg) {
         if (!cfg.unequipNearEnemy || unequippedThisFlight) return false;
+        // endigina uchdik yoki tepaga ko'tarilyapmiz - yechmaymiz (dushman oldidan uchib ketish mumkin bo'lsin)
+        if (glideTicks < 30 || p.getVelocity().y > -0.15) return false;
         PlayerEntity enemy = null;
         double best = cfg.unequipDist;
         for (PlayerEntity e : c.world.getPlayers()) {
             if (e == p || !e.isAlive() || e.isSpectator() || e.isCreative() || isFriend(e)) continue;
             double d = p.distanceTo(e);
-            if (d <= best && p.getY() - e.getY() >= cfg.unequipMinAbove) {
+            double hd = Math.hypot(e.getX() - p.getX(), e.getZ() - p.getZ());
+            // dushmanga qarab tushyapmizmi: u oldimizda/ostimizda va gorizontal yaqin
+            Vec3d to = e.getEntityPos().subtract(p.getEntityPos());
+            boolean toward = p.getVelocity().normalize().dotProduct(to.normalize()) > 0.6;
+            if (d <= best && hd <= 5 && toward && p.getY() - e.getY() >= cfg.unequipMinAbove) {
                 best = d;
                 enemy = e;
             }
