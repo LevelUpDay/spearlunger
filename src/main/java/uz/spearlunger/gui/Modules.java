@@ -1,5 +1,7 @@
 package uz.spearlunger.gui;
 
+import uz.anchorguard.AnchorGuardClient;
+import uz.anchorguard.AnchorGuardConfig;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
@@ -16,6 +18,10 @@ import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
 import uz.fastplace.FastPlaceClient;
 import uz.fastplace.FastPlaceConfig;
+import uz.cheststealer.ChestStealerClient;
+import uz.cheststealer.StealerConfig;
+import uz.nametags.NametagsClient;
+import uz.nametags.NametagsConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
@@ -26,6 +32,7 @@ import static uz.spearlunger.gui.Setting.action;
 import static uz.spearlunger.gui.Setting.bool;
 import static uz.spearlunger.gui.Setting.choice;
 import static uz.spearlunger.gui.Setting.group;
+import static uz.spearlunger.gui.Setting.items;
 import static uz.spearlunger.gui.Setting.key;
 import static uz.spearlunger.gui.Setting.num;
 
@@ -55,6 +62,9 @@ public final class Modules {
         PotionConfig.save();
         BowAimConfig.save();
         FastPlaceConfig.save();
+        AnchorGuardConfig.save();
+        StealerConfig.save();
+        NametagsConfig.save();
     }
 
     private static List<Module> build() {
@@ -277,6 +287,25 @@ public final class Modules {
                     bool("HUD", "Ekranda nishon va masofa", () -> c.hud, v -> c.hud = v));
         }));
 
+        l.add(new Module("Anchor Guard", "Anchor portlashidan oldin oldiga blok qo'yadi - o'zingizga zarar kamayadi",
+                Module.Category.COMBAT, () -> AnchorGuardConfig.get().enabled, v -> AnchorGuardConfig.get().enabled = v, () -> {
+            AnchorGuardConfig c = AnchorGuardConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AnchorGuardClient.keyToggle),
+                    bool("Portlatganda", "Anchor'ni bossangiz: avval blok, keyin o'sha zahoti portlaydi",
+                            () -> c.onDetonate, v -> c.onDetonate = v),
+                    bool("Proaktiv", "Yaqinda zaryadlangan anchor bo'lsa (dushmanniki ham) oldindan to'sadi",
+                            () -> c.proactive, v -> c.proactive = v),
+                    num("Radius", "Proaktiv qidiruv", 2, 8, () -> c.radius, v -> c.radius = v, v -> v + " blok"),
+                    bool("Ikki qavat", "Oyoq va bosh balandligida (zarar ancha kam)", () -> c.twoHigh,
+                            v -> c.twoHigh = v),
+                    bool("Faqat obsidian", "OFF - istalgan to'liq blok (obsidian afzal)", () -> c.obsidianOnly,
+                            v -> c.obsidianOnly = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan", () -> c.fromInventory,
+                            v -> c.fromInventory = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
         l.add(new Module("Auto Elytra", "Firework bosilganda elytra'ni kiyadi, ochadi va firework'ga qaytadi",
                 Module.Category.MOVEMENT, () -> ElytraConfig.get().enabled, v -> ElytraConfig.get().enabled = v, () -> {
             ElytraConfig c = ElytraConfig.get();
@@ -370,6 +399,54 @@ public final class Modules {
                             v -> c.perTick = v),
                     bool("Faqat bloklar", "Ovqat, kamon va boshqa narsalarga ta'sir qilmaydi", () -> c.onlyBlocks,
                             v -> c.onlyBlocks = v));
+        }));
+
+        l.add(new Module("Chest Stealer", "Sandiq ochilganda faqat tanlangan itemlarni o'zi oladi",
+                Module.Category.WORLD, () -> StealerConfig.get().enabled, v -> StealerConfig.get().enabled = v, () -> {
+            StealerConfig c = StealerConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", ChestStealerClient.keyToggle),
+                    choice("Nima olinadi", "Tanlanganlar / hammasi / tanlanganlardan tashqari",
+                            new String[] {"Tanlanganlar", "Hammasi", "Tanlanmaganlar"},
+                            () -> Math.floorMod(c.mode, 3), v -> c.mode = v),
+                    items("Itemlar", "Bosing va olinadigan itemlarni tanlang", c.items),
+                    num("Kechikish", "Itemlar orasida (0 - hammasi birdaniga)", 0, 10, () -> c.delay,
+                            v -> c.delay = v, v -> v + " tick"),
+                    num("Ochilgach kutish", "Birinchi itemdan oldin", 0, 20, () -> c.openDelay, v -> c.openDelay = v,
+                            v -> v + " tick"),
+                    bool("Avto yopish", "Tugagach sandiqni yopadi", () -> c.autoClose, v -> c.autoClose = v),
+                    bool("Shulker ham", "Shulker box'dan ham oladi", () -> c.shulkers, v -> c.shulkers = v),
+                    bool("Shift - to'xtatish", "Shift bosib ochsangiz ishlamaydi", () -> c.shiftPause,
+                            v -> c.shiftPause = v));
+        }));
+
+        l.add(new Module("Nametags+", "O'yinchi ustida ism, zirh, protection, qo'lidagilar va totem soni",
+                Module.Category.RENDER, () -> NametagsConfig.get().enabled, v -> NametagsConfig.get().enabled = v, () -> {
+            NametagsConfig c = NametagsConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", NametagsClient.keyToggle),
+                    group("Matn"),
+                    bool("Ism", "O'yinchi nicki (do'stlar yashil)", () -> c.name, v -> c.name = v),
+                    bool("Jon", "Health indicator modingiz bo'lsa o'chiq qoldiring", () -> c.health,
+                            v -> c.health = v),
+                    bool("Masofa", "Necha blok uzoqda", () -> c.distance, v -> c.distance = v),
+                    bool("Totem pop", "Nechta totem ishlatgani (o'lsa nolga tushadi)", () -> c.totemPops,
+                            v -> c.totemPops = v),
+                    bool("Pop xabari", "Chatga \"X totem ishlatdi\"", () -> c.popChat, v -> c.popChat = v),
+                    group("Itemlar"),
+                    bool("Zirh", "Kiygan zirhi", () -> c.armor, v -> c.armor = v),
+                    bool("Qo'lidagilar", "Asosiy va chap qo'lidagi narsalar", () -> c.hands, v -> c.hands = v),
+                    bool("Protection", "Zirhdagi himoya darajasi (P4, B4...) va qurol (S5, D5...)", () -> c.protection,
+                            v -> c.protection = v),
+                    bool("Durability", "Durability chizig'i va %", () -> c.durability, v -> c.durability = v),
+                    group("Ko'rinish"),
+                    num("Balandlik", "Bosh ustidan (health indicator'ga xalaqit bermasligi uchun)", 0, 30,
+                            () -> c.heightTenths, v -> c.heightTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Hajmi", "Nametag kattaligi", 50, 200, () -> c.scale, v -> c.scale = v, v -> v + "%"),
+                    num("Masofa limiti", "Shundan uzoqdagilar ko'rsatilmaydi", 8, 256, () -> c.range,
+                            v -> c.range = v, v -> v + " blok"),
+                    bool("Ko'rinmaslar ham", "Invisibility ichgan o'yinchilar", () -> c.invisible,
+                            v -> c.invisible = v));
         }));
 
         l.add(new Module("Anti-cheat", "Kamerani silliq burish va boshqa \"odamga o'xshash\" sozlamalar",

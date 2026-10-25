@@ -24,5 +24,11 @@
   "key.category.bowaim.main": "Bow Aim",
   "key.bowaim.toggle": "Bow Aim yoqish/o'chirish",
   "key.category.fastplace.main": "Fast Place",
-  "key.fastplace.toggle": "Fast Place yoqish/o'chirish"
+  "key.fastplace.toggle": "Fast Place yoqish/o'chirish",
+  "key.category.anchorguard.main": "Anchor Guard",
+  "key.anchorguard.toggle": "Anchor Guard yoqish/o'chirish",
+  "key.category.cheststealer.main": "Chest Stealer",
+  "key.cheststealer.toggle": "Chest Stealer yoqish/o'chirish",
+  "key.category.nametags.main": "Nametags+",
+  "key.nametags.toggle": "Nametags+ yoqish/o'chirish"
 }

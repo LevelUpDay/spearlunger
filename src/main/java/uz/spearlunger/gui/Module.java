@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 /** ClickGUI'dagi bitta modul: chap tugma yoqadi/o'chiradi, o'ng tugma sozlamalarini ochadi. */
 public final class Module {
     public enum Category {
-        COMBAT("Combat"), MOVEMENT("Movement"), WORLD("World"), CLIENT("Client");
+        COMBAT("Combat"), MOVEMENT("Movement"), WORLD("World"), RENDER("Render"), CLIENT("Client");
 
         public final String title;
 

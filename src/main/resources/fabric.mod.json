@@ -3,7 +3,7 @@
   "id": "spearlunger",
   "version": "${version}",
   "name": "Spear Lunger + Utility Pack",
-  "description": "Auto Lunge, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Shield, Auto Potion, Bow Aim, Fast Place va Meteor uslubidagi ClickGUI (O).",
+  "description": "Auto Lunge, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Shield, Auto Potion, Bow Aim, Anchor Guard, Fast Place, Chest Stealer, Nametags+ va Meteor uslubidagi ClickGUI (O).",
   "authors": [
     "LevelUpDay"
   ],
@@ -19,7 +19,10 @@
       "uz.autoshield.AutoShieldClient",
       "uz.autopotion.AutoPotionClient",
       "uz.bowaim.BowAimClient",
-      "uz.fastplace.FastPlaceClient"
+      "uz.fastplace.FastPlaceClient",
+      "uz.anchorguard.AnchorGuardClient",
+      "uz.cheststealer.ChestStealerClient",
+      "uz.nametags.NametagsClient"
     ]
   },
   "mixins": [
