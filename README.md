@@ -44,6 +44,15 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
 - uchayotganda elytra sinay desa boshqa elytra'ga almashtiradi, durability kam qolsa ogohlantiradi;
 - HUD: elytra durability'si va firework soni.
 
+## Auto Cobweb
+
+Hotbar (yoki inventar) dagi cobweb'ni o'zi qo'yadi:
+- **Turgan dushman**: joyida turgan yoki devorga tiqilib qolgan dushman oyog'iga;
+- **Kelayotgan dushman**: yugurib yoki sakrab oldingizga kelayotgan dushman tushadigan joyga (oldindan hisoblaydi);
+- **Anti-mace**: ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga — u ipga ilinib, mace zarbasi bo'lmaydi;
+- **MLG**: baland joydan yiqilayotganda tagingizga — fall damage bo'lmaydi;
+- ikki qavat (oyoq + bosh), do'stlarga qo'ymaslik, masofa, kechikish, avval qarab qo'yish.
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:

@@ -14,5 +14,7 @@
   "key.autototem.toggle": "Auto Totem yoqish/o'chirish",
   "key.autotnt.rail": "Rail auto-TNT yoqish/o'chirish",
   "key.spearlunger.toggle": "Spear Lunger yoqish/o'chirish",
-  "key.autotnt.toggle": "Auto TNT Cart yoqish/o'chirish"
+  "key.autotnt.toggle": "Auto TNT Cart yoqish/o'chirish",
+  "key.category.autocobweb.main": "Auto Cobweb",
+  "key.autocobweb.toggle": "Auto Cobweb yoqish/o'chirish"
 }

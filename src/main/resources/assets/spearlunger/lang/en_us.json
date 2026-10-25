@@ -14,5 +14,7 @@
   "key.autototem.toggle": "Auto Totem on/off",
   "key.autotnt.rail": "Rail auto-TNT on/off",
   "key.spearlunger.toggle": "Spear Lunger on/off",
-  "key.autotnt.toggle": "Auto TNT Cart on/off"
+  "key.autotnt.toggle": "Auto TNT Cart on/off",
+  "key.category.autocobweb.main": "Auto Cobweb",
+  "key.autocobweb.toggle": "Auto Cobweb on/off"
 }

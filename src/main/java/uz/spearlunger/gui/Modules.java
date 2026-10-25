@@ -1,5 +1,7 @@
 package uz.spearlunger.gui;
 
+import uz.autocobweb.AutoCobwebClient;
+import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
 import uz.autoelytra.ElytraConfig;
 import uz.autotnt.AutoTntClient;
@@ -40,6 +42,7 @@ public final class Modules {
         AutoTntConfig.save();
         ElytraConfig.save();
         TotemConfig.save();
+        CobwebConfig.save();
     }
 
     private static List<Module> build() {
@@ -111,6 +114,48 @@ public final class Modules {
                             v -> c.popMessage = v),
                     bool("Xabarlar", "Chatdagi xabarlar", () -> c.messages, v -> c.messages = v),
                     bool("HUD", "Ekranda totemlar soni", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Auto Cobweb", "Dushman oyog'iga, yo'liga va mace'ga qarshi cobweb; yiqilganda MLG",
+                Module.Category.COMBAT, () -> CobwebConfig.get().enabled, v -> CobwebConfig.get().enabled = v, () -> {
+            CobwebConfig c = CobwebConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", AutoCobwebClient.keyToggle),
+                    group("Dushmanga"),
+                    bool("Turgan dushman", "Joyida turgan / devorga tiqilgan dushman oyog'iga", () -> c.trapStill,
+                            v -> c.trapStill = v),
+                    num("Turish vaqti", "Shuncha tick qimirlamasa \"turibdi\"", 1, 20, () -> c.stillTicks,
+                            v -> c.stillTicks = v, v -> v + " tick"),
+                    bool("Kelayotgan dushman", "Yugurib/sakrab kelayotgan dushman tushadigan joyiga", () -> c.trapApproach,
+                            v -> c.trapApproach = v),
+                    num("Kelish masofasi", "Shundan yaqin kelsa", 2, 8, () -> c.approachDist, v -> c.approachDist = v,
+                            v -> v + " blok"),
+                    num("Oldindan hisoblash", "Dushman necha tickdan keyin qayerda bo'lishi", 0, 10, () -> c.lookahead,
+                            v -> c.lookahead = v, v -> v + " tick"),
+                    bool("Ikki qavat", "Oyog'i bilan birga bosh balandligiga ham", () -> c.doubleWeb,
+                            v -> c.doubleWeb = v),
+                    bool("Moblar ham", "Dushman moblarga ham", () -> c.targetMobs, v -> c.targetMobs = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilarga qo'ymaydi", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    group("Himoya"),
+                    bool("Anti-mace", "Ustingizdan tushayotgan dushman bo'lsa boshingiz ustiga", () -> c.antiMace,
+                            v -> c.antiMace = v),
+                    bool("MLG", "Baland joydan yiqilayotganda tagingizga (fall damage yo'q)", () -> c.selfMlg,
+                            v -> c.selfMlg = v),
+                    num("MLG balandligi", "Shundan baland yiqilganda", 3, 30, () -> c.minFall, v -> c.minFall = v,
+                            v -> v + " blok"),
+                    group("Qo'yish"),
+                    num("Masofa", "Qo'yish masofasi", 30, 60, () -> c.reachTenths, v -> c.reachTenths = v,
+                            v -> (v / 10.0) + " blok"),
+                    num("Kechikish", "Qo'yishlar orasida", 0, 20, () -> c.placeDelay, v -> c.placeDelay = v,
+                            v -> v + " tick"),
+                    bool("Qarab qo'yish", "Avval o'sha joyga qaraydi (Anti-cheat burilish sozlamalari)", () -> c.rotate,
+                            v -> c.rotate = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan olib keladi", () -> c.fromInventory,
+                            v -> c.fromInventory = v),
+                    bool("Xabarlar", "Nima uchun qo'yganini action bar'da yozadi", () -> c.messages,
+                            v -> c.messages = v),
+                    bool("HUD", "Ekranda cobweb soni", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Elytra", "Firework bosilganda elytra'ni kiyadi, ochadi va firework'ga qaytadi",

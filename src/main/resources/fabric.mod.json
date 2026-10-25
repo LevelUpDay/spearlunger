@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "spearlunger",
   "version": "${version}",
-  "name": "Spear Lunger + Auto TNT Cart + Auto Elytra + Auto Totem",
-  "description": "Auto Lunge nayza (R/X), auto TNT minecart (B/Z), auto elytra, auto totem va anti-cheat sozlamalari (O).",
+  "name": "Spear Lunger + Auto TNT + Elytra + Totem + Cobweb",
+  "description": "Auto Lunge nayza, auto TNT minecart, auto elytra, auto totem, auto cobweb va Meteor uslubidagi ClickGUI (O).",
   "authors": [
     "LevelUpDay"
   ],
@@ -14,7 +14,8 @@
       "uz.spearlunger.SpearLungerClient",
       "uz.autotnt.AutoTntClient",
       "uz.autoelytra.AutoElytraClient",
-      "uz.autototem.AutoTotemClient"
+      "uz.autototem.AutoTotemClient",
+      "uz.autocobweb.AutoCobwebClient"
     ]
   },
   "mixins": [
