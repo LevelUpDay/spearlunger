@@ -8,6 +8,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
+import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
@@ -19,6 +20,8 @@ public class AutoTntClient implements ClientModInitializer {
     public static KeyBinding keyCrossbow;  // Z - crossbow: bir marta hammasini qiladi
     public static KeyBinding keySettings;  // P - sozlamalar
     public static KeyBinding keyProfile;   // V - profilni almashtirish
+    public static KeyBinding keyRail;      // G - rail qo'yganda auto-TNT on/off
+    public static KeyBinding keyToggle;    // modulni yoqish/o'chirish (tugma berilmagan)
     public static final TntController CONTROLLER = new TntController();
 
     @Override
@@ -33,8 +36,13 @@ public class AutoTntClient implements ClientModInitializer {
                 new KeyBinding("key.autotnt.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P, cat));
         keyProfile = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.autotnt.profile", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, cat));
+        keyRail = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding("key.autotnt.rail", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, cat));
+        keyToggle = KeyBindingHelper.registerKeyBinding(
+                new KeyBinding("key.autotnt.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
 
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
+        UseBlockCallback.EVENT.register(CONTROLLER::onUseBlock);
 
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
                 Identifier.of("autotnt", "status"), TntHud::render);

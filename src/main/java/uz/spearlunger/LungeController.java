@@ -18,6 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import uz.autotnt.AutoTntConfig;
+import uz.spearlunger.gui.ClickGuiScreen;
 
 import java.util.List;
 import java.util.Random;
@@ -80,7 +81,17 @@ public class LungeController {
             return;
         }
         while (SpearLungerClient.keySettings.wasPressed()) {
-            client.setScreen(new MainScreen(null));
+            client.setScreen(new ClickGuiScreen(null));
+            return;
+        }
+        while (SpearLungerClient.keyToggle.wasPressed()) {
+            Config.get().enabled = !Config.get().enabled;
+            Config.save();
+            player.sendMessage(Text.literal(Config.get().enabled ? "§aSpear Lunger: ON" : "§cSpear Lunger: OFF"), true);
+        }
+        if (!Config.get().enabled) {
+            if (mode != Mode.NONE) stop(client, player, null);
+            toggled = false;
             return;
         }
 

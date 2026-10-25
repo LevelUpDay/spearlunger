@@ -6,6 +6,8 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Config {
     /** Ikkala modga ham tegishli anti-cheat sozlamalari. */
@@ -37,6 +39,8 @@ public class Config {
      * Nayza cooldown'i baribir majburiy (netherite ~23 tick, diamond ~21 tick), bu undan tashqari.
      */
     public int extraDelayTicks = 0;
+    /** Modul yoqilganmi (ClickGUI'da chap tugma). */
+    public boolean enabled = true;
     /** Ochlik shundan past bo'lsa lunge qilmaydi (0 = o'chiq). Lunge III har safar ~3 ochlik yeydi. */
     public int minFood = 6;
     /** R: ochlik kam bo'lsa hotbar'dagi ovqatni avtomatik yeydi. */
@@ -71,6 +75,10 @@ public class Config {
 
     public AntiCheat antiCheat = new AntiCheat();
 
+    /** ClickGUI: asosiy rang (Theme.ACCENT_NAMES) va panellar joyi. */
+    public int guiAccent = 0;
+    public Map<String, int[]> guiPanels = new HashMap<>();
+
     public AntiCheat ac() {
         if (antiCheat == null) antiCheat = new AntiCheat();
         return antiCheat;
@@ -93,6 +101,7 @@ public class Config {
                 if (c != null) instance = c;
             }
             instance.ac();
+            if (instance.guiPanels == null) instance.guiPanels = new HashMap<>();
             save();   // yangi maydonlarni faylga yozib qo'yamiz
         } catch (Exception e) {
             e.printStackTrace();

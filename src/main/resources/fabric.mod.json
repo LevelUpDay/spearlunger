@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "id": "spearlunger",
   "version": "${version}",
-  "name": "Spear Lunger + Auto TNT Cart",
-  "description": "Auto Lunge nayza (R/X), auto TNT minecart (B/Z) va anti-cheat sozlamalari (O).",
+  "name": "Spear Lunger + Utility Pack",
+  "description": "Auto Lunge, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Shield, Auto Potion, Bow Aim, Fast Place va Meteor uslubidagi ClickGUI (O).",
   "authors": [
     "LevelUpDay"
   ],
@@ -12,9 +12,19 @@
   "entrypoints": {
     "client": [
       "uz.spearlunger.SpearLungerClient",
-      "uz.autotnt.AutoTntClient"
+      "uz.autotnt.AutoTntClient",
+      "uz.autoelytra.AutoElytraClient",
+      "uz.autototem.AutoTotemClient",
+      "uz.autocobweb.AutoCobwebClient",
+      "uz.autoshield.AutoShieldClient",
+      "uz.autopotion.AutoPotionClient",
+      "uz.bowaim.BowAimClient",
+      "uz.fastplace.FastPlaceClient"
     ]
   },
+  "mixins": [
+    "spearlunger.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.18.1",
     "minecraft": "~1.21.11",
