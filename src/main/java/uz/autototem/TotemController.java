@@ -13,7 +13,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import org.lwjgl.glfw.GLFW;
-import uz.autototem.mixin.HandledScreenAccessor;
+import uz.spearlunger.mixin.HandledScreenAccessor;
 
 import java.util.Random;
 

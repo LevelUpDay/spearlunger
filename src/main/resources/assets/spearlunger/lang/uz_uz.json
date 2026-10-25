@@ -22,5 +22,7 @@
   "key.category.autopotion.main": "Auto Potion",
   "key.autopotion.toggle": "Auto Potion yoqish/o'chirish",
   "key.category.bowaim.main": "Bow Aim",
-  "key.bowaim.toggle": "Bow Aim yoqish/o'chirish"
+  "key.bowaim.toggle": "Bow Aim yoqish/o'chirish",
+  "key.category.fastplace.main": "Fast Place",
+  "key.fastplace.toggle": "Fast Place yoqish/o'chirish"
 }

@@ -1,4 +1,4 @@
-package uz.autototem.mixin;
+package uz.spearlunger.mixin;
 
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import org.spongepowered.asm.mixin.Mixin;

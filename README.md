@@ -86,6 +86,12 @@ Kamonni tortganingizda (yoki o'qlangan arbalet / trident ushlaganingizda) pritse
 - **O'zi otsin** (standart o'chiq): kamon belgilangan % tortilib nishonga qaraganda o'zi qo'yib yuboradi;
   o'ng tugmani bosib tursangiz ketma-ket otadi. Arbaletni ham otishi mumkin.
 
+## Fast Place (World)
+
+O'ng tugmani bosib turganda vanilla bloklarni har 4 tickda qo'yadi. Fast Place bilan **Kechikish** 1 tick (har tickda)
+gacha tushadi, **Bloklar/tick** bilan bir tickda 4 tagacha blok qo'yiladi — wind charge bilan tepaga ko'tarilishda
+yoki bedwars'da ko'prik qurishda. "Faqat bloklar" yoqilgan bo'lsa ovqat, kamon va boshqalarga ta'sir qilmaydi.
+
 ## Auto Totem
 
 Chap qo'lda totem bo'lmasa qo'yadi. Turlari:

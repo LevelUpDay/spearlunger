@@ -14,6 +14,8 @@ import uz.autototem.AutoTotemClient;
 import uz.autototem.TotemConfig;
 import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
+import uz.fastplace.FastPlaceClient;
+import uz.fastplace.FastPlaceConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
@@ -52,6 +54,7 @@ public final class Modules {
         ShieldConfig.save();
         PotionConfig.save();
         BowAimConfig.save();
+        FastPlaceConfig.save();
     }
 
     private static List<Module> build() {
@@ -354,6 +357,19 @@ public final class Modules {
                     bool("Tovush", "Muvaffaqiyat/xato tovushlari", () -> c.sounds, v -> c.sounds = v),
                     bool("Xabarlar", "Chat va action bar xabarlari", () -> c.messages, v -> c.messages = v),
                     bool("HUD", "Ekranda holat va o'q tushadigan joy", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Fast Place", "O'ng tugmani bosib turganda bloklar tez qo'yiladi (vanilla 4 tick)",
+                Module.Category.WORLD, () -> FastPlaceConfig.get().enabled, v -> FastPlaceConfig.get().enabled = v, () -> {
+            FastPlaceConfig c = FastPlaceConfig.get();
+            return List.of(
+                    key("Yoqish/o'chirish", "Modulni yoqib-o'chiradigan tugma", FastPlaceClient.keyToggle),
+                    num("Kechikish", "Qo'yishlar orasida (vanilla 4, eng tezi 1)", 1, 4, () -> c.delay, v -> c.delay = v,
+                            v -> v == 4 ? "4 tick (vanilla)" : v + " tick"),
+                    num("Bloklar/tick", "Bir tickda nechta blok (tepaga ko'tarilish, ko'prik)", 1, 4, () -> c.perTick,
+                            v -> c.perTick = v),
+                    bool("Faqat bloklar", "Ovqat, kamon va boshqa narsalarga ta'sir qilmaydi", () -> c.onlyBlocks,
+                            v -> c.onlyBlocks = v));
         }));
 
         l.add(new Module("Anti-cheat", "Kamerani silliq burish va boshqa \"odamga o'xshash\" sozlamalar",

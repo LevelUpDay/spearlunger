@@ -1,10 +1,11 @@
 {
   "required": true,
   "minVersion": "0.8",
-  "package": "uz.autototem.mixin",
+  "package": "uz.spearlunger.mixin",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "HandledScreenAccessor"
+    "HandledScreenAccessor",
+    "MinecraftClientAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
