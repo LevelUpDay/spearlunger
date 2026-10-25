@@ -22,6 +22,14 @@ public final class InvHelper {
         if (open && c.currentScreen instanceof InventoryScreen s) s.close();
     }
 
+    /** Shift + bosish (QUICK_MOVE) - masalan kiyilgan zirhni inventarga olish (slot 5-8 = zirh). */
+    public static void quickMove(MinecraftClient c, ClientPlayerEntity p, int slot) {
+        boolean open = Config.get().ac().openInventory && c.currentScreen == null;
+        if (open) c.setScreen(new InventoryScreen(p));
+        c.interactionManager.clickSlot(p.playerScreenHandler.syncId, slot, 0, SlotActionType.QUICK_MOVE, p);
+        if (open && c.currentScreen instanceof InventoryScreen s) s.close();
+    }
+
     /** Olingan narsani eski joyiga qaytarish kerakmi (Anti-cheat: "Joyiga qaytarish"). */
     public static boolean returnItems() {
         return Config.get().ac().returnItems;

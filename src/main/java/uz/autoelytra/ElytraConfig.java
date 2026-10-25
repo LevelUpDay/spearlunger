@@ -30,6 +30,14 @@ public class ElytraConfig {
     public int warnDurability = 30;
     /** Amallar orasidagi kechikish (tick). */
     public int delayTicks = 0;
+    /** Uchib dushman ustiga kelganda elytra'ni yechadi (nagrudnik kiyadi) - mace bilan tushish uchun. */
+    public boolean unequipNearEnemy = true;
+    /** Dushmangacha shu masofada (blok). */
+    public int unequipDist = 8;
+    /** Dushmandan kamida shuncha baland bo'lsangiz (blok). */
+    public int unequipMinAbove = 2;
+    /** Yechgach mace'ni qo'lga oladi. */
+    public boolean unequipToMace = true;
     public boolean messages = true;
     /** Uchayotganda ekranda elytra durability'si. */
     public boolean hud = true;

@@ -44,6 +44,10 @@ Kamon yoki o'q bo'lmasa cartni flint bilan yoqadi. O'ng tugmani bosib turmang �
 
 Firework'ni bosing: mod hotbar'dan (yoki inventardan) eng yaxshi elytra'ni topib kiyadi, yerda bo'lsangiz sakraydi,
 elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'shimcha:
+- kiyish ko'rinadigan qadamlar bilan: elytra slotini tanlaydi → o'ng tugma (kiyadi) → firework slotiga qaytadi;
+- **Dushman oldida yechish** (mace uchun): uchib dushman ustiga (standart 8 blok ichida, kamida 2 blok baland)
+  kelganingizda elytra'ni yechadi — eng yaxshi nagrudnikni kiyadi (bo'lmasa elytra inventarga olinadi), siz pastga
+  tushasiz va mace qo'lga olinadi; bitta uchishda bir marta;
 - qo'nganda avvalgi nagrudnikni qaytarib kiyadi;
 - uchayotganda elytra sinay desa boshqa elytra'ga almashtiradi, durability kam qolsa ogohlantiradi;
 - HUD: elytra durability'si va firework soni.
