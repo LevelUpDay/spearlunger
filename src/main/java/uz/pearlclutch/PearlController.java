@@ -141,6 +141,22 @@ public class PearlController {
         if (cfg.messages) p.sendMessage(Text.literal("§dPearl clutch!"), true);
     }
 
+    // ------------------------------------------------------------ boshqa modullar uchun
+    /** Hotbar'dagi pearl'ni target nuqtaga (harakatni hisoblab) otadi. Otilsa true. */
+    public boolean throwAt(MinecraftClient c, ClientPlayerEntity p, Vec3d target) {
+        int slot = -1;
+        for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(Items.ENDER_PEARL)) { slot = i; break; }
+        if (slot < 0 || p.getItemCooldownManager().isCoolingDown(p.getInventory().getStack(slot))) return false;
+        Vec3d start = spawnPos(p), add = shooterVelocity(p);
+        Aim aim = solve(start, target, add);
+        if (aim == null || !verify(c.world, p, start, aim, add, target, 2.5)) return false;
+        int original = p.getInventory().getSelectedSlot();
+        p.getInventory().setSelectedSlot(slot);
+        throwPearl(c, p, Hand.MAIN_HAND, aim);
+        p.getInventory().setSelectedSlot(original);
+        return true;
+    }
+
     // ------------------------------------------------------------ otish
     /** Yo'nalishni faqat otish paketiga yozib otadi va qarashni darhol qaytaradi. */
     private void throwPearl(MinecraftClient c, ClientPlayerEntity p, Hand hand, Aim aim) {

@@ -38,6 +38,8 @@ public class ShieldController {
     private boolean ours = false;
     private int holdTimer = 0;
     private int lowered = 0;
+    /** Qalqon necha tickdan beri ko'tarilgan va qayta ko'tarishgacha kutish. */
+    private int upTicks = 0, rearm = 0;
     private int lastHurt = 0;
     private Vec3d threatPos = null;
     private String reason = null;
@@ -75,14 +77,25 @@ public class ShieldController {
 
         boolean hurtNow = p.hurtTime > lastHurt;
         lastHurt = p.hurtTime;
+        if (rearm > 0) rearm--;
         Threat t = findThreat(c.world, p, cfg);
-        if (t != null) {
-            holdTimer = Math.max(holdTimer, cfg.holdTicks);
+        // o'q va zarba - darhol; boshqa xavf - qisqa "puls" (doim ko'tarilib turmaydi)
+        boolean urgent = t != null && t.why.equals("o'q");
+        if (t != null && (rearm == 0 || urgent || ours)) {
+            holdTimer = Math.max(holdTimer, cfg.holdAfterTicks + 1);
             threatPos = t.pos;
             reason = t.why;
         } else if (cfg.onHurt && hurtNow) {
-            holdTimer = Math.max(holdTimer, cfg.holdTicks + 4);
+            holdTimer = Math.max(holdTimer, cfg.holdAfterTicks + 4);
+            rearm = 0;
             reason = "zarba";
+        }
+        if (ours && ++upTicks > cfg.maxUpTicks && !urgent) {
+            // juda uzoq ko'tarildi: tushiramiz va biroz kutamiz
+            lower(c, p);
+            holdTimer = 0;
+            rearm = cfg.rearmTicks;
+            return;
         }
 
         // urish uchun tushiramiz (qalqon ko'tarilganda vanilla chap tugmani e'tiborsiz qoldiradi)
@@ -115,6 +128,7 @@ public class ShieldController {
     }
 
     private void lower(MinecraftClient c, ClientPlayerEntity p) {
+        upTicks = 0;
         if (!ours) return;
         ours = false;
         c.options.useKey.setPressed(false);
@@ -176,7 +190,7 @@ public class ShieldController {
                                 ShieldConfig cfg) {
         if (!cfg.players && !cfg.playerRanged && !cfg.maceFall) return null;
         Vec3d v = velocity.getOrDefault(pl.getUuid(), Vec3d.ZERO);
-        double range = cfg.playerRangeTenths / 10.0;
+        double range = cfg.playerRange / 10.0;
 
         if (cfg.maceFall) {
             double dy = pl.getY() - p.getY();

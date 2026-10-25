@@ -36,5 +36,7 @@
   "key.category.pearlclutch.main": "Pearl Clutch",
   "key.pearlclutch.toggle": "Pearl Clutch yoqish/o'chirish",
   "key.category.autoclutch.main": "Auto Clutch",
-  "key.autoclutch.toggle": "Auto Clutch yoqish/o'chirish"
+  "key.autoclutch.toggle": "Auto Clutch yoqish/o'chirish",
+  "key.category.autopvp.main": "Auto PvP",
+  "key.autopvp.toggle": "Auto PvP yoqish/o'chirish"
 }

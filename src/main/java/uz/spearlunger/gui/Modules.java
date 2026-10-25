@@ -8,6 +8,8 @@ import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
 import uz.autopotion.AutoPotionClient;
+import uz.autopvp.AutoPvpClient;
+import uz.autopvp.PvpConfig;
 import uz.autopotion.PotionConfig;
 import uz.autoshield.AutoShieldClient;
 import uz.autoshield.ShieldConfig;
@@ -74,6 +76,7 @@ public final class Modules {
         FallComboConfig.save();
         PearlConfig.save();
         ClutchConfig.save();
+        PvpConfig.save();
     }
 
     private static List<Module> build() {
@@ -118,6 +121,48 @@ public final class Modules {
                             v -> c.maceReach = v / 10.0, v -> (v / 10.0) + " blok"),
                     num("Vaqt limiti", "X eng ko'pi bilan shuncha ishlaydi", 40, 600,
                             () -> c.targetTimeoutTicks, v -> c.targetTimeoutTicks = v, v -> v + " tick"));
+        }));
+
+        l.add(new Module("Auto PvP", "K bilan yoqing: eng yaqin dushman bilan o'zi jang qiladi (lunge, qilich, mace, wind charge, pearl)",
+                Module.Category.COMBAT, () -> PvpConfig.get().enabled, v -> PvpConfig.get().enabled = v, () -> {
+            PvpConfig c = PvpConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (standart K)",
+                            AutoPvpClient.keyToggle),
+                    num("Nishon masofasi", "Eng yaqin dushmanni shu masofada qidiradi", 8, 64, () -> c.range,
+                            v -> c.range = v, v -> v + " blok"),
+                    group("Yaqinlashish"),
+                    bool("Lunge", "Uzoqda Lunge nayza bilan uchib boradi (cooldown to'lishi bilan)", () -> c.lunge,
+                            v -> c.lunge = v),
+                    bool("Gorizontal lunge", "Uzoqda pitch 0 - impuls to'liq oldinga", () -> c.flatten,
+                            v -> c.flatten = v),
+                    bool("Wind charge sakrash", "Yerda bo'lsangiz wind charge bilan sakraydi", () -> c.windJump,
+                            v -> c.windJump = v),
+                    num("Wind charge masofasi", "Shundan uzoqda sakraydi", 2, 20, () -> c.windMinDist,
+                            v -> c.windMinDist = v, v -> v + " blok"),
+                    bool("Ender pearl", "Juda uzoq bo'lsa nishon oldiga pearl (harakatni hisoblab)", () -> c.pearl,
+                            v -> c.pearl = v),
+                    num("Pearl masofasi", "Shundan uzoqda pearl", 8, 60, () -> c.pearlDist, v -> c.pearlDist = v,
+                            v -> v + " blok"),
+                    num("Min ochlik", "Lunge ochlik yeydi: shundan kam bo'lsa lunge qilmaydi", 0, 20, () -> c.minFood,
+                            v -> c.minFood = v),
+                    group("Urish"),
+                    bool("Qilich/bolta", "Yaqinda qilich (bo'lmasa bolta, oxiri nayza) bilan uradi", () -> c.melee,
+                            v -> c.melee = v),
+                    num("Urish masofasi", "Qilich bilan urish masofasi", 20, 45, () -> c.meleeTenths,
+                            v -> c.meleeTenths = v, v -> (v / 10.0) + " blok"),
+                    bool("Qalqonni sindirish", "Nishon qalqon ushlasa bolta bilan o'chiradi", () -> c.axeShield,
+                            v -> c.axeShield = v),
+                    bool("Mace", "Tushayotganda mace: zirhli nishonga Breach, aks holda Density", () -> c.mace,
+                            v -> c.mace = v),
+                    num("Mace balandligi", "Kamida shuncha tushganda", 1, 20, () -> c.maceMinFall,
+                            v -> c.maceMinFall = v, v -> v + " blok"),
+                    group("Nishon"),
+                    bool("O'yinchilar", "O'yinchilarga", () -> c.players, v -> c.players = v),
+                    bool("Moblar", "Dushman moblarga ham", () -> c.mobs, v -> c.mobs = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Totem", "Chap qo'lda totem bo'lmasa inventardan qo'yadi",
@@ -197,8 +242,8 @@ public final class Modules {
                     group("O'yinchilar"),
                     bool("O'yinchilar", "Yaqinda sizga qarab turgan / yugurib kelayotgan o'yinchi", () -> c.players,
                             v -> c.players = v),
-                    num("Masofa", "Shu masofada xavf deb hisoblanadi", 25, 80, () -> c.playerRangeTenths,
-                            v -> c.playerRangeTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Masofa", "Shu masofada xavf deb hisoblanadi", 25, 80, () -> c.playerRange,
+                            v -> c.playerRange = v, v -> (v / 10.0) + " blok"),
                     num("Qarash burchagi", "Sizga shuncha gradus ichida qarab tursa", 10, 90, () -> c.faceAngle,
                             v -> c.faceAngle = v, v -> v + "°"),
                     bool("Kamon/arbalet", "Sizni kamon, arbalet yoki trident bilan nishonga olsa", () -> c.playerRanged,
@@ -215,8 +260,12 @@ public final class Modules {
                     bool("O'qlar", "Sizga qarab uchayotgan o'q, trident, fireball", () -> c.projectiles,
                             v -> c.projectiles = v),
                     bool("Zarba yeganda", "Urishsa darhol ko'taradi", () -> c.onHurt, v -> c.onHurt = v),
-                    num("Ushlab turish", "Xavf o'tgach yana shuncha tick", 0, 30, () -> c.holdTicks,
-                            v -> c.holdTicks = v, v -> v + " tick"),
+                    num("Ushlab turish", "Xavf o'tgach yana shuncha tick", 0, 20, () -> c.holdAfterTicks,
+                            v -> c.holdAfterTicks = v, v -> v + " tick"),
+                    num("Eng uzoq", "Qalqon eng ko'pi bilan shuncha tick ko'tariladi, keyin tushadi", 5, 60,
+                            () -> c.maxUpTicks, v -> c.maxUpTicks = v, v -> v + " tick"),
+                    num("Qayta ko'tarish", "Tushgach shuncha tick kutadi (zarba/o'qda darhol)", 0, 40,
+                            () -> c.rearmTicks, v -> c.rearmTicks = v, v -> v + " tick"),
                     bool("Hujumchiga burilish", "Orqangizdan kelsa unga buriladi (qalqon faqat oldni to'sadi)",
                             () -> c.autoFace, v -> c.autoFace = v),
                     bool("Urish uchun tushirish", "Chap tugmani bossangiz qalqon tushadi va urasiz", () -> c.lowerToAttack,

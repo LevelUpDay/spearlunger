@@ -14,6 +14,7 @@ Kerakli modlar: Fabric Loader, Fabric API.
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **K** | Auto PvP yoqish/o'chirish |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
 
 ## ClickGUI (O)
@@ -52,6 +53,18 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
 - uchayotganda elytra sinay desa boshqa elytra'ga almashtiradi, durability kam qolsa ogohlantiradi;
 - HUD: elytra durability'si va firework soni.
 
+## Auto PvP (Combat)
+
+**K** bilan yoqiladi va o'chirguningizcha eng yaqin dushman bilan o'zi jang qiladi — siz faqat yurasiz:
+- **uzoqda**: Lunge nayza bilan uchib boradi — nayza cooldown'i to'lishi bilan darhol (vanilla Lunge bundan tez
+  ruxsat bermaydi: nayzada jab faqat 100% cooldown'da ishlaydi); yerda bo'lsangiz **wind charge** bilan sakraydi
+  (nayza cooldown'i yo'qolmasligi uchun bir tickda almashtirib-qaytarib); juda uzoq bo'lsa nishon oldiga
+  **ender pearl** otadi (harakatingiz hisoblanadi);
+- **yaqinda**: qilich (bo'lmasa bolta, oxiri nayza) bilan cooldown to'lganda uradi; nishon qalqon ushlasa bolta
+  bilan o'chiradi;
+- **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
+HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
+
 ## Auto Cobweb
 
 Hotbar (yoki inventar) dagi cobweb'ni o'zi qo'yadi:
@@ -80,7 +93,7 @@ shuning uchun xavf zarbadan **oldin** aniqlanadi:
 - yaqindagi dushman mob, portlay deb turgan creeper, sizga qarab uchayotgan o'q/fireball;
 - zarba yesangiz darhol ko'taradi.
 
-Hujumchi orqada bo'lsa unga buriladi, chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. Bolta bilan
+Qalqon doim ko'tarilib turmaydi: xavf paydo bo'lganda qisqa vaqtga (standart eng ko'pi 12 tick) ko'tariladi, keyin tushadi va biroz kutadi — zarba yoki o'q kelsa darhol. Hujumchi orqada bo'lsa unga buriladi, chap tugmani bossangiz urishingiz uchun qalqonni tushiradi. Bolta bilan
 o'chirilgan qalqonni ko'tarmaydi. Har bir tur alohida yoqiladi/o'chiriladi.
 
 ## Auto Potion
