@@ -55,5 +55,7 @@
   "key.category.autotravel.main": "Auto Travel",
   "key.autotravel.toggle": "Auto Travel on/off",
   "key.category.crystalhud.main": "Crystal HUD",
-  "key.crystalhud.toggle": "Crystal HUD on/off"
+  "key.crystalhud.toggle": "Crystal HUD on/off",
+  "key.category.elytrapvp.main": "Elytra PvP",
+  "key.elytrapvp.toggle": "Elytra PvP on/off"
 }

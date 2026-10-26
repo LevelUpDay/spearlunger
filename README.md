@@ -67,6 +67,21 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
 - **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
 HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
 
+## Elytra PvP (Combat)
+
+Eng yaqin o'yinchiga qarshi to'liq avtomatik jang (standart o'chiq):
+- **Uzoqda** (12+ blok): elytra'ni o'zi kiyadi (inventardan ham), sakraydi va ochadi, firework bilan nishondan
+  18 blok baland uchib boradi (nishon qayerga yurayotgani hisoblanadi, tog'/devordan ko'tariladi). Ustiga yetgach
+  sho'ng'iydi va yetib borishiga bir necha tick qolganda elytra'ni yechib (nagrudnik kiyib) **mace** bilan uradi.
+  Qo'ngach nishon yana uzoq bo'lsa — qaytadan kiyib uchadi. Firework bo'lmasa oyoq ostiga **wind charge** tashlab
+  tepaga otiladi va elytra bilan sirpanib boradi.
+- **Yaqinda**: oyoq ostiga wind charge — sakrab mace; o'rtacha masofada **pearl + wind charge** bilan tepaga teleport
+  va mace; yerda qilich/bolta; qalqon ushlasa **stun slam** (bolta + mace bir tickda). Zirhli nishonga Breach,
+  aks holda Density mace.
+- **Jon kam** (standart 4 yurak): nishondan uzoqqa pearl otib qochadi va ovqat yeydi (avval oltin olma).
+- **Yurish**: siz W/A/S/D/Space bossangiz bot harakat tugmalariga tegmaydi, yerda qarashingizni ham o'zgartirmaydi
+  (zarba paytida faqat paketda qaraydi) — sizniki ustun; bosmasangiz nishonga o'zi yuradi. Uchayotganda yo'nalishni bot boshqaradi.
+
 ## Auto Mace (Combat)
 
 Tushayotganda (standart 2+ blok) nishon urish masofasiga kirishi bilan mace'ga o'tib uradi — almashtirish va zarba

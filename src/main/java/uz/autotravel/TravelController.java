@@ -26,6 +26,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.EmptyBlockView;
+import uz.spearlunger.ElytraHelper;
 import uz.spearlunger.InvHelper;
 import uz.spearlunger.Rotations;
 
@@ -332,21 +333,21 @@ public class TravelController {
 
     // ------------------------------------------------------------ elytra
     private boolean canFly(ClientPlayerEntity p, TravelConfig cfg, double hd) {
-        return cfg.elytra && !noElytra && hd >= cfg.elytraMinDist && elytraSlot(p, cfg) != -2
-                && fireworks(p) > 0 && p.isOnGround() && !p.isTouchingWater();
+        return cfg.elytra && !noElytra && hd >= cfg.elytraMinDist && ElytraHelper.elytraSlot(p, cfg.minDurability) != -2
+                && ElytraHelper.fireworks(p) > 0 && p.isOnGround() && !p.isTouchingWater();
     }
 
     private void elytra(MinecraftClient c, ClientPlayerEntity p, TravelConfig cfg, double hd) {
         flyTicks++;
         switch (fly) {
             case EQUIP -> {
-                int slot = elytraSlot(p, cfg);
+                int slot = ElytraHelper.elytraSlot(p, cfg.minDurability);
                 if (slot == -2) {
                     noElytra = true;
                     toWalk();
                     return;
                 }
-                if (slot >= 0) equip(c, p, slot);
+                if (slot >= 0) ElytraHelper.equip(c, p, slot);
                 fly = Fly.JUMP;
                 flyTicks = 0;
             }
@@ -366,7 +367,7 @@ public class TravelController {
             }
             case DEPLOY -> {
                 if (p.isGliding()) {
-                    firework(c, p);
+                    ElytraHelper.firework(c, p);
                     fwCooldown = cfg.fireworkDelay;
                     fly = Fly.FLY;
                     flyTicks = 0;
@@ -413,7 +414,7 @@ public class TravelController {
             String why = null;
             if (hd < Math.max(40, alt * 1.6)) why = "yetib keldik, qo'nyapmiz";
             else if (dur <= cfg.minDurability) why = "elytra tugayapti, qo'nyapmiz";
-            else if (fireworks(p) == 0) why = "firework tugadi, qo'nyapmiz";
+            else if (ElytraHelper.fireworks(p) == 0) why = "firework tugadi, qo'nyapmiz";
             if (why != null) {
                 landing = true;
                 if (hd >= Math.max(40, alt * 1.6)) noElytra = true;
@@ -438,7 +439,7 @@ public class TravelController {
                 pitch = -55.0f;
                 boost = true;
             }
-            if (boost && fwCooldown == 0 && firework(c, p)) fwCooldown = Math.max(5, cfg.fireworkDelay);
+            if (boost && fwCooldown == 0 && ElytraHelper.firework(c, p)) fwCooldown = Math.max(5, cfg.fireworkDelay);
             status = String.format("elytra %.0fm, %.0f blok baland, dur %d", hd, alt, dur);
         }
         Rotations.turn(p, yaw, pitch, 2.0f);
@@ -447,95 +448,16 @@ public class TravelController {
     /** Qo'ndik: elytra'ni yechib nagrudnikni kiyamiz va piyoda davom etamiz. */
     private void landed(MinecraftClient c, ClientPlayerEntity p, TravelConfig cfg) {
         if (cfg.restoreChest && p.getEquippedStack(EquipmentSlot.CHEST).isOf(Items.ELYTRA)) {
-            int plate = chestplateSlot(p);
-            if (plate >= 0) equip(c, p, plate);
+            int plate = ElytraHelper.chestplateSlot(p);
+            if (plate >= 0) ElytraHelper.equip(c, p, plate);
         }
         say(p, "§aAuto Travel: qo'ndik, piyoda davom etamiz");
         landing = false;
         toWalk();
     }
 
-    /** Ko'krak kiyimini (slotdagi narsani) kiyadi - o'ng tugma bilan almashtirish; inventardan bo'lsa E orqali. */
-    private static void equip(MinecraftClient c, ClientPlayerEntity p, int slot) {
-        int original = p.getInventory().getSelectedSlot();
-        int hb = slot < 9 ? slot : original;
-        if (slot >= 9) InvHelper.swap(c, p, slot, hb);
-        p.getInventory().setSelectedSlot(hb);
-        c.interactionManager.interactItem(p, Hand.MAIN_HAND);
-        p.swingHand(Hand.MAIN_HAND);
-        if (slot >= 9) InvHelper.swap(c, p, slot, hb);
-        p.getInventory().setSelectedSlot(original);
-    }
-
-    /** -1 = yaroqli elytra kiyilgan, 0..35 = inventardagi slot, -2 = yo'q. */
-    private static int elytraSlot(ClientPlayerEntity p, TravelConfig cfg) {
-        ItemStack chest = p.getEquippedStack(EquipmentSlot.CHEST);
-        if (chest.isOf(Items.ELYTRA) && chest.getMaxDamage() - chest.getDamage() > cfg.minDurability) return -1;
-        int best = -2, bestDur = cfg.minDurability;
-        for (int i = 0; i < 36; i++) {
-            ItemStack s = p.getInventory().getStack(i);
-            if (!s.isOf(Items.ELYTRA)) continue;
-            int dur = s.getMaxDamage() - s.getDamage();
-            if (dur > bestDur) {
-                bestDur = dur;
-                best = i;
-            }
-        }
-        return best;
-    }
-
-    private static int chestplateSlot(ClientPlayerEntity p) {
-        int best = -1, bestRank = -1;
-        for (int i = 0; i < 36; i++) {
-            ItemStack s = p.getInventory().getStack(i);
-            String id = Registries.ITEM.getId(s.getItem()).getPath();
-            if (!id.endsWith("_chestplate")) continue;
-            int rank = id.startsWith("netherite") ? 6 : id.startsWith("diamond") ? 5 : id.startsWith("iron") ? 4
-                    : id.startsWith("chainmail") ? 3 : id.startsWith("golden") ? 2 : 1;
-            if (rank > bestRank) {
-                bestRank = rank;
-                best = i;
-            }
-        }
-        return best;
-    }
-
-    private static int fireworks(ClientPlayerEntity p) {
-        int n = p.getOffHandStack().isOf(Items.FIREWORK_ROCKET) ? p.getOffHandStack().getCount() : 0;
-        for (int i = 0; i < 36; i++) {
-            ItemStack s = p.getInventory().getStack(i);
-            if (s.isOf(Items.FIREWORK_ROCKET)) n += s.getCount();
-        }
-        return n;
-    }
-
-    /** Firework ishlatadi (chap qo'l, hotbar yoki inventardan) va qo'lni joyiga qaytaradi. */
-    private static boolean firework(MinecraftClient c, ClientPlayerEntity p) {
-        if (p.getOffHandStack().isOf(Items.FIREWORK_ROCKET)) {
-            c.interactionManager.interactItem(p, Hand.OFF_HAND);
-            return true;
-        }
-        int original = p.getInventory().getSelectedSlot();
-        int slot = -1;
-        for (int i = 0; i < 36; i++) {
-            if (p.getInventory().getStack(i).isOf(Items.FIREWORK_ROCKET)) {
-                slot = i;
-                break;
-            }
-        }
-        if (slot < 0) return false;
-        int hb = slot < 9 ? slot : original;
-        if (slot >= 9) InvHelper.swap(c, p, slot, hb);
-        p.getInventory().setSelectedSlot(hb);
-        c.interactionManager.interactItem(p, Hand.MAIN_HAND);
-        p.swingHand(Hand.MAIN_HAND);
-        if (slot >= 9) InvHelper.swap(c, p, slot, hb);
-        p.getInventory().setSelectedSlot(original);
-        return true;
-    }
-
     /** Oldindagi yo'lda (dist blokgacha) eng baland yer/devor (yuklanmagan chunk'lar hisobga olinmaydi). */
-    private static double terrainAhead(ClientWorld w, Vec3d pos, Vec3d dir, double dist) {
+    public static double terrainAhead(ClientWorld w, Vec3d pos, Vec3d dir, double dist) {
         double max = groundY(w, pos.x, pos.z);
         for (double i = 4; i <= dist; i += 4) {
             double x = pos.x + dir.x * i, z = pos.z + dir.z * i;
@@ -545,12 +467,12 @@ public class TravelController {
         return max;
     }
 
-    private static int groundY(ClientWorld w, double x, double z) {
+    public static int groundY(ClientWorld w, double x, double z) {
         return w.getTopY(Heightmap.Type.MOTION_BLOCKING, MathHelper.floor(x), MathHelper.floor(z));
     }
 
     /** Uchish yo'nalishida (tana balandligida) devor bormi. */
-    private static boolean wallAhead(ClientWorld w, ClientPlayerEntity p, Vec3d dir, double dist) {
+    public static boolean wallAhead(ClientWorld w, ClientPlayerEntity p, Vec3d dir, double dist) {
         Vec3d v = p.getVelocity();
         Vec3d look = v.lengthSquared() > 0.04 ? v.normalize() : dir;
         for (double off : new double[] {0.2, 1.0}) {

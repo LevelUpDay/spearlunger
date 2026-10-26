@@ -71,6 +71,25 @@ public class PearlBoostController {
         else if (cfg.enabled && cfg.chase) tickChase(c, p, cfg);
     }
 
+    /** Boshqa modullar uchun: berilgan yo'nalishga pearl + wind charge (teleport). Boshlansa true. */
+    public boolean launch(MinecraftClient c, ClientPlayerEntity p, float yaw, float pitch) {
+        if (phase != Phase.IDLE) return false;
+        float oy = p.getYaw(), op = p.getPitch();
+        p.setYaw(yaw);
+        p.setPitch(pitch);
+        try {
+            start(c, p, PearlBoostConfig.get());
+        } finally {
+            p.setYaw(oy);
+            p.setPitch(op);
+        }
+        return phase == Phase.WAIT_PEARL;
+    }
+
+    public boolean busy() {
+        return phase != Phase.IDLE;
+    }
+
     // ------------------------------------------------------------ pearl
     private void start(MinecraftClient c, ClientPlayerEntity p, PearlBoostConfig cfg) {
         int pearlSlot = slot(c, p, Items.ENDER_PEARL, cfg);
