@@ -9,6 +9,8 @@ import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
 import uz.automace.AutoMaceClient;
 import uz.automace.MaceConfig;
+import uz.autotravel.AutoTravelClient;
+import uz.autotravel.TravelConfig;
 import uz.autopotion.AutoPotionClient;
 import uz.autopvp.AutoPvpClient;
 import uz.autopvp.PvpConfig;
@@ -24,6 +26,8 @@ import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
 import uz.crystaldefense.CrystalDefenseClient;
 import uz.crystaldefense.CrystalDefenseConfig;
+import uz.crystalhud.CrystalHudClient;
+import uz.crystalhud.CrystalHudConfig;
 import uz.fallcombo.FallComboClient;
 import uz.fallcombo.FallComboConfig;
 import uz.fastplace.FastPlaceClient;
@@ -93,6 +97,8 @@ public final class Modules {
         PearlBoostConfig.save();
         CrystalDefenseConfig.save();
         MaceConfig.save();
+        TravelConfig.save();
+        CrystalHudConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
     }
@@ -763,6 +769,70 @@ public final class Modules {
                     bool("Portlash zarrachalari", "Crystal/anchor/TNT portlash zarrachalari (FPS va ko'rish)",
                             () -> c.explosions, v -> c.explosions = v),
                     bool("Ob-havo", "Yomg'ir va qor", () -> c.weather, v -> c.weather = v));
+        }));
+
+        l.add(new Module("Auto Travel", "/goto x z (yoki x y z): o'zi boradi - elytra, piyoda (blok sindirib/qo'yib), suvda kema",
+                Module.Category.MOVEMENT, () -> TravelConfig.get().enabled, v -> TravelConfig.get().enabled = v, () -> {
+            TravelConfig c = TravelConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (o'chsa yo'l to'xtaydi)",
+                            AutoTravelClient.keyToggle),
+                    action("To'xtatish", "Hozirgi yo'lni to'xtatadi (/goto stop)",
+                            () -> AutoTravelClient.CONTROLLER.stop(net.minecraft.client.MinecraftClient.getInstance(),
+                                    "§eAuto Travel: to'xtatildi")),
+                    group("Elytra"),
+                    bool("Elytra bilan", "Elytra (kiyilgan yoki inventarda) va firework bo'lsa uchib boradi", () -> c.elytra,
+                            v -> c.elytra = v),
+                    num("Elytra masofasi", "Shundan uzoq bo'lsa uchadi", 30, 1000, () -> c.elytraMinDist,
+                            v -> c.elytraMinDist = v, v -> v + " blok"),
+                    num("Balandlik", "Yer va oldindagi tog'/devordan shuncha baland uchadi", 8, 80, () -> c.cruiseHeight,
+                            v -> c.cruiseHeight = v, v -> v + " blok"),
+                    num("Min durability", "Elytra shundan kam qolsa qo'nadi, yechadi va piyoda boradi", 2, 200,
+                            () -> c.minDurability, v -> c.minDurability = v, v -> v + ""),
+                    num("Firework tezligi", "Tezlik shundan past bo'lsa firework", 5, 25, () -> c.fireworkSpeedTenths,
+                            v -> c.fireworkSpeedTenths = v, v -> (v / 10.0) + " blok/tick"),
+                    num("Firework oralig'i", "Firework'lar orasida eng kami", 5, 80, () -> c.fireworkDelay,
+                            v -> c.fireworkDelay = v, v -> v + " tick"),
+                    bool("Nagrudnikni kiyish", "Qo'ngach elytra o'rniga nagrudnik", () -> c.restoreChest,
+                            v -> c.restoreChest = v),
+                    group("Kema"),
+                    bool("Kema bilan", "Katta suvda kemani qo'yib o'tiradi", () -> c.boat, v -> c.boat = v),
+                    num("Suv kattaligi", "Oldinda shuncha blok suv bo'lsa kema", 4, 64, () -> c.boatMinWater,
+                            v -> c.boatMinWater = v, v -> v + " blok"),
+                    bool("Kemani olish", "Qirg'oqda kemani sindirib oladi", () -> c.pickupBoat, v -> c.pickupBoat = v),
+                    group("Piyoda"),
+                    bool("Blok sindirish", "Yo'lni to'sgan bloklarni eng yaxshi asbob bilan sindiradi", () -> c.breakBlocks,
+                            v -> c.breakBlocks = v),
+                    bool("Blok qo'yish", "Bo'shliqqa ko'prik, tepaga ustun (arzon bloklar)", () -> c.placeBlocks,
+                            v -> c.placeBlocks = v),
+                    num("Max tushish", "Shundan baland joydan sakramaydi", 1, 20, () -> c.maxFall, v -> c.maxFall = v,
+                            v -> v + " blok"),
+                    bool("Yugurish", "Sprint", () -> c.sprint, v -> c.sprint = v),
+                    num("Qidiruv", "Bitta yo'l qidirishdagi nuqtalar (ko'p - aqlliroq, lekin og'irroq)", 2000, 40000,
+                            () -> c.searchNodes, v -> c.searchNodes = v, v -> v + ""),
+                    group("Boshqa"),
+                    bool("Xabarlar", "Chatga holat xabarlari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Ekranda holat va masofa", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Crystal HUD", "Dushmanga eng ko'p zarar beradigan crystal joylarini ko'rsatadi (o'zingiz qo'yasiz)",
+                Module.Category.COMBAT, () -> CrystalHudConfig.get().enabled, v -> CrystalHudConfig.get().enabled = v, () -> {
+            CrystalHudConfig c = CrystalHudConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", CrystalHudClient.keyToggle),
+                    bool("Faqat crystal qo'lda", "Qo'lda end crystal bo'lganda ko'rsatadi", () -> c.onlyHolding,
+                            v -> c.onlyHolding = v),
+                    num("Dushman masofasi", "Shu masofadagi eng yaqin dushman", 4, 24, () -> c.range, v -> c.range = v,
+                            v -> v + " blok"),
+                    num("Qo'yish masofasi", "Shu masofadagi obsidian/bedrock", 30, 60, () -> c.placeRangeTenths,
+                            v -> c.placeRangeTenths = v, v -> (v / 10.0) + " blok"),
+                    num("Nechta joy", "Eng yaxshi joylar soni (yashil - eng yaxshisi)", 1, 8, () -> c.count,
+                            v -> c.count = v, v -> v + ""),
+                    num("Min zarar", "Dushmanga kamida (1 = yarim yurak)", 1, 30, () -> c.minDamage, v -> c.minDamage = v,
+                            v -> v + ""),
+                    num("Max o'zimga", "O'zingizga eng ko'pi", 1, 36, () -> c.maxSelf, v -> c.maxSelf = v, v -> v + ""),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v));
         }));
 
         l.add(new Module("Pearl Tracker", "Dushman pearl'i qayerga tushishini qizil bilan ajratadi - borib kutib olasiz",
