@@ -44,5 +44,12 @@
   "key.category.pearltracker.main": "Pearl Tracker",
   "key.pearltracker.toggle": "Pearl Tracker yoqish/o'chirish",
   "key.category.macecombo.main": "Mace Combo",
-  "key.macecombo.combo": "Mace Combo (pearl -> wind charge -> mace)"
+  "key.macecombo.combo": "Mace Combo (pearl -> wind charge -> mace)",
+  "key.category.pearlboost.main": "Pearl Boost",
+  "key.pearlboost.boost": "Pearl Boost (pearl + wind charge)",
+  "key.pearlboost.chase": "Pearl Chase yoqish/o'chirish",
+  "key.category.crystaldefense.main": "Crystal Defense",
+  "key.crystaldefense.toggle": "Crystal Defense yoqish/o'chirish",
+  "key.category.automace.main": "Auto Mace",
+  "key.automace.toggle": "Auto Mace yoqish/o'chirish"
 }

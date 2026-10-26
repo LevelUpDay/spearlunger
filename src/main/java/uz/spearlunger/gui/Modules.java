@@ -7,6 +7,8 @@ import uz.autoclutch.ClutchConfig;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
+import uz.automace.AutoMaceClient;
+import uz.automace.MaceConfig;
 import uz.autopotion.AutoPotionClient;
 import uz.autopvp.AutoPvpClient;
 import uz.autopvp.PvpConfig;
@@ -20,6 +22,8 @@ import uz.autototem.AutoTotemClient;
 import uz.autototem.TotemConfig;
 import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
+import uz.crystaldefense.CrystalDefenseClient;
+import uz.crystaldefense.CrystalDefenseConfig;
 import uz.fallcombo.FallComboClient;
 import uz.fallcombo.FallComboConfig;
 import uz.fastplace.FastPlaceClient;
@@ -32,6 +36,8 @@ import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
 import uz.norender.NoRenderClient;
 import uz.norender.NoRenderConfig;
+import uz.pearlboost.PearlBoostClient;
+import uz.pearlboost.PearlBoostConfig;
 import uz.pearlclutch.PearlClutchClient;
 import uz.pearltracker.PearlTrackerClient;
 import uz.pearltracker.PearlTrackerConfig;
@@ -84,6 +90,9 @@ public final class Modules {
         ClutchConfig.save();
         PvpConfig.save();
         MaceComboConfig.save();
+        PearlBoostConfig.save();
+        CrystalDefenseConfig.save();
+        MaceConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
     }
@@ -179,6 +188,44 @@ public final class Modules {
                     bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
         }));
 
+        l.add(new Module("Auto Mace", "Tushayotganda nishonga yetishi bilan mace'ga o'tib uradi (bir tickda, eng kuchli paytda)",
+                Module.Category.COMBAT, () -> MaceConfig.get().enabled, v -> MaceConfig.get().enabled = v, () -> {
+            MaceConfig c = MaceConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", AutoMaceClient.keyToggle),
+                    group("Zarba"),
+                    bool("Avto almashtirish", "Mace'ga o'zi o'tadi (OFF - faqat qo'lda mace bo'lsa)", () -> c.autoSwitch,
+                            v -> c.autoSwitch = v),
+                    choice("Qaysi mace", "Avto: zirhli nishonga Breach, qolganiga Density",
+                            new String[] {"Avto", "Density", "Breach", "Wind Burst"}, () -> Math.floorMod(c.prefer, 4),
+                            v -> c.prefer = v),
+                    choice("Urgandan keyin", "Mace'da qoladimi yoki eski slotga qaytadimi",
+                            new String[] {"Mace'da qolish", "Eskisiga qaytish"}, () -> Math.floorMod(c.after, 2),
+                            v -> c.after = v),
+                    num("Qaytish kechikishi", "Eski slotga qaytishdan oldin", 0, 20, () -> c.returnDelay,
+                            v -> c.returnDelay = v, v -> v == 0 ? "darhol" : v + " tick"),
+                    choice("Qachon", "Eng kuchli: yerga tegishdan oldingi oxirgi tickda (maksimal tushish). Darhol: yetishi bilan",
+                            new String[] {"Eng kuchli", "Darhol"}, () -> Math.floorMod(c.timing, 2), v -> c.timing = v),
+                    num("Min tushish", "Shundan baland tushganda uradi", 1, 30, () -> c.minFall, v -> c.minFall = v,
+                            v -> v + " blok"),
+                    num("Masofa", "Urish masofasi", 20, 45, () -> c.reachTenths, v -> c.reachTenths = v,
+                            v -> (v / 10.0) + " blok"),
+                    num("Kechikish", "Zarbalar orasida eng kami", 1, 20, () -> c.delay, v -> c.delay = v,
+                            v -> v + " tick"),
+                    bool("Qalqonni sindirish", "Nishon qalqon ushlasa avval bolta bilan o'chiradi", () -> c.axeShield,
+                            v -> c.axeShield = v),
+                    group("Nishon"),
+                    bool("Faqat pritselda", "Faqat qarab turgan nishonga (OFF - eng yaqiniga o'zi qaraydi)",
+                            () -> c.requireCrosshair, v -> c.requireCrosshair = v),
+                    bool("O'yinchilar", "O'yinchilarga", () -> c.players, v -> c.players = v),
+                    bool("Moblar", "Dushman moblarga ham", () -> c.mobs, v -> c.mobs = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    group("Boshqa"),
+                    bool("Xabarlar", "Har zarbada action bar xabari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Tushish balandligi va oxirgi zarba", () -> c.hud, v -> c.hud = v));
+        }));
+
         l.add(new Module("Mace Combo", "J: pearl (uzoq bo'lsa) -> wind charge -> mace; harakatingiz va nishonniki hisoblanadi",
                 Module.Category.COMBAT, () -> MaceComboConfig.get().enabled, v -> MaceComboConfig.get().enabled = v, () -> {
             MaceComboConfig c = MaceComboConfig.get();
@@ -200,6 +247,58 @@ public final class Modules {
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
+        l.add(new Module("Pearl Boost", "H: pearl + uni urib yuboradigan wind charge - havoga teleport, keyin mace; Pearl Chase",
+                Module.Category.COMBAT, () -> PearlBoostConfig.get().enabled, v -> PearlBoostConfig.get().enabled = v, () -> {
+            PearlBoostConfig c = PearlBoostConfig.get();
+            return List.of(
+                    key("Pearl Boost tugmasi", "Qaragan tomonga pearl, keyin unga tegadigan wind charge (standart H)",
+                            PearlBoostClient.keyBoost),
+                    choice("Wind charge qachon", "Pearl eng balandga chiqqanda (eng baland teleport) yoki iloji boricha tez",
+                            new String[] {"Eng balandda", "Tez"}, () -> Math.floorMod(c.timing, 2), v -> c.timing = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    group("Pearl Chase"),
+                    key("Pearl Chase tugmasi", "Pearl Chase'ni yoqib-o'chiradi", PearlBoostClient.keyChase),
+                    bool("Pearl Chase", "Dushman pearl otsa o'zingiz ham o'sha joy yoniga pearl otasiz", () -> c.chase,
+                            v -> c.chase = v),
+                    num("Chase masofasi", "Dushman pearl'i shundan uzoqqa tushsa quvmaydi", 8, 80, () -> c.chaseRange,
+                            v -> c.chaseRange = v, v -> v + " blok"),
+                    num("Oldinroq", "Dushman tushadigan joydan shuncha oldinroqqa", 0, 50, () -> c.chaseShortTenths,
+                            v -> c.chaseShortTenths = v, v -> (v / 10.0) + " blok"),
+                    bool("Do'stlarnikini emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
+        l.add(new Module("Crystal Defense", "Crystal PvP: chuqurdagi dushmandan pearl bilan qochish, surround, crystal joylarini yopish",
+                Module.Category.COMBAT, () -> CrystalDefenseConfig.get().enabled, v -> CrystalDefenseConfig.get().enabled = v, () -> {
+            CrystalDefenseConfig c = CrystalDefenseConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", CrystalDefenseClient.keyToggle),
+                    num("Dushman radiusi", "Dushman shu masofada bo'lsa xavf", 3, 16, () -> c.range, v -> c.range = v,
+                            v -> v + " blok"),
+                    group("Qochish (pearl)"),
+                    bool("Pearl bilan qochish", "Dushman pastda/chuqurda turib crystal qilsa yoki jon kam bo'lsa",
+                            () -> c.escapePearl, v -> c.escapePearl = v),
+                    num("Jon", "Shu jon yoki kamida dushman pastda bo'lmasa ham qochadi", 0, 20, () -> c.escapeHealth,
+                            v -> c.escapeHealth = v, v -> (v / 2.0) + " yurak"),
+                    choice("Qayerga", "Dushman ko'rmaydigan xavfsiz joyga (topilmasa oldinga) yoki doim qaragan tomonga",
+                            new String[] {"Xavfsiz joyga", "Oldinga"}, () -> Math.floorMod(c.escapeMode, 2),
+                            v -> c.escapeMode = v),
+                    group("Bloklar"),
+                    bool("Surround", "Oyog'ingiz atrofiga 4 tomondan obsidian", () -> c.surround, v -> c.surround = v),
+                    bool("Crystal joylarini yopish", "Yoningizdagi obsidian/bedrock ustiga oddiy blok - crystal qo'yib bo'lmaydi",
+                            () -> c.sealSpots, v -> c.sealSpots = v),
+                    num("Blok/tick", "Bir tickda eng ko'pi bilan", 1, 6, () -> c.blocksPerTick, v -> c.blocksPerTick = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    group("Boshqa"),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar xavf emas", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Ekranda crystal xavfi ogohlantirishi", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Totem", "Chap qo'lda totem bo'lmasa inventardan qo'yadi",

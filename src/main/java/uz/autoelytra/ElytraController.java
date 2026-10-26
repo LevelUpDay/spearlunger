@@ -17,6 +17,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import uz.automace.AutoMaceClient;
 import uz.autotnt.AutoTntConfig;
 import uz.spearlunger.InvHelper;
 
@@ -208,7 +209,7 @@ public class ElytraController {
         if (!cfg.unequipNearEnemy || unequippedThisFlight) return false;
         Vec3d v = p.getVelocity();
         // endigina uchdik yoki tepaga ko'tarilyapmiz - yechmaymiz (dushman oldidan uchib ketish mumkin bo'lsin)
-        if (glideTicks < 10 || v.y > -0.05) return false;
+        if (glideTicks < 5 || v.y > 0.2) return false;
         double speed = Math.max(0.3, v.length());
         PlayerEntity enemy = null;
         double bestT = Double.MAX_VALUE;
@@ -216,10 +217,12 @@ public class ElytraController {
             if (e == p || !e.isAlive() || e.isSpectator() || e.isCreative() || isFriend(e)) continue;
             if (p.getY() - e.getY() < cfg.unequipMinAbove) continue;
             Vec3d to = e.getEntityPos().add(0, 1, 0).subtract(p.getEntityPos());
-            if (v.normalize().dotProduct(to.normalize()) < 0.5) continue;   // unga qarab uchmayapmiz
+            if (v.normalize().dotProduct(to.normalize()) < 0.4) continue;   // unga qarab uchmayapmiz
             // tez uchsak oldinroq: yetib borishga necha tick qoldi
             double ticks = to.length() / speed;
-            if (ticks <= cfg.unequipLeadTicks && to.length() <= Math.max(cfg.unequipDist, speed * cfg.unequipLeadTicks + 2)
+            // tez uchsak yanada oldinroq (har 1 blok/tick tezlikka +2 tick)
+            int lead = cfg.unequipLeadTicks + (int) Math.round(Math.max(0, speed - 1.0) * 2);
+            if (ticks <= lead && to.length() <= Math.max(cfg.unequipDist, speed * lead + 2)
                     && ticks < bestT) {
                 bestT = ticks;
                 enemy = e;
@@ -243,6 +246,8 @@ public class ElytraController {
             InvHelper.quickMove(c, p, 6);   // zirh sloti 6 = ko'krak
         }
         p.getInventory().setSelectedSlot(mace >= 0 ? mace : original);
+        // yechilishi bilan: masofada bo'lsa shu tickda mace bilan uramiz, bo'lmasa Auto Mace keyingi ticklarda darhol uradi
+        if (!AutoMaceClient.CONTROLLER.hitNow(c, p, enemy)) AutoMaceClient.CONTROLLER.arm(enemy, 40);
         say(p, "§cAuto Elytra: " + enemy.getName().getString() + " - elytra yechildi");
         return true;
     }

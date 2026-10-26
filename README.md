@@ -14,6 +14,7 @@ Kerakli modlar: Fabric Loader, Fabric API.
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **H** | Pearl Boost: pearl + unga tegadigan wind charge (havoga teleport) |
 | **J** | Mace Combo: pearl → wind charge → mace (bir bosish) |
 | **K** | Auto PvP yoqish/o'chirish |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
@@ -65,6 +66,25 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
   bilan o'chiradi;
 - **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
 HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
+
+## Auto Mace (Combat)
+
+Tushayotganda (standart 2+ blok) nishon urish masofasiga kirishi bilan mace'ga o'tib uradi — almashtirish va zarba
+bir tickda. **Eng kuchli** rejimida yerga/nishonga tegishdan oldingi oxirgi tickda uradi (tushish masofasi va zarar
+maksimal), **Darhol** — yetishi bilan. Sozlamalar: avto almashtirish, qaysi mace (avto: zirhliga Breach, qolganiga
+Density / Density / Breach / Wind Burst), urgandan keyin mace'da qolish yoki eski slotga (kechikish bilan) qaytish,
+min tushish, masofa, zarbalar kechikishi, qalqonni bolta bilan sindirish, faqat pritseldagi nishon, moblar, do'stlar.
+Elytra'dagi "dushman oldida yechish" bilan bog'langan: elytra yechilgan tickning o'zida (nishon masofada bo'lsa) mace bilan uradi, bo'lmasa keyingi ticklarda min tushishni kutmasdan masofaga kirishi bilan uradi. Tez uchsangiz elytra oldinroq yechiladi.
+
+## Pearl Boost (Combat, H)
+
+Bitta tugma: qaragan tomoningizga **ender pearl**, keyin **wind charge**'ni aynan o'sha pearl'ga tegadigan qilib otadi —
+wind charge pearl'ga tekkanda pearl "tushadi" va siz havodagi o'sha nuqtaga **teleport** bo'lasiz, keyin mace bilan
+tushasiz. Ikkala snaryad ham sizning tezligingizni (yurish, uchish, sakrash) oladi — ikkalasida ham hisoblanadi:
+pearl turib otgandagidek qaragan yo'nalishga ketadi, wind charge esa pearl'ning keyingi yo'lini oldindan hisoblab
+unga uchrashadigan yo'nalishda otiladi. "Eng balandda" rejimida pearl cho'qqisiga yaqin uriladi (eng baland teleport).
+
+**Pearl Chase**: dushman pearl otsa, uning tushadigan joyi yoniga o'zingiz ham pearl otasiz (harakatingiz hisoblanadi).
 
 ## Mace Combo (Combat, J)
 
@@ -143,6 +163,16 @@ Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidag
   bo'lsa, joy band bo'lsa;
 - istalgan to'liq blok (obsidian afzal), xohlasangiz ikki qavat; **Dushman anchor'lari** (standart o'chiq) — yaqindagi
   zaryadlangan anchor'larni oldindan to'sadi; Nether'da ishlamaydi (u yerda anchor portlamaydi).
+
+## Crystal Defense (Combat)
+
+Crystal PvP himoyasi. Xavf: yaqinda dushman bor va atrofda end crystal bor yoki yaqinda zarba yedingiz.
+- **Pearl bilan qochish**: dushman pastda / chuqurda turib crystal qilyapti yoki jon kam — pearl'ni darhol tanlab
+  dushman ko'rmaydigan, undan 9+ blok uzoq xavfsiz joyga otadi (topilmasa qaragan tomonga; harakatingiz hisoblanadi);
+- **Surround**: oyog'ingiz atrofiga 4 tomondan obsidian;
+- **Crystal joylarini yopish**: yoningizdagi obsidian/bedrock ustiga oddiy (obsidian emas) blok — u yerga crystal
+  qo'yib bo'lmaydi;
+- HUD'da "CRYSTAL xavf" / "dushman pastda!" ogohlantirishi. Auto Totem va Anchor Guard bilan birga ishlating.
 
 ## Fall Combo (Combat)
 
