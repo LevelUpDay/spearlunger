@@ -44,5 +44,8 @@
   "key.category.pearltracker.main": "Pearl Tracker",
   "key.pearltracker.toggle": "Pearl Tracker on/off",
   "key.category.macecombo.main": "Mace Combo",
-  "key.macecombo.combo": "Mace Combo (pearl -> wind charge -> mace)"
+  "key.macecombo.combo": "Mace Combo (pearl -> wind charge -> mace)",
+  "key.category.pearlboost.main": "Pearl Boost",
+  "key.pearlboost.boost": "Pearl Boost (pearl + wind charge)",
+  "key.pearlboost.chase": "Pearl Chase on/off"
 }

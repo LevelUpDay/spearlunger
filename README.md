@@ -14,6 +14,7 @@ Kerakli modlar: Fabric Loader, Fabric API.
 | **Z** | Arbalet auto-TNT (bir marta) |
 | **V** | TNT profilini almashtirish |
 | **P** | Auto TNT sozlamalari |
+| **H** | Pearl Boost: pearl + unga tegadigan wind charge (havoga teleport) |
 | **J** | Mace Combo: pearl → wind charge → mace (bir bosish) |
 | **K** | Auto PvP yoqish/o'chirish |
 | **G** | Rail qo'yganda auto-TNT yoqish/o'chirish |
@@ -65,6 +66,16 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
   bilan o'chiradi;
 - **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
 HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
+
+## Pearl Boost (Combat, H)
+
+Bitta tugma: qaragan tomoningizga **ender pearl**, keyin **wind charge**'ni aynan o'sha pearl'ga tegadigan qilib otadi —
+wind charge pearl'ga tekkanda pearl "tushadi" va siz havodagi o'sha nuqtaga **teleport** bo'lasiz, keyin mace bilan
+tushasiz. Ikkala snaryad ham sizning tezligingizni (yurish, uchish, sakrash) oladi — ikkalasida ham hisoblanadi:
+pearl turib otgandagidek qaragan yo'nalishga ketadi, wind charge esa pearl'ning keyingi yo'lini oldindan hisoblab
+unga uchrashadigan yo'nalishda otiladi. "Eng balandda" rejimida pearl cho'qqisiga yaqin uriladi (eng baland teleport).
+
+**Pearl Chase**: dushman pearl otsa, uning tushadigan joyi yoniga o'zingiz ham pearl otasiz (harakatingiz hisoblanadi).
 
 ## Mace Combo (Combat, J)
 

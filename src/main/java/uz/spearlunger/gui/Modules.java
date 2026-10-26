@@ -32,6 +32,8 @@ import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
 import uz.norender.NoRenderClient;
 import uz.norender.NoRenderConfig;
+import uz.pearlboost.PearlBoostClient;
+import uz.pearlboost.PearlBoostConfig;
 import uz.pearlclutch.PearlClutchClient;
 import uz.pearltracker.PearlTrackerClient;
 import uz.pearltracker.PearlTrackerConfig;
@@ -84,6 +86,7 @@ public final class Modules {
         ClutchConfig.save();
         PvpConfig.save();
         MaceComboConfig.save();
+        PearlBoostConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
     }
@@ -198,6 +201,29 @@ public final class Modules {
                     num("Nishon masofasi", "Eng yaqin dushmanni shu masofada qidiradi", 8, 96, () -> c.range,
                             v -> c.range = v, v -> v + " blok"),
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
+        l.add(new Module("Pearl Boost", "H: pearl + uni urib yuboradigan wind charge - havoga teleport, keyin mace; Pearl Chase",
+                Module.Category.COMBAT, () -> PearlBoostConfig.get().enabled, v -> PearlBoostConfig.get().enabled = v, () -> {
+            PearlBoostConfig c = PearlBoostConfig.get();
+            return List.of(
+                    key("Pearl Boost tugmasi", "Qaragan tomonga pearl, keyin unga tegadigan wind charge (standart H)",
+                            PearlBoostClient.keyBoost),
+                    choice("Wind charge qachon", "Pearl eng balandga chiqqanda (eng baland teleport) yoki iloji boricha tez",
+                            new String[] {"Eng balandda", "Tez"}, () -> Math.floorMod(c.timing, 2), v -> c.timing = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    group("Pearl Chase"),
+                    key("Pearl Chase tugmasi", "Pearl Chase'ni yoqib-o'chiradi", PearlBoostClient.keyChase),
+                    bool("Pearl Chase", "Dushman pearl otsa o'zingiz ham o'sha joy yoniga pearl otasiz", () -> c.chase,
+                            v -> c.chase = v),
+                    num("Chase masofasi", "Dushman pearl'i shundan uzoqqa tushsa quvmaydi", 8, 80, () -> c.chaseRange,
+                            v -> c.chaseRange = v, v -> v + " blok"),
+                    num("Oldinroq", "Dushman tushadigan joydan shuncha oldinroqqa", 0, 50, () -> c.chaseShortTenths,
+                            v -> c.chaseShortTenths = v, v -> (v / 10.0) + " blok"),
+                    bool("Do'stlarnikini emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
