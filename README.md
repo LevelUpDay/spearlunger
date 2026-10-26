@@ -155,6 +155,16 @@ Respawn anchor portlashi zarari "ko'rinish"ga bog'liq: siz bilan anchor orasidag
 - istalgan to'liq blok (obsidian afzal), xohlasangiz ikki qavat; **Dushman anchor'lari** (standart o'chiq) — yaqindagi
   zaryadlangan anchor'larni oldindan to'sadi; Nether'da ishlamaydi (u yerda anchor portlamaydi).
 
+## Crystal Defense (Combat)
+
+Crystal PvP himoyasi. Xavf: yaqinda dushman bor va atrofda end crystal bor yoki yaqinda zarba yedingiz.
+- **Pearl bilan qochish**: dushman pastda / chuqurda turib crystal qilyapti yoki jon kam — pearl'ni darhol tanlab
+  dushman ko'rmaydigan, undan 9+ blok uzoq xavfsiz joyga otadi (topilmasa qaragan tomonga; harakatingiz hisoblanadi);
+- **Surround**: oyog'ingiz atrofiga 4 tomondan obsidian;
+- **Crystal joylarini yopish**: yoningizdagi obsidian/bedrock ustiga oddiy (obsidian emas) blok — u yerga crystal
+  qo'yib bo'lmaydi;
+- HUD'da "CRYSTAL xavf" / "dushman pastda!" ogohlantirishi. Auto Totem va Anchor Guard bilan birga ishlating.
+
 ## Fall Combo (Combat)
 
 Tepadan o'yinchi ustiga tushayotganingizda (standart 3+ blok):

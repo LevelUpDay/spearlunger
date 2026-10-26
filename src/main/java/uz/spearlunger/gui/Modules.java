@@ -20,6 +20,8 @@ import uz.autototem.AutoTotemClient;
 import uz.autototem.TotemConfig;
 import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
+import uz.crystaldefense.CrystalDefenseClient;
+import uz.crystaldefense.CrystalDefenseConfig;
 import uz.fallcombo.FallComboClient;
 import uz.fallcombo.FallComboConfig;
 import uz.fastplace.FastPlaceClient;
@@ -87,6 +89,7 @@ public final class Modules {
         PvpConfig.save();
         MaceComboConfig.save();
         PearlBoostConfig.save();
+        CrystalDefenseConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
     }
@@ -226,6 +229,35 @@ public final class Modules {
                     bool("Do'stlarnikini emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+        }));
+
+        l.add(new Module("Crystal Defense", "Crystal PvP: chuqurdagi dushmandan pearl bilan qochish, surround, crystal joylarini yopish",
+                Module.Category.COMBAT, () -> CrystalDefenseConfig.get().enabled, v -> CrystalDefenseConfig.get().enabled = v, () -> {
+            CrystalDefenseConfig c = CrystalDefenseConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", CrystalDefenseClient.keyToggle),
+                    num("Dushman radiusi", "Dushman shu masofada bo'lsa xavf", 3, 16, () -> c.range, v -> c.range = v,
+                            v -> v + " blok"),
+                    group("Qochish (pearl)"),
+                    bool("Pearl bilan qochish", "Dushman pastda/chuqurda turib crystal qilsa yoki jon kam bo'lsa",
+                            () -> c.escapePearl, v -> c.escapePearl = v),
+                    num("Jon", "Shu jon yoki kamida dushman pastda bo'lmasa ham qochadi", 0, 20, () -> c.escapeHealth,
+                            v -> c.escapeHealth = v, v -> (v / 2.0) + " yurak"),
+                    choice("Qayerga", "Dushman ko'rmaydigan xavfsiz joyga (topilmasa oldinga) yoki doim qaragan tomonga",
+                            new String[] {"Xavfsiz joyga", "Oldinga"}, () -> Math.floorMod(c.escapeMode, 2),
+                            v -> c.escapeMode = v),
+                    group("Bloklar"),
+                    bool("Surround", "Oyog'ingiz atrofiga 4 tomondan obsidian", () -> c.surround, v -> c.surround = v),
+                    bool("Crystal joylarini yopish", "Yoningizdagi obsidian/bedrock ustiga oddiy blok - crystal qo'yib bo'lmaydi",
+                            () -> c.sealSpots, v -> c.sealSpots = v),
+                    num("Blok/tick", "Bir tickda eng ko'pi bilan", 1, 6, () -> c.blocksPerTick, v -> c.blocksPerTick = v),
+                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    group("Boshqa"),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar xavf emas", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Ekranda crystal xavfi ogohlantirishi", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Totem", "Chap qo'lda totem bo'lmasa inventardan qo'yadi",
