@@ -55,5 +55,7 @@
   "key.category.autotravel.main": "Auto Travel",
   "key.autotravel.toggle": "Auto Travel yoqish/o'chirish",
   "key.category.crystalhud.main": "Crystal HUD",
-  "key.crystalhud.toggle": "Crystal HUD yoqish/o'chirish"
+  "key.crystalhud.toggle": "Crystal HUD yoqish/o'chirish",
+  "key.category.elytrapvp.main": "Elytra PvP",
+  "key.elytrapvp.toggle": "Elytra PvP yoqish/o'chirish"
 }

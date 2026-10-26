@@ -28,6 +28,8 @@ import uz.crystaldefense.CrystalDefenseClient;
 import uz.crystaldefense.CrystalDefenseConfig;
 import uz.crystalhud.CrystalHudClient;
 import uz.crystalhud.CrystalHudConfig;
+import uz.elytrapvp.ElytraPvpClient;
+import uz.elytrapvp.ElytraPvpConfig;
 import uz.fallcombo.FallComboClient;
 import uz.fallcombo.FallComboConfig;
 import uz.fastplace.FastPlaceClient;
@@ -98,6 +100,7 @@ public final class Modules {
         CrystalDefenseConfig.save();
         MaceConfig.save();
         TravelConfig.save();
+        ElytraPvpConfig.save();
         CrystalHudConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
@@ -192,6 +195,58 @@ public final class Modules {
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Elytra PvP", "Elytra kiyib firework/wind charge bilan uchib boradi, yechib mace bilan uradi, takrorlaydi",
+                Module.Category.COMBAT, () -> ElytraPvpConfig.get().enabled, v -> ElytraPvpConfig.get().enabled = v, () -> {
+            ElytraPvpConfig c = ElytraPvpConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", ElytraPvpClient.keyToggle),
+                    num("Nishon masofasi", "Shu masofadagi eng yaqin o'yinchi", 8, 128, () -> c.range, v -> c.range = v,
+                            v -> v + " blok"),
+                    group("Elytra hujum"),
+                    bool("Elytra bilan", "Uzoqda elytra kiyib uchib boradi, ustidan mace bilan tushadi", () -> c.elytra,
+                            v -> c.elytra = v),
+                    num("Uchish masofasi", "Nishon shundan uzoq bo'lsa uchadi", 6, 64, () -> c.flyDist, v -> c.flyDist = v,
+                            v -> v + " blok"),
+                    num("Hujum balandligi", "Nishondan shuncha baland uchib, keyin sho'ng'iydi", 6, 50, () -> c.attackHeight,
+                            v -> c.attackHeight = v, v -> v + " blok"),
+                    num("Yechish vaqti", "Yetib borishga shuncha tick qolganda yechadi (tez bo'lsa oldinroq)", 1, 10,
+                            () -> c.unequipLead, v -> c.unequipLead = v, v -> v + " tick"),
+                    num("Firework oralig'i", "Firework'lar orasida eng kami", 5, 60, () -> c.fireworkDelay,
+                            v -> c.fireworkDelay = v, v -> v + " tick"),
+                    num("Min durability", "Elytra shundan kam bo'lsa ishlatilmaydi", 1, 100, () -> c.minDurability,
+                            v -> c.minDurability = v, v -> v + ""),
+                    bool("Wind charge bilan uchish", "Firework bo'lmasa oyoq ostiga wind charge - tepaga otilib uchadi",
+                            () -> c.windTakeoff, v -> c.windTakeoff = v),
+                    bool("Yerda nagrudnik", "Yerda elytra kiyib qolsa nagrudnikni kiyadi", () -> c.armorOnGround,
+                            v -> c.armorOnGround = v),
+                    group("Yaqin jang"),
+                    bool("Wind sakrash", "Yaqinda oyoq ostiga wind charge - sakrab mace bilan", () -> c.windJump,
+                            v -> c.windJump = v),
+                    num("Wind masofasi", "Shu masofada sakraydi", 2, 8, () -> c.windJumpDist, v -> c.windJumpDist = v,
+                            v -> v + " blok"),
+                    bool("Pearl bilan tepaga", "Pearl + wind charge (Pearl Boost) - tepaga teleport, keyin mace",
+                            () -> c.pearlUp, v -> c.pearlUp = v),
+                    num("Pearl masofasi", "Shundan yaqin bo'lsa pearl bilan", 6, 30, () -> c.pearlUpDist,
+                            v -> c.pearlUpDist = v, v -> v + " blok"),
+                    bool("Stun slam", "Qalqon ushlasa bolta + mace bir tickda", () -> c.stunSlam, v -> c.stunSlam = v),
+                    bool("O'zi yurish", "Siz yurmasangiz nishonga yuradi (siz yursangiz sizniki ustun)", () -> c.walk,
+                            v -> c.walk = v),
+                    num("Masofa", "Urish masofasi", 20, 45, () -> c.reachTenths, v -> c.reachTenths = v,
+                            v -> (v / 10.0) + " blok"),
+                    group("Omon qolish"),
+                    num("Ovqat joni", "Jon shundan kam bo'lsa ovqat (avval oltin olma) yeydi", 2, 18, () -> c.eatHealth,
+                            v -> c.eatHealth = v, v -> (v / 2.0) + " yurak"),
+                    bool("Qochish pearl'i", "Ovqatdan oldin nishondan uzoqqa pearl otadi", () -> c.retreatPearl,
+                            v -> c.retreatPearl = v),
+                    num("Qochish masofasi", "Pearl shuncha uzoqqa", 6, 30, () -> c.retreatDist, v -> c.retreatDist = v,
+                            v -> v + " blok"),
+                    group("Boshqa"),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Nishon, holat va oxirgi zarba", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Mace", "Tushayotganda nishonga yetishi bilan mace'ga o'tib uradi (bir tickda, eng kuchli paytda)",
