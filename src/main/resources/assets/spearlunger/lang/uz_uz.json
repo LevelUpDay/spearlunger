@@ -49,5 +49,7 @@
   "key.pearlboost.boost": "Pearl Boost (pearl + wind charge)",
   "key.pearlboost.chase": "Pearl Chase yoqish/o'chirish",
   "key.category.crystaldefense.main": "Crystal Defense",
-  "key.crystaldefense.toggle": "Crystal Defense yoqish/o'chirish"
+  "key.crystaldefense.toggle": "Crystal Defense yoqish/o'chirish",
+  "key.category.automace.main": "Auto Mace",
+  "key.automace.toggle": "Auto Mace yoqish/o'chirish"
 }

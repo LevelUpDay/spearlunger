@@ -67,6 +67,15 @@ elytra'ni ochadi va firework'ni ishlatadi, keyin firework slotiga qaytadi. Qo'sh
 - **tushayotganda**: mace — zirhli nishonga Breach, aks holda Density — almashtirish va zarba bir tickda.
 HUD'da nishon, masofa va hozir nima qilayotgani ko'rinadi.
 
+## Auto Mace (Combat)
+
+Tushayotganda (standart 2+ blok) nishon urish masofasiga kirishi bilan mace'ga o'tib uradi — almashtirish va zarba
+bir tickda. **Eng kuchli** rejimida yerga/nishonga tegishdan oldingi oxirgi tickda uradi (tushish masofasi va zarar
+maksimal), **Darhol** — yetishi bilan. Sozlamalar: avto almashtirish, qaysi mace (avto: zirhliga Breach, qolganiga
+Density / Density / Breach / Wind Burst), urgandan keyin mace'da qolish yoki eski slotga (kechikish bilan) qaytish,
+min tushish, masofa, zarbalar kechikishi, qalqonni bolta bilan sindirish, faqat pritseldagi nishon, moblar, do'stlar.
+Elytra'dagi "dushman oldida yechish" bilan birga yaxshi ishlaydi.
+
 ## Pearl Boost (Combat, H)
 
 Bitta tugma: qaragan tomoningizga **ender pearl**, keyin **wind charge**'ni aynan o'sha pearl'ga tegadigan qilib otadi —

@@ -7,6 +7,8 @@ import uz.autoclutch.ClutchConfig;
 import uz.autocobweb.AutoCobwebClient;
 import uz.autocobweb.CobwebConfig;
 import uz.autoelytra.AutoElytraClient;
+import uz.automace.AutoMaceClient;
+import uz.automace.MaceConfig;
 import uz.autopotion.AutoPotionClient;
 import uz.autopvp.AutoPvpClient;
 import uz.autopvp.PvpConfig;
@@ -90,6 +92,7 @@ public final class Modules {
         MaceComboConfig.save();
         PearlBoostConfig.save();
         CrystalDefenseConfig.save();
+        MaceConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
     }
@@ -183,6 +186,44 @@ public final class Modules {
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Auto Mace", "Tushayotganda nishonga yetishi bilan mace'ga o'tib uradi (bir tickda, eng kuchli paytda)",
+                Module.Category.COMBAT, () -> MaceConfig.get().enabled, v -> MaceConfig.get().enabled = v, () -> {
+            MaceConfig c = MaceConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", AutoMaceClient.keyToggle),
+                    group("Zarba"),
+                    bool("Avto almashtirish", "Mace'ga o'zi o'tadi (OFF - faqat qo'lda mace bo'lsa)", () -> c.autoSwitch,
+                            v -> c.autoSwitch = v),
+                    choice("Qaysi mace", "Avto: zirhli nishonga Breach, qolganiga Density",
+                            new String[] {"Avto", "Density", "Breach", "Wind Burst"}, () -> Math.floorMod(c.prefer, 4),
+                            v -> c.prefer = v),
+                    choice("Urgandan keyin", "Mace'da qoladimi yoki eski slotga qaytadimi",
+                            new String[] {"Mace'da qolish", "Eskisiga qaytish"}, () -> Math.floorMod(c.after, 2),
+                            v -> c.after = v),
+                    num("Qaytish kechikishi", "Eski slotga qaytishdan oldin", 0, 20, () -> c.returnDelay,
+                            v -> c.returnDelay = v, v -> v == 0 ? "darhol" : v + " tick"),
+                    choice("Qachon", "Eng kuchli: yerga tegishdan oldingi oxirgi tickda (maksimal tushish). Darhol: yetishi bilan",
+                            new String[] {"Eng kuchli", "Darhol"}, () -> Math.floorMod(c.timing, 2), v -> c.timing = v),
+                    num("Min tushish", "Shundan baland tushganda uradi", 1, 30, () -> c.minFall, v -> c.minFall = v,
+                            v -> v + " blok"),
+                    num("Masofa", "Urish masofasi", 20, 45, () -> c.reachTenths, v -> c.reachTenths = v,
+                            v -> (v / 10.0) + " blok"),
+                    num("Kechikish", "Zarbalar orasida eng kami", 1, 20, () -> c.delay, v -> c.delay = v,
+                            v -> v + " tick"),
+                    bool("Qalqonni sindirish", "Nishon qalqon ushlasa avval bolta bilan o'chiradi", () -> c.axeShield,
+                            v -> c.axeShield = v),
+                    group("Nishon"),
+                    bool("Faqat pritselda", "Faqat qarab turgan nishonga (OFF - eng yaqiniga o'zi qaraydi)",
+                            () -> c.requireCrosshair, v -> c.requireCrosshair = v),
+                    bool("O'yinchilar", "O'yinchilarga", () -> c.players, v -> c.players = v),
+                    bool("Moblar", "Dushman moblarga ham", () -> c.mobs, v -> c.mobs = v),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    group("Boshqa"),
+                    bool("Xabarlar", "Har zarbada action bar xabari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Tushish balandligi va oxirgi zarba", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Mace Combo", "J: pearl (uzoq bo'lsa) -> wind charge -> mace; harakatingiz va nishonniki hisoblanadi",

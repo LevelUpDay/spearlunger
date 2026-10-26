@@ -49,5 +49,7 @@
   "key.pearlboost.boost": "Pearl Boost (pearl + wind charge)",
   "key.pearlboost.chase": "Pearl Chase on/off",
   "key.category.crystaldefense.main": "Crystal Defense",
-  "key.crystaldefense.toggle": "Crystal Defense on/off"
+  "key.crystaldefense.toggle": "Crystal Defense on/off",
+  "key.category.automace.main": "Auto Mace",
+  "key.automace.toggle": "Auto Mace on/off"
 }
