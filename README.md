@@ -74,7 +74,7 @@ bir tickda. **Eng kuchli** rejimida yerga/nishonga tegishdan oldingi oxirgi tick
 maksimal), **Darhol** — yetishi bilan. Sozlamalar: avto almashtirish, qaysi mace (avto: zirhliga Breach, qolganiga
 Density / Density / Breach / Wind Burst), urgandan keyin mace'da qolish yoki eski slotga (kechikish bilan) qaytish,
 min tushish, masofa, zarbalar kechikishi, qalqonni bolta bilan sindirish, faqat pritseldagi nishon, moblar, do'stlar.
-Elytra'dagi "dushman oldida yechish" bilan birga yaxshi ishlaydi.
+Elytra'dagi "dushman oldida yechish" bilan bog'langan: elytra yechilgan tickning o'zida (nishon masofada bo'lsa) mace bilan uradi, bo'lmasa keyingi ticklarda min tushishni kutmasdan masofaga kirishi bilan uradi. Tez uchsangiz elytra oldinroq yechiladi.
 
 ## Pearl Boost (Combat, H)
 

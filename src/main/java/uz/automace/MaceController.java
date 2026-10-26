@@ -31,6 +31,43 @@ import uz.spearlunger.Rotations;
 public class MaceController {
     private int cooldown = 0, returnIn = -1, returnSlot = -1;
     private String last = null;
+    /** Elytra yechilgach: shu nishonga darhol urish rejimi (min tushish kutilmaydi). */
+    private LivingEntity armedTarget = null;
+    private int armedTicks = 0;
+
+    /** Auto Elytra elytra'ni yechganda chaqiradi: keyingi ticklarda shu nishonga darhol uramiz. */
+    public void arm(LivingEntity target, int ticks) {
+        armedTarget = target;
+        armedTicks = ticks;
+        cooldown = 0;
+    }
+
+    /** Darhol (shu tickda) urishga urinadi: nishon masofada bo'lsa mace'ga o'tib uradi. Urilsa true. */
+    public boolean hitNow(MinecraftClient c, ClientPlayerEntity p, LivingEntity target) {
+        MaceConfig cfg = MaceConfig.get();
+        if (!cfg.enabled || target == null || !target.isAlive()) return false;
+        Vec3d eye = p.getEyePos();
+        if (eye.distanceTo(closest(target, eye)) > cfg.reachTenths / 10.0) return false;
+        int original = p.getInventory().getSelectedSlot();
+        int mace = mace(p, target, cfg);
+        if (mace < 0) return false;
+        Vec3d center = target.getBoundingBox().getCenter();
+        Rotations.sendLook(p, Rotations.yawTo(eye, center), Rotations.pitchTo(eye, center));
+        p.getInventory().setSelectedSlot(mace);
+        c.interactionManager.attackEntity(p, target);
+        p.swingHand(Hand.MAIN_HAND);
+        last = String.format("%s %.1f blok (elytra)", target.getName().getString(), p.fallDistance);
+        cooldown = Math.max(1, cfg.delay);
+        armedTarget = null;
+        if (cfg.after == 1 && mace != original) {
+            if (cfg.returnDelay <= 0) p.getInventory().setSelectedSlot(original);
+            else {
+                returnSlot = original;
+                returnIn = cfg.returnDelay;
+            }
+        }
+        return true;
+    }
 
     public void tick(MinecraftClient c) {
         ClientPlayerEntity p = c.player;
@@ -48,6 +85,17 @@ public class MaceController {
         }
         if (cooldown > 0) cooldown--;
         if (!cfg.enabled || cooldown > 0 || InvHelper.screenOpen(c) || p.isSpectator()) return;
+        // elytra yechilgandan keyin: min tushish kutilmaydi, masofaga kirishi bilan uramiz
+        if (armedTarget != null) {
+            if (--armedTicks < 0 || p.isOnGround() || !armedTarget.isAlive()) armedTarget = null;
+            else {
+                Vec3d eye = p.getEyePos();
+                Vec3d center = armedTarget.getBoundingBox().getCenter();
+                Rotations.turn(p, Rotations.yawTo(eye, center), Rotations.pitchTo(eye, center), 30);
+                hitNow(c, p, armedTarget);
+                return;
+            }
+        }
         if (p.isOnGround() || p.isTouchingWater() || p.isGliding() || p.getVelocity().y >= 0) return;
         if (p.fallDistance < cfg.minFall) return;
 
