@@ -76,6 +76,28 @@ Density / Density / Breach / Wind Burst), urgandan keyin mace'da qolish yoki esk
 min tushish, masofa, zarbalar kechikishi, qalqonni bolta bilan sindirish, faqat pritseldagi nishon, moblar, do'stlar.
 Elytra'dagi "dushman oldida yechish" bilan bog'langan: elytra yechilgan tickning o'zida (nishon masofada bo'lsa) mace bilan uradi, bo'lmasa keyingi ticklarda min tushishni kutmasdan masofaga kirishi bilan uradi. Tez uchsangiz elytra oldinroq yechiladi.
 
+## Auto Travel (Movement, /goto)
+
+`/goto x z` yoki `/goto x y z` — koordinataga o'zi boradi, `/goto stop` (yoki modulni o'chirish) to'xtatadi.
+- **Elytra**: uzoq bo'lsa (standart 120+ blok) va elytra (kiyilgan yoki inventarda) + firework bo'lsa — elytra'ni
+  kiyadi, sakraydi, ochadi va uchadi. Yerdan va oldindagi tog'/devordan 24 blok baland uchadi (oldindagi joy
+  oldindan tekshiriladi, devor ko'rinsa keskin tepaga + firework), sekinlashsa firework. Elytra durability tugay desa
+  yoki firework qolmasa — qo'nadi, elytra'ni yechib nagrudnikni kiyadi va **piyoda** davom etadi. Yaqinlashganda o'zi qo'nadi.
+- **Piyoda**: A* yo'l topish — yuradi, sakraydi, 3 blokkacha tushadi, suzadi; yo'lni to'sgan blokni eng yaxshi asbob
+  bilan **sindiradi**, bo'shliqqa ko'prik / tepaga ustun qilib **blok qo'yadi** (cobblestone, dirt kabi arzon bloklar;
+  qimmatbaho bloklar ishlatilmaydi). Lava, olov, kaktus, o'rgimchak to'ri yo'ldan chetlab o'tiladi.
+- **Kema**: oldinda katta suv (standart 12+ blok) bo'lsa va kema bo'lsa — suvga qo'yib o'tiradi, nishonga qarab
+  suzadi, qirg'oqqa yetgach tushadi va kemani sindirib oladi. Kema bo'lmasa suzib boradi.
+
+Eslatma: blok sindirish vanilla kabi (qarab, chap tugmani bosib) — o'yin oynasi faol bo'lishi kerak.
+
+## Crystal HUD (Combat)
+
+Qo'lingizda end crystal bo'lsa, yaqindagi dushmanga eng ko'p zarar beradigan crystal joylarini (obsidian/bedrock,
+qo'yish masofasida) ekranda ko'rsatadi: yashil — eng yaxshisi, sariq — keyingilari, ustida `dushmanga / o'zingizga`
+zarar. Zarar vanilla formulasi bilan (masofa, to'siqlar, zirh va toughness); o'zingizni o'ldiradigan yoki juda ko'p
+zarar beradigan joylar ko'rsatilmaydi. Crystal'ni o'zingiz qo'yasiz.
+
 ## Pearl Boost (Combat, H)
 
 Bitta tugma: qaragan tomoningizga **ender pearl**, keyin **wind charge**'ni aynan o'sha pearl'ga tegadigan qilib otadi —
