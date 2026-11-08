@@ -23,7 +23,7 @@ import org.lwjgl.glfw.GLFW;
 import uz.autotnt.AutoTntConfig;
 import uz.autotravel.TravelController;
 import uz.pearlboost.PearlBoostClient;
-import uz.pearlclutch.PearlClutchClient;
+import uz.spearlunger.PearlHelper;
 import uz.spearlunger.ElytraHelper;
 import uz.spearlunger.InvHelper;
 import uz.spearlunger.Rotations;
@@ -351,7 +351,7 @@ public class ElytraPvpController {
             if (away.lengthSquared() < 1e-3) away = new Vec3d(1, 0, 0);
             Vec3d spot = p.getEntityPos().add(away.normalize().multiply(cfg.retreatDist));
             int gy = TravelController.groundY(c.world, spot.x, spot.z);
-            if (PearlClutchClient.CONTROLLER.throwAt(c, p, new Vec3d(spot.x, gy, spot.z))) {
+            if (PearlHelper.throwAt(c, p, new Vec3d(spot.x, gy, spot.z))) {
                 say(p, "§eElytra PvP: qochib ovqat yeyapmiz");
             }
         }

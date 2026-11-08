@@ -122,6 +122,13 @@ public class TntController {
         if (!cfg.enabled) {
             pendingRail = null;
             crossPressed = false;
+            // modul o'chirilganda allaqachon boshlangan qadamlar (masalan kamon otilgandan keyingi
+            // cart/olov ketma-ketligi) ham to'xtashi kerak - bo'lmasa ular davom etib ketaveradi
+            if (!steps.isEmpty()) cancelSteps();
+            if (drawing) {
+                client.options.useKey.setPressed(false);
+                drawing = false;
+            }
         }
 
         if (pendingRail != null && steps.isEmpty()) {
@@ -155,6 +162,16 @@ public class TntController {
 
         if (crossPressed && steps.isEmpty() && client.currentScreen == null) {
             onCrossbow(client, p);
+        }
+    }
+
+    /** Modul o'chirilganda: qolgan qadamlarni (tayyor bo'lmasa ham) bitta-bitta ishga tushirib tugatamiz -
+     *  shunda ularning oxiridagi "inventarni joyiga qaytarish" qadami ham ishlaydi, borrow qilingan narsa
+     *  hotbar'da osilib qolmaydi. Haqiqiy portlatish/joylashtirish bajarilmasligi mumkin - bu kutilgan holat. */
+    private void cancelSteps() {
+        int guard = 0;
+        while (!steps.isEmpty() && guard++ < 200) {
+            steps.poll().run();
         }
     }
 

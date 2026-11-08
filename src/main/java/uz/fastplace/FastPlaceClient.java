@@ -26,6 +26,7 @@ public class FastPlaceClient implements ClientModInitializer {
     /** Vanilla doItemUse() dan keyin qo'yadigan kechikish. */
     private static final int VANILLA_COOLDOWN = 4;
     public static KeyBinding keyToggle;
+    private static boolean wasEnabled = false;
 
     @Override
     public void onInitializeClient() {
@@ -46,6 +47,13 @@ public class FastPlaceClient implements ClientModInitializer {
             FastPlaceConfig.save();
             p.sendMessage(Text.literal(cfg.enabled ? "§aFast Place: ON" : "§cFast Place: OFF"), true);
         }
+        if (wasEnabled && !cfg.enabled) {
+            // o'chirilgan zahoti: pasaytirib qo'ygan cooldown qolib ketmasin (bo'lmasa o'chirgandan keyin ham
+            // bitta-ikki qo'yish hali ham tez chiqib ketadi - ClickGUI'dan ham, tugmadan ham o'chirilganda ishlaydi)
+            MinecraftClientAccessor acc0 = (MinecraftClientAccessor) c;
+            if (acc0.fastplace$getItemUseCooldown() < VANILLA_COOLDOWN) acc0.fastplace$setItemUseCooldown(VANILLA_COOLDOWN);
+        }
+        wasEnabled = cfg.enabled;
         if (!cfg.enabled || InvHelper.screenOpen(c) || !c.options.useKey.isPressed() || p.isUsingItem()) return;
         Hand hand = blockHand(p);
         if (cfg.onlyBlocks && hand == null) return;

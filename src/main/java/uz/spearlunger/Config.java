@@ -100,6 +100,12 @@ public class Config {
     /** 0 = yuqori chap, 1 = yuqori o'ng, 2 = pastki o'ng. */
     public int arraylistPos = 2;
     public boolean arraylistRainbow = false;
+    /** Arraylist (va asosiy HUD) matnlari o'lchami, % (100 = odatiy). */
+    public int hudScale = 100;
+    /** Arraylist'ni ClickGUI ichida sudrab, o'zi belgilagan joyga qo'yilganmi (ON bo'lsa "Joyi" sozlamasi e'tiborga olinmaydi). */
+    public boolean arraylistCustomPos = false;
+    public int arraylistX = 6;
+    public int arraylistY = 32;
     public Map<String, int[]> guiPanels = new HashMap<>();
 
     public AntiCheat ac() {
