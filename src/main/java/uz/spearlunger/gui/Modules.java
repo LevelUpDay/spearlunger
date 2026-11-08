@@ -121,7 +121,12 @@ public final class Modules {
                             new String[] {"Avto", "Bosib turish", "Bosib yoqish"},
                             () -> Math.floorMod(c.rMode, 3), v -> c.rMode = v),
                     group("Lunge"),
-                    num("Qo'shimcha kechikish", "Cooldown to'lgach yana kutish", 0, 40,
+                    bool("Tez almashtirish (cooldown skip)", "Har jabdan oldin boshqa slotga chiqib-kirib - "
+                            + "nayzaning o'z cooldown'i umuman kutilmaydi (ba'zi serverlarda ataylab bloklanmagan)",
+                            () -> c.fastSwitch, v -> c.fastSwitch = v),
+                    bool("2 nayza bilan", "Tez almashtirish yoqilganda: 2-chi Lunge nayza bo'lsa ikkisi orasida "
+                            + "almashtiradi - har tickda jab (eng tezi)", () -> c.dualSpear, v -> c.dualSpear = v),
+                    num("Qo'shimcha kechikish", "Cooldown to'lgach yana kutish (Tez almashtirish OFF bo'lsa)", 0, 40,
                             () -> c.extraDelayTicks, v -> c.extraDelayTicks = v, v -> v + " tick"),
                     num("Min ochlik", "Ochlik shundan kam bo'lsa lunge qilmaydi", 0, 20,
                             () -> c.minFood, v -> c.minFood = v, v -> v == 0 ? "o'chiq" : String.valueOf(v)),
@@ -887,7 +892,14 @@ public final class Modules {
                             v -> v + ""),
                     num("Max o'zimga", "O'zingizga eng ko'pi", 1, 36, () -> c.maxSelf, v -> c.maxSelf = v, v -> v + ""),
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
-                            v -> c.ignoreFriends = v));
+                            v -> c.ignoreFriends = v),
+                    group("Avto qo'yish"),
+                    bool("O'zi qo'yib portlatsin", "Yashil (eng yaxshi) joy topilsa o'zi crystal tanlab qo'yadi va "
+                            + "portlatadi; sariq (qolgan) joylarga qo'ymaydi", () -> c.autoPlace, v -> c.autoPlace = v),
+                    bool("Inventardan olish", "Hotbar'da crystal bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    num("Qo'yishlar orasida", "Avto-qo'yishlar orasida eng kami", 0, 40, () -> c.autoPlaceDelay,
+                            v -> c.autoPlaceDelay = v, v -> v + " tick"));
         }));
 
         l.add(new Module("Pearl Tracker", "Dushman pearl'i qayerga tushishini qizil bilan ajratadi - borib kutib olasiz",

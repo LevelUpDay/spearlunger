@@ -16,18 +16,24 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
+import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.explosion.ExplosionImpl;
 import org.lwjgl.glfw.GLFW;
 import uz.autotnt.AutoTntConfig;
+import uz.spearlunger.InvHelper;
 import uz.spearlunger.Projector;
+import uz.spearlunger.Rotations;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +52,13 @@ public class CrystalHudClient implements ClientModInitializer {
     private static final List<Spot> SPOTS = new ArrayList<>();
     private static String targetName = null;
 
+    // ------------------------------------------------------------ avto-qo'yish (yashil joyga)
+    /** Crystal qo'yilgan - shu yerda (obsidian ustida) paydo bo'lishini kutamiz, keyin uramiz (portlatamiz). */
+    private static BlockPos pendingPos = null;
+    private static int pendingWait = 0;
+    private static int borrowedInv = -1, borrowedHotbar = -1;
+    private static int autoCooldown = 0;
+
     @Override
     public void onInitializeClient() {
         CrystalHudConfig.load();
@@ -62,6 +75,9 @@ public class CrystalHudClient implements ClientModInitializer {
         targetName = null;
         ClientPlayerEntity p = c.player;
         if (p == null || c.world == null) return;
+        if (autoCooldown > 0) autoCooldown--;
+        // yoqilmasa/nishon topilmasa ham, allaqachon qo'yilgan crystal'ni portlatib tugatamiz (osilib qolmasin)
+        if (pendingPos != null) tickPending(c, p);
         CrystalHudConfig cfg = CrystalHudConfig.get();
         while (keyToggle.wasPressed()) {
             cfg.enabled = !cfg.enabled;
@@ -109,6 +125,73 @@ public class CrystalHudClient implements ClientModInitializer {
         }
         all.sort((a, b2) -> Float.compare(b2.enemy - b2.self * 0.5f, a.enemy - a.self * 0.5f));
         for (int i = 0; i < Math.min(Math.max(1, cfg.count), all.size()); i++) SPOTS.add(all.get(i));
+
+        if (pendingPos == null && cfg.autoPlace && autoCooldown == 0 && !SPOTS.isEmpty()) {
+            // faqat yashil (eng yaxshi, SPOTS.get(0)) joyga - sariq (qolgan) joylarga qo'ymaymiz
+            tryAutoPlace(c, p, SPOTS.get(0), cfg);
+        }
+    }
+
+    /** Yashil joyga crystal qo'yadi (qarab, slot almashtirib - keyin darhol qaytib). Entity paydo bo'lishini kutib uramiz. */
+    private static void tryAutoPlace(MinecraftClient c, ClientPlayerEntity p, Spot spot, CrystalHudConfig cfg) {
+        if (InvHelper.screenOpen(c)) return;
+        BlockPos ground = spot.pos();
+        Vec3d hitVec = new Vec3d(ground.getX() + 0.5, ground.getY() + 1.0, ground.getZ() + 0.5);
+        if (p.getEyePos().distanceTo(hitVec) > p.getBlockInteractionRange()) return;
+        int slot = crystalSlot(c, p, cfg);
+        if (slot < 0) return;
+
+        int original = p.getInventory().getSelectedSlot();
+        float yaw = p.getYaw(), pitch = p.getPitch();
+        Vec3d eye = p.getEyePos();
+        Rotations.sendLook(p, Rotations.yawTo(eye, hitVec), Rotations.pitchTo(eye, hitVec));
+        p.getInventory().setSelectedSlot(slot);
+        c.interactionManager.interactBlock(p, Hand.MAIN_HAND, new BlockHitResult(hitVec, Direction.UP, ground, false));
+        p.swingHand(Hand.MAIN_HAND);
+        p.getInventory().setSelectedSlot(original);
+        Rotations.sendLook(p, yaw, pitch);
+        if (borrowedInv >= 0 && InvHelper.returnItems()) {
+            InvHelper.swap(c, p, borrowedInv, borrowedHotbar);
+        }
+        borrowedInv = -1;
+        borrowedHotbar = -1;
+
+        pendingPos = ground.up().toImmutable();
+        pendingWait = 0;
+    }
+
+    /** Server crystal'ni dunyoga qo'shishini kutamiz (bitta tickda emas - ping bo'yicha), keyin uning o'ziga urib portlatamiz. */
+    private static void tickPending(MinecraftClient c, ClientPlayerEntity p) {
+        if (++pendingWait > 10) { pendingPos = null; autoCooldown = CrystalHudConfig.get().autoPlaceDelay; return; }
+        List<EndCrystalEntity> found = c.world.getEntitiesByClass(EndCrystalEntity.class, new Box(pendingPos), e -> true);
+        if (found.isEmpty()) return;
+        EndCrystalEntity crystal = found.get(0);
+        float yaw = p.getYaw(), pitch = p.getPitch();
+        Vec3d eye = p.getEyePos();
+        Vec3d center = crystal.getBoundingBox().getCenter();
+        Rotations.sendLook(p, Rotations.yawTo(eye, center), Rotations.pitchTo(eye, center));
+        c.interactionManager.attackEntity(p, crystal);
+        p.swingHand(Hand.MAIN_HAND);
+        Rotations.sendLook(p, yaw, pitch);
+        pendingPos = null;
+        autoCooldown = CrystalHudConfig.get().autoPlaceDelay;
+    }
+
+    /** Hotbar'dagi end crystal slot'i; bo'lmasa (ruxsat bo'lsa) inventardan bo'sh/eng yaqin hotbar slotiga almashtirib oladi. */
+    private static int crystalSlot(MinecraftClient c, ClientPlayerEntity p, CrystalHudConfig cfg) {
+        for (int i = 0; i < 9; i++) if (p.getInventory().getStack(i).isOf(Items.END_CRYSTAL)) return i;
+        if (!cfg.fromInventory) return -1;
+        int invSlot = -1;
+        for (int i = 9; i < 36; i++) if (p.getInventory().getStack(i).isOf(Items.END_CRYSTAL)) { invSlot = i; break; }
+        if (invSlot < 0) return -1;
+        int sel = p.getInventory().getSelectedSlot();
+        int target = -1;
+        for (int h = 8; h >= 0; h--) if (h != sel && p.getInventory().getStack(h).isEmpty()) { target = h; break; }
+        if (target < 0) target = sel == 8 ? 7 : 8;
+        InvHelper.swap(c, p, invSlot, target);
+        borrowedInv = invSlot;
+        borrowedHotbar = target;
+        return target;
     }
 
     /** Vanilla portlash zarari (kuch 6) + zirh kamaytirishi. */

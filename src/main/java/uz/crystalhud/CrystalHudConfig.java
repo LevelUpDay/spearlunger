@@ -23,6 +23,13 @@ public class CrystalHudConfig {
     public int maxSelf = 8;
     public boolean ignoreFriends = true;
 
+    /** Eng yaxshi (yashil) joy topilsa o'zi crystal tanlab qo'yadi va portlatadi (sariq joylarga qo'ymaydi). */
+    public boolean autoPlace = false;
+    /** Hotbar'da end crystal bo'lmasa inventardan olib keladi (keyin joyiga qaytaradi). */
+    public boolean fromInventory = true;
+    /** Avto-qo'yishlar orasida eng kami shuncha tick. */
+    public int autoPlaceDelay = 10;
+
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static CrystalHudConfig instance = new CrystalHudConfig();
 

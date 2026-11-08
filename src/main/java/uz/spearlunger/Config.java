@@ -61,6 +61,16 @@ public class Config {
     public int rMode = 0;
     /** Ekranda lunge holati (cooldown, ochlik). */
     public boolean hud = true;
+    /**
+     * Cooldown'ni "tez almashtirish" trikisi bilan chetlab o'tish: qo'ldagi narsa almashganda cooldown
+     * player tick'ida nolga tushadi, lekin undan OLDIN (shu tickda) urilsa eski (to'lgan) cooldown hisoblanadi -
+     * shuning uchun har jabdan oldin boshqa slotga chiqib-kirib, nayzaning o'z cooldown'ini umuman kutmaymiz.
+     * Ba'zi serverlar bu "swap" trikini ataylab bloklamaydi.
+     */
+    public boolean fastSwitch = false;
+    /** fastSwitch: hotbar'da 2-chi Lunge nayza bo'lsa, dummy slotga chiqib-kirish o'rniga ikkisi orasida
+     * almashtiradi - har tickda bittasi bilan jab (umuman kutilmaydi, 1 nayzaga qaraganda tezroq). */
+    public boolean dualSpear = false;
 
     /** X uchun qidiruv: gorizontal masofa (blok). */
     public int rangeHorizontal = 50;
