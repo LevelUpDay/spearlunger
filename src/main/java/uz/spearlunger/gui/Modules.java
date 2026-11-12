@@ -46,7 +46,9 @@ import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static uz.spearlunger.gui.Setting.action;
 import static uz.spearlunger.gui.Setting.bool;
@@ -63,13 +65,78 @@ public final class Modules {
     private Modules() {}
 
     public static List<Module> all() {
-        if (all == null) all = build();
+        if (all == null) {
+            all = build();
+            ensureDefaultProfile();
+        }
         return all;
     }
 
     public static Module byName(String name) {
         for (Module m : all()) if (m.name.equals(name)) return m;
         return null;
+    }
+
+    // ------------------------------------------------------------ profillar
+    /** Birinchi marta ishga tushganda: profil bo'lmasa hozirgi holatdan bittasini yaratadi. */
+    private static void ensureDefaultProfile() {
+        Config c = Config.get();
+        if (c.profiles.isEmpty()) {
+            c.profiles.put(c.activeProfile, snapshot());
+        } else if (!c.profiles.containsKey(c.activeProfile)) {
+            c.activeProfile = c.profiles.keySet().iterator().next();
+        }
+    }
+
+    private static Map<String, Boolean> snapshot() {
+        Map<String, Boolean> m = new LinkedHashMap<>();
+        for (Module mod : all) if (mod.toggleable()) m.put(mod.name, mod.isEnabled());
+        return m;
+    }
+
+    public static List<String> profileNames() {
+        return new ArrayList<>(Config.get().profiles.keySet());
+    }
+
+    public static String activeProfile() {
+        return Config.get().activeProfile;
+    }
+
+    /** Hozirgi profil nomi ostiga, hozir qaysi modullar yoqilganini saqlab qo'yadi. */
+    private static void saveCurrentIntoProfile() {
+        Config c = Config.get();
+        c.profiles.put(c.activeProfile, snapshot());
+    }
+
+    /** Boshqa profilga o'tadi: hozirgisini saqlaydi, yangisining saqlangan on/off holatlarini qo'llaydi. */
+    public static void switchProfile(String name) {
+        Config c = Config.get();
+        if (name.equals(c.activeProfile)) return;
+        saveCurrentIntoProfile();
+        c.activeProfile = name;
+        Map<String, Boolean> data = c.profiles.computeIfAbsent(name, k -> new LinkedHashMap<>());
+        for (Module mod : all()) {
+            if (!mod.toggleable()) continue;
+            mod.applyEnabled(data.getOrDefault(mod.name, false));
+        }
+        saveAll();
+    }
+
+    /** ‹ › bilan navbatdagi/oldingi profilga o'tadi. */
+    public static void cycleProfile(int dir) {
+        List<String> names = profileNames();
+        if (names.size() < 2) return;
+        int i = names.indexOf(Config.get().activeProfile);
+        switchProfile(names.get(Math.floorMod((i < 0 ? 0 : i) + dir, names.size())));
+    }
+
+    /** Yangi, bo'sh (hammasi o'chiq) profil yaratadi va shunga o'tadi. */
+    public static void createProfile(String name) {
+        Config c = Config.get();
+        if (name == null || name.isBlank() || c.profiles.containsKey(name)) return;
+        saveCurrentIntoProfile();
+        c.profiles.put(name, new LinkedHashMap<>());
+        switchProfile(name);
     }
 
     public static void saveAll() {

@@ -7,6 +7,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Config {
@@ -108,6 +109,13 @@ public class Config {
     public int arraylistY = 32;
     public Map<String, int[]> guiPanels = new HashMap<>();
 
+    /**
+     * Profillar: masalan "Bedwars", "PvP" - har birida qaysi modullar yoqilgan/o'chirilgani alohida saqlanadi.
+     * ClickGUI pastki markazida "+" bilan xohlagancha yangisini yaratish, ‹ › bilan almashtirish mumkin.
+     */
+    public Map<String, Map<String, Boolean>> profiles = new LinkedHashMap<>();
+    public String activeProfile = "Standart";
+
     public AntiCheat ac() {
         if (antiCheat == null) antiCheat = new AntiCheat();
         return antiCheat;
@@ -131,6 +139,8 @@ public class Config {
             }
             instance.ac();
             if (instance.guiPanels == null) instance.guiPanels = new HashMap<>();
+            if (instance.profiles == null) instance.profiles = new LinkedHashMap<>();
+            if (instance.activeProfile == null) instance.activeProfile = "Standart";
             save();   // yangi maydonlarni faylga yozib qo'yamiz
         } catch (Exception e) {
             e.printStackTrace();

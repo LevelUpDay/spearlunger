@@ -64,6 +64,16 @@ public class ClickGuiScreen extends Screen {
         return new int[] { a[0] - 3, a[1], tw + 6, 11 };
     }
 
+    /** Pastki markazdagi profil paneli: {+ x, y, + kengligi, nom kengligi}. */
+    private int[] profileRect() {
+        String label = "‹ " + Modules.activeProfile() + " ›";
+        int lw = textRenderer.getWidth(label);
+        int plusW = 14, gap = 6;
+        int y = height - 32;
+        int x0 = width / 2 - (plusW + gap + lw) / 2;
+        return new int[] { x0, y, plusW, lw };
+    }
+
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
         super.render(ctx, mouseX, mouseY, delta);
@@ -114,9 +124,21 @@ public class ClickGuiScreen extends Screen {
             ctx.drawTextWithShadow(textRenderer, Text.literal("Arraylist"), hb[0] + 3, hb[1] + 1, Theme.TEXT);
         }
 
+        int[] pr = profileRect();
+        int ppx = pr[0], ppy = pr[1], plusW = pr[2], lw = pr[3];
+        boolean hoverPlus = inside(mouseX, mouseY, ppx, ppy - 1, plusW, 11);
+        ctx.fill(ppx, ppy - 1, ppx + plusW, ppy + 10, hoverPlus ? Theme.accent() : Theme.WIDGET_BG);
+        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("+"), ppx + plusW / 2, ppy + 1, Theme.TEXT);
+        int pnx = ppx + plusW + 6;
+        boolean hoverName = inside(mouseX, mouseY, pnx, ppy - 1, lw, 11);
+        ctx.drawTextWithShadow(textRenderer, "‹ " + Modules.activeProfile() + " ›", pnx, ppy + 1,
+                hoverName ? Theme.TEXT : Theme.accent());
+
         int by = height - 14;
-        if (hovered != null) {
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(hovered.desc), width / 2, by - 12, Theme.TEXT);
+        String tip = hoverPlus ? "Yangi profil yaratish" : hoverName
+                ? "Chap: keyingi profil  •  O'ng: oldingi profil" : hovered != null ? hovered.desc : null;
+        if (tip != null) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(tip), width / 2, by - 12, Theme.TEXT);
         }
         ctx.drawCenteredTextWithShadow(textRenderer,
                 Text.literal("Chap: yoqish/o'chirish  •  O'ng: sozlamalar  •  O'rta: tugma (bind) berish  •  Sarlavhani sudrang"),
@@ -136,6 +158,18 @@ public class ClickGuiScreen extends Screen {
                 return true;
             }
         }
+        int[] pr = profileRect();
+        int ppx = pr[0], ppy = pr[1], plusW = pr[2], lw = pr[3];
+        if (button == 0 && inside(mx, my, ppx, ppy - 1, plusW, 11)) {
+            client.setScreen(new ProfileNameScreen(this));
+            return true;
+        }
+        int pnx = ppx + plusW + 6;
+        if ((button == 0 || button == 1) && inside(mx, my, pnx, ppy - 1, lw, 11)) {
+            Modules.cycleProfile(button == 1 ? -1 : 1);
+            return true;
+        }
+
         // ustma-ust tushsa eng ustidagi (oxirgi chizilgan) panel
         Module.Category[] cats = Module.Category.values();
         for (int i = cats.length - 1; i >= 0; i--) {
