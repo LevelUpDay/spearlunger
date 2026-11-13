@@ -15,9 +15,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.EmptyBlockView;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EmptyBlockView;
 import uz.spearlunger.InvHelper;
 import uz.spearlunger.Rotations;
 
