@@ -1,4 +1,4 @@
-package uz.crystaldefense;
+package uz.autobridge;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -14,20 +14,20 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-public class CrystalDefenseClient implements ClientModInitializer {
+public class AutoBridgeClient implements ClientModInitializer {
     public static KeyBinding keyToggle;   // tugma berilmagan, ClickGUI'da sozlanadi
-    public static final CrystalDefenseController CONTROLLER = new CrystalDefenseController();
+    public static final BridgeController CONTROLLER = new BridgeController();
 
     @Override
     public void onInitializeClient() {
-        CrystalDefenseConfig.load();
-        KeyBinding.Category cat = KeyBinding.Category.create(Identifier.of("crystaldefense", "main"));
+        BridgeConfig.load();
+        KeyBinding.Category cat = KeyBinding.Category.create(Identifier.of("autobridge", "main"));
         keyToggle = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding("key.crystaldefense.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
+                new KeyBinding("key.autobridge.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
 
         ClientTickEvents.START_CLIENT_TICK.register(CONTROLLER::tick);
         HudElementRegistry.attachElementAfter(VanillaHudElements.MISC_OVERLAYS,
-                Identifier.of("crystaldefense", "status"), CrystalDefenseClient::renderHud);
+                Identifier.of("autobridge", "status"), AutoBridgeClient::renderHud);
     }
 
     private static void renderHud(DrawContext ctx, RenderTickCounter tickCounter) {
@@ -36,6 +36,6 @@ public class CrystalDefenseClient implements ClientModInitializer {
         String line = CONTROLLER.hudLine(c);
         if (line == null) return;
         int x = ctx.getScaledWindowWidth() - c.textRenderer.getWidth(line) - 6;
-        ctx.drawTextWithShadow(c.textRenderer, Text.literal(line), x, 102, 0xFFFFFFFF);
+        ctx.drawTextWithShadow(c.textRenderer, Text.literal(line), x, 54, 0xFFFFFFFF);
     }
 }

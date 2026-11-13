@@ -15,7 +15,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 import uz.autotnt.AutoTntConfig;
-import uz.pearlclutch.PearlClutchClient;
+import uz.spearlunger.PearlHelper;
 import uz.spearlunger.InvHelper;
 
 import java.util.HashSet;
@@ -33,12 +33,16 @@ public class PearlBoostController {
     /** Wind charge: tezlik 1.5, gravitatsiya va havo qarshiligi yo'q (to'g'ri chiziq). */
     private static final double WIND_SPEED = 1.5;
 
-    private enum Phase { IDLE, WAIT_PEARL }
+    private enum Phase { IDLE, WAIT_PEARL, WAIT_HIT }
 
     private Phase phase = Phase.IDLE;
     private int ticks = 0;
     private EnderPearlEntity pearl = null;
     private Vec3d thrownFrom = null;
+    /** Wind charge otilgandan keyin: tegib-tegmaganini tekshirish uchun "tegmasa shunday bo'lardi" yo'li. */
+    private Vec3d[] unperturbedPath = null;
+    private int checkIndex = 0;
+    private int checkTicks = 0;
     private final java.util.List<int[]> borrowed = new java.util.ArrayList<>();
     private final Set<UUID> chased = new HashSet<>();
 
@@ -68,6 +72,7 @@ public class PearlBoostController {
             return;
         }
         if (phase == Phase.WAIT_PEARL) tickWait(c, p, cfg);
+        else if (phase == Phase.WAIT_HIT) tickCheckHit(c, p);
         else if (cfg.enabled && cfg.chase) tickChase(c, p, cfg);
     }
 
@@ -169,7 +174,21 @@ public class PearlBoostController {
         int windSlot = slot(c, p, Items.WIND_CHARGE, cfg);
         if (windSlot < 0) { finish(c, p, "§cPearl Boost: wind charge yo'q"); return; }
         throwItem(c, p, windSlot, dir);
-        finish(c, p, String.format("§bPearl Boost: wind charge (%.0f blok balandda)", at.y - p.getY()));
+        say(p, String.format("§bPearl Boost: wind charge (%.0f blok balandda)", at.y - p.getY()));
+        // tegib-tegmaganini keyinroq tekshiramiz: tegmasa pearl aynan shu (o'zgarishsiz) yo'ldan davom etadi
+        unperturbedPath = path;
+        checkIndex = Math.min(last, (int) Math.round(hitK) + 2);
+        checkTicks = checkIndex;
+        phase = Phase.WAIT_HIT;
+    }
+
+    /** Wind charge otilgandan bir necha tick keyin: pearl kutilgan (tegmagan holdagi) yo'ldan og'ganmi tekshiradi. */
+    private void tickCheckHit(MinecraftClient c, ClientPlayerEntity p) {
+        if (pearl == null || pearl.isRemoved()) { finish(c, p, null); return; }
+        if (checkTicks-- > 0) return;
+        Vec3d expected = unperturbedPath[Math.min(checkIndex, unperturbedPath.length - 1)];
+        boolean missed = pearl.getEntityPos().distanceTo(expected) < 0.8;
+        finish(c, p, missed ? "§cPearl Boost: wind charge tegmadi!" : null);
     }
 
     // ------------------------------------------------------------ pearl chase
@@ -186,7 +205,7 @@ public class PearlBoostController {
             Vec3d flat = new Vec3d(toMe.x, 0, toMe.z);
             Vec3d point = flat.lengthSquared() < 1e-3 ? land
                     : land.add(flat.normalize().multiply(cfg.chaseShortTenths / 10.0));
-            if (PearlClutchClient.CONTROLLER.throwAt(c, p, point)) {
+            if (PearlHelper.throwAt(c, p, point)) {
                 say(p, "§dPearl Chase: " + owner.getName().getString());
                 return;
             }

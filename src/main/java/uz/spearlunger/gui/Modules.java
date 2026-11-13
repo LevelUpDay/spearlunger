@@ -2,6 +2,8 @@ package uz.spearlunger.gui;
 
 import uz.anchorguard.AnchorGuardClient;
 import uz.anchorguard.AnchorGuardConfig;
+import uz.autobridge.AutoBridgeClient;
+import uz.autobridge.BridgeConfig;
 import uz.autoclutch.AutoClutchClient;
 import uz.autoclutch.ClutchConfig;
 import uz.autocobweb.AutoCobwebClient;
@@ -15,8 +17,6 @@ import uz.autopotion.AutoPotionClient;
 import uz.autopvp.AutoPvpClient;
 import uz.autopvp.PvpConfig;
 import uz.autopotion.PotionConfig;
-import uz.autoshield.AutoShieldClient;
-import uz.autoshield.ShieldConfig;
 import uz.autoelytra.ElytraConfig;
 import uz.autotnt.AutoTntClient;
 import uz.autotnt.AutoTntConfig;
@@ -24,8 +24,6 @@ import uz.autototem.AutoTotemClient;
 import uz.autototem.TotemConfig;
 import uz.bowaim.BowAimClient;
 import uz.bowaim.BowAimConfig;
-import uz.crystaldefense.CrystalDefenseClient;
-import uz.crystaldefense.CrystalDefenseConfig;
 import uz.crystalhud.CrystalHudClient;
 import uz.crystalhud.CrystalHudConfig;
 import uz.elytrapvp.ElytraPvpClient;
@@ -36,23 +34,21 @@ import uz.fastplace.FastPlaceClient;
 import uz.fastplace.FastPlaceConfig;
 import uz.cheststealer.ChestStealerClient;
 import uz.cheststealer.StealerConfig;
-import uz.macecombo.MaceComboClient;
-import uz.macecombo.MaceComboConfig;
 import uz.nametags.NametagsClient;
 import uz.nametags.NametagsConfig;
 import uz.norender.NoRenderClient;
 import uz.norender.NoRenderConfig;
 import uz.pearlboost.PearlBoostClient;
 import uz.pearlboost.PearlBoostConfig;
-import uz.pearlclutch.PearlClutchClient;
 import uz.pearltracker.PearlTrackerClient;
 import uz.pearltracker.PearlTrackerConfig;
-import uz.pearlclutch.PearlConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static uz.spearlunger.gui.Setting.action;
 import static uz.spearlunger.gui.Setting.bool;
@@ -69,7 +65,10 @@ public final class Modules {
     private Modules() {}
 
     public static List<Module> all() {
-        if (all == null) all = build();
+        if (all == null) {
+            all = build();
+            ensureDefaultProfile();
+        }
         return all;
     }
 
@@ -78,13 +77,74 @@ public final class Modules {
         return null;
     }
 
+    // ------------------------------------------------------------ profillar
+    /** Birinchi marta ishga tushganda: profil bo'lmasa hozirgi holatdan bittasini yaratadi. */
+    private static void ensureDefaultProfile() {
+        Config c = Config.get();
+        if (c.profiles.isEmpty()) {
+            c.profiles.put(c.activeProfile, snapshot());
+        } else if (!c.profiles.containsKey(c.activeProfile)) {
+            c.activeProfile = c.profiles.keySet().iterator().next();
+        }
+    }
+
+    private static Map<String, Boolean> snapshot() {
+        Map<String, Boolean> m = new LinkedHashMap<>();
+        for (Module mod : all) if (mod.toggleable()) m.put(mod.name, mod.isEnabled());
+        return m;
+    }
+
+    public static List<String> profileNames() {
+        return new ArrayList<>(Config.get().profiles.keySet());
+    }
+
+    public static String activeProfile() {
+        return Config.get().activeProfile;
+    }
+
+    /** Hozirgi profil nomi ostiga, hozir qaysi modullar yoqilganini saqlab qo'yadi. */
+    private static void saveCurrentIntoProfile() {
+        Config c = Config.get();
+        c.profiles.put(c.activeProfile, snapshot());
+    }
+
+    /** Boshqa profilga o'tadi: hozirgisini saqlaydi, yangisining saqlangan on/off holatlarini qo'llaydi. */
+    public static void switchProfile(String name) {
+        Config c = Config.get();
+        if (name.equals(c.activeProfile)) return;
+        saveCurrentIntoProfile();
+        c.activeProfile = name;
+        Map<String, Boolean> data = c.profiles.computeIfAbsent(name, k -> new LinkedHashMap<>());
+        for (Module mod : all()) {
+            if (!mod.toggleable()) continue;
+            mod.applyEnabled(data.getOrDefault(mod.name, false));
+        }
+        saveAll();
+    }
+
+    /** ‹ › bilan navbatdagi/oldingi profilga o'tadi. */
+    public static void cycleProfile(int dir) {
+        List<String> names = profileNames();
+        if (names.size() < 2) return;
+        int i = names.indexOf(Config.get().activeProfile);
+        switchProfile(names.get(Math.floorMod((i < 0 ? 0 : i) + dir, names.size())));
+    }
+
+    /** Yangi, bo'sh (hammasi o'chiq) profil yaratadi va shunga o'tadi. */
+    public static void createProfile(String name) {
+        Config c = Config.get();
+        if (name == null || name.isBlank() || c.profiles.containsKey(name)) return;
+        saveCurrentIntoProfile();
+        c.profiles.put(name, new LinkedHashMap<>());
+        switchProfile(name);
+    }
+
     public static void saveAll() {
         Config.save();
         AutoTntConfig.save();
         ElytraConfig.save();
         TotemConfig.save();
         CobwebConfig.save();
-        ShieldConfig.save();
         PotionConfig.save();
         BowAimConfig.save();
         FastPlaceConfig.save();
@@ -92,18 +152,16 @@ public final class Modules {
         StealerConfig.save();
         NametagsConfig.save();
         FallComboConfig.save();
-        PearlConfig.save();
         ClutchConfig.save();
         PvpConfig.save();
-        MaceComboConfig.save();
         PearlBoostConfig.save();
-        CrystalDefenseConfig.save();
         MaceConfig.save();
         TravelConfig.save();
         ElytraPvpConfig.save();
         CrystalHudConfig.save();
         NoRenderConfig.save();
         PearlTrackerConfig.save();
+        BridgeConfig.save();
     }
 
     private static List<Module> build() {
@@ -121,7 +179,12 @@ public final class Modules {
                             new String[] {"Avto", "Bosib turish", "Bosib yoqish"},
                             () -> Math.floorMod(c.rMode, 3), v -> c.rMode = v),
                     group("Lunge"),
-                    num("Qo'shimcha kechikish", "Cooldown to'lgach yana kutish", 0, 40,
+                    bool("Tez almashtirish (cooldown skip)", "Har jabdan oldin boshqa slotga chiqib-kirib - "
+                            + "nayzaning o'z cooldown'i umuman kutilmaydi (ba'zi serverlarda ataylab bloklanmagan)",
+                            () -> c.fastSwitch, v -> c.fastSwitch = v),
+                    bool("2 nayza bilan", "Tez almashtirish yoqilganda: 2-chi Lunge nayza bo'lsa ikkisi orasida "
+                            + "almashtiradi - har tickda jab (eng tezi)", () -> c.dualSpear, v -> c.dualSpear = v),
+                    num("Qo'shimcha kechikish", "Cooldown to'lgach yana kutish (Tez almashtirish OFF bo'lsa)", 0, 40,
                             () -> c.extraDelayTicks, v -> c.extraDelayTicks = v, v -> v + " tick"),
                     num("Min ochlik", "Ochlik shundan kam bo'lsa lunge qilmaydi", 0, 20,
                             () -> c.minFood, v -> c.minFood = v, v -> v == 0 ? "o'chiq" : String.valueOf(v)),
@@ -287,29 +350,6 @@ public final class Modules {
                     bool("HUD", "Tushish balandligi va oxirgi zarba", () -> c.hud, v -> c.hud = v));
         }));
 
-        l.add(new Module("Mace Combo", "J: pearl (uzoq bo'lsa) -> wind charge -> mace; harakatingiz va nishonniki hisoblanadi",
-                Module.Category.COMBAT, () -> MaceComboConfig.get().enabled, v -> MaceComboConfig.get().enabled = v, () -> {
-            MaceComboConfig c = MaceComboConfig.get();
-            return List.of(
-                    key("Kombinatsiya tugmasi", "Bir bosish - bitta kombinatsiya, yana bossangiz bekor (standart J)",
-                            MaceComboClient.keyCombo),
-                    bool("Ender pearl", "Nishon uzoq bo'lsa avval pearl bilan yaqinlashadi", () -> c.pearl,
-                            v -> c.pearl = v),
-                    num("Pearl masofasi", "Shundan uzoq bo'lsa pearl", 6, 40, () -> c.pearlDist, v -> c.pearlDist = v,
-                            v -> v + " blok"),
-                    num("Pearl oldinroq", "Pearl nishondan shuncha oldinga tushadi", 0, 50, () -> c.pearlShortTenths,
-                            v -> c.pearlShortTenths = v, v -> (v / 10.0) + " blok"),
-                    num("Wind charge masofasi", "Shu masofada tepaga sakraydi", 2, 12, () -> c.windDist,
-                            v -> c.windDist = v, v -> v + " blok"),
-                    num("Mace masofasi", "Shu masofada mace bilan uradi", 20, 45, () -> c.reachTenths,
-                            v -> c.reachTenths = v, v -> (v / 10.0) + " blok"),
-                    num("Nishon masofasi", "Eng yaqin dushmanni shu masofada qidiradi", 8, 96, () -> c.range,
-                            v -> c.range = v, v -> v + " blok"),
-                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
-                            v -> c.ignoreFriends = v),
-                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
-        }));
-
         l.add(new Module("Pearl Boost", "H: pearl + uni urib yuboradigan wind charge - havoga teleport, keyin mace; Pearl Chase",
                 Module.Category.COMBAT, () -> PearlBoostConfig.get().enabled, v -> PearlBoostConfig.get().enabled = v, () -> {
             PearlBoostConfig c = PearlBoostConfig.get();
@@ -331,35 +371,6 @@ public final class Modules {
                     bool("Do'stlarnikini emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
-        }));
-
-        l.add(new Module("Crystal Defense", "Crystal PvP: chuqurdagi dushmandan pearl bilan qochish, surround, crystal joylarini yopish",
-                Module.Category.COMBAT, () -> CrystalDefenseConfig.get().enabled, v -> CrystalDefenseConfig.get().enabled = v, () -> {
-            CrystalDefenseConfig c = CrystalDefenseConfig.get();
-            return List.of(
-                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", CrystalDefenseClient.keyToggle),
-                    num("Dushman radiusi", "Dushman shu masofada bo'lsa xavf", 3, 16, () -> c.range, v -> c.range = v,
-                            v -> v + " blok"),
-                    group("Qochish (pearl)"),
-                    bool("Pearl bilan qochish", "Dushman pastda/chuqurda turib crystal qilsa yoki jon kam bo'lsa",
-                            () -> c.escapePearl, v -> c.escapePearl = v),
-                    num("Jon", "Shu jon yoki kamida dushman pastda bo'lmasa ham qochadi", 0, 20, () -> c.escapeHealth,
-                            v -> c.escapeHealth = v, v -> (v / 2.0) + " yurak"),
-                    choice("Qayerga", "Dushman ko'rmaydigan xavfsiz joyga (topilmasa oldinga) yoki doim qaragan tomonga",
-                            new String[] {"Xavfsiz joyga", "Oldinga"}, () -> Math.floorMod(c.escapeMode, 2),
-                            v -> c.escapeMode = v),
-                    group("Bloklar"),
-                    bool("Surround", "Oyog'ingiz atrofiga 4 tomondan obsidian", () -> c.surround, v -> c.surround = v),
-                    bool("Crystal joylarini yopish", "Yoningizdagi obsidian/bedrock ustiga oddiy blok - crystal qo'yib bo'lmaydi",
-                            () -> c.sealSpots, v -> c.sealSpots = v),
-                    num("Blok/tick", "Bir tickda eng ko'pi bilan", 1, 6, () -> c.blocksPerTick, v -> c.blocksPerTick = v),
-                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
-                            () -> c.fromInventory, v -> c.fromInventory = v),
-                    group("Boshqa"),
-                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar xavf emas", () -> c.ignoreFriends,
-                            v -> c.ignoreFriends = v),
-                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
-                    bool("HUD", "Ekranda crystal xavfi ogohlantirishi", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Totem", "Chap qo'lda totem bo'lmasa inventardan qo'yadi",
@@ -429,47 +440,6 @@ public final class Modules {
                     bool("Xabarlar", "Nima uchun qo'yganini action bar'da yozadi", () -> c.messages,
                             v -> c.messages = v),
                     bool("HUD", "Ekranda cobweb soni", () -> c.hud, v -> c.hud = v));
-        }));
-
-        l.add(new Module("Auto Shield", "Qo'lda qalqon bo'lsa, urmoqchi bo'lishsa o'zi ko'taradi",
-                Module.Category.COMBAT, () -> ShieldConfig.get().enabled, v -> ShieldConfig.get().enabled = v, () -> {
-            ShieldConfig c = ShieldConfig.get();
-            return List.of(
-                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoShieldClient.keyToggle),
-                    group("O'yinchilar"),
-                    bool("O'yinchilar", "Yaqinda sizga qarab turgan / yugurib kelayotgan o'yinchi", () -> c.players,
-                            v -> c.players = v),
-                    num("Masofa", "Shu masofada xavf deb hisoblanadi", 25, 80, () -> c.playerRange,
-                            v -> c.playerRange = v, v -> (v / 10.0) + " blok"),
-                    num("Qarash burchagi", "Sizga shuncha gradus ichida qarab tursa", 10, 90, () -> c.faceAngle,
-                            v -> c.faceAngle = v, v -> v + "°"),
-                    bool("Kamon/arbalet", "Sizni kamon, arbalet yoki trident bilan nishonga olsa", () -> c.playerRanged,
-                            v -> c.playerRanged = v),
-                    bool("Mace", "Ustingizdan tushayotgan o'yinchi", () -> c.maceFall, v -> c.maceFall = v),
-                    group("Moblar"),
-                    bool("Moblar", "Yaqindagi dushman mob urmoqchi bo'lsa", () -> c.mobs, v -> c.mobs = v),
-                    num("Mob masofasi", "Shu masofada", 15, 60, () -> c.mobRangeTenths, v -> c.mobRangeTenths = v,
-                            v -> (v / 10.0) + " blok"),
-                    bool("Skelet/pillager", "Sizga qarab o'q tortayotgan moblar", () -> c.mobRanged,
-                            v -> c.mobRanged = v),
-                    bool("Creeper", "Portlay deb turgan creeper", () -> c.creepers, v -> c.creepers = v),
-                    group("Boshqa"),
-                    bool("O'qlar", "Sizga qarab uchayotgan o'q, trident, fireball", () -> c.projectiles,
-                            v -> c.projectiles = v),
-                    bool("Zarba yeganda", "Urishsa darhol ko'taradi", () -> c.onHurt, v -> c.onHurt = v),
-                    num("Ushlab turish", "Xavf o'tgach yana shuncha tick", 0, 20, () -> c.holdAfterTicks,
-                            v -> c.holdAfterTicks = v, v -> v + " tick"),
-                    num("Eng uzoq", "Qalqon eng ko'pi bilan shuncha tick ko'tariladi, keyin tushadi", 5, 60,
-                            () -> c.maxUpTicks, v -> c.maxUpTicks = v, v -> v + " tick"),
-                    num("Qayta ko'tarish", "Tushgach shuncha tick kutadi (zarba/o'qda darhol)", 0, 40,
-                            () -> c.rearmTicks, v -> c.rearmTicks = v, v -> v + " tick"),
-                    bool("Hujumchiga burilish", "Orqangizdan kelsa unga buriladi (qalqon faqat oldni to'sadi)",
-                            () -> c.autoFace, v -> c.autoFace = v),
-                    bool("Urish uchun tushirish", "Chap tugmani bossangiz qalqon tushadi va urasiz", () -> c.lowerToAttack,
-                            v -> c.lowerToAttack = v),
-                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar xavf emas", () -> c.ignoreFriends,
-                            v -> c.ignoreFriends = v),
-                    bool("HUD", "Ekranda qalqon holati", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Potion", "Jon kam qolsa Healing splash'ni oyog'ingizga otib, darhol qaytadi",
@@ -661,24 +631,21 @@ public final class Modules {
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
 
-        l.add(new Module("Pearl Clutch", "Ender pearl: harakatingizni hisoblab aniq otadi, yiqilayotganda o'zi clutch qiladi",
-                Module.Category.MOVEMENT, () -> PearlConfig.get().enabled, v -> PearlConfig.get().enabled = v, () -> {
-            PearlConfig c = PearlConfig.get();
+        l.add(new Module("Auto Bridge", "Shift + yurish (W/A/S/D): oldinda joy bo'lmasa o'zi blok qo'yib ko'prik quradi",
+                Module.Category.MOVEMENT, () -> BridgeConfig.get().enabled, v -> BridgeConfig.get().enabled = v, () -> {
+            BridgeConfig c = BridgeConfig.get();
             return List.of(
                     key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)",
-                            PearlClutchClient.keyToggle),
-                    bool("Aim tuzatish", "O'zingiz otganda: yugurib/sakrab/uchib otsangiz ham qaragan joyingizga tushadi",
-                            () -> c.aimAssist, v -> c.aimAssist = v),
-                    bool("Avto clutch", "Baland joydan yiqilayotganda o'zi xavfsiz blokka otadi", () -> c.autoClutch,
-                            v -> c.autoClutch = v),
-                    bool("Void clutch", "Ostida blok yo'q bo'lsa (void) ham", () -> c.voidClutch, v -> c.voidClutch = v),
-                    num("Min yiqilish", "Jami yiqilish shundan ko'p bo'lsa clutch", 4, 40, () -> c.minFall,
-                            v -> c.minFall = v, v -> v + " blok"),
-                    num("Qidiruv radiusi", "Qo'nadigan blokni shu radiusda qidiradi", 3, 16, () -> c.radius,
-                            v -> c.radius = v, v -> v + " blok"),
-                    bool("Inventardan olish", "Hotbar'da bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            AutoBridgeClient.keyToggle),
+                    choice("Turi", "Tez: kamera qimirlamaydi, qayerga qarasangiz ham quradi. Oddiy: o'zingiz "
+                            + "orqaga-pastga qarab turasiz, mod shunchaki bosadi. Klassik: kamera ko'rinib "
+                            + "pastga-orqaga buriladi (haqiqiy \"god bridge\")",
+                            new String[] {"Tez (silent)", "Oddiy (qarab)", "Klassik (burilib)"},
+                            () -> Math.floorMod(c.mode, 3), v -> c.mode = v),
+                    bool("Inventardan olish", "Hotbar'da qurilish bloki bo'lmasa inventardan (keyin joyiga qaytaradi)",
                             () -> c.fromInventory, v -> c.fromInventory = v),
-                    bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
+                    bool("Xabarlar", "Devor yoki blok tugaganda ogohlantiradi", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Ekranda holat (tayyor / to'siq / blok tugadi)", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto TNT Cart", "Kamon/arbalet o'qi tushadigan joyga yoki qo'ygan railingizga TNT minecart",
@@ -887,32 +854,57 @@ public final class Modules {
                             v -> v + ""),
                     num("Max o'zimga", "O'zingizga eng ko'pi", 1, 36, () -> c.maxSelf, v -> c.maxSelf = v, v -> v + ""),
                     bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
-                            v -> c.ignoreFriends = v));
+                            v -> c.ignoreFriends = v),
+                    group("Avto qo'yish"),
+                    bool("O'zi qo'yib portlatsin", "Yashil (eng yaxshi) joy topilsa o'zi crystal tanlab qo'yadi va "
+                            + "portlatadi; sariq (qolgan) joylarga qo'ymaydi", () -> c.autoPlace, v -> c.autoPlace = v),
+                    bool("Inventardan olish", "Hotbar'da crystal bo'lmasa inventardan (keyin joyiga qaytaradi)",
+                            () -> c.fromInventory, v -> c.fromInventory = v),
+                    num("Qo'yishlar orasida", "Avto-qo'yishlar orasida eng kami", 0, 40, () -> c.autoPlaceDelay,
+                            v -> c.autoPlaceDelay = v, v -> v + " tick"));
         }));
 
-        l.add(new Module("Pearl Tracker", "Dushman pearl'i qayerga tushishini qizil bilan ajratadi - borib kutib olasiz",
+        l.add(new Module("Pearl Tracker", "Dushman pearl'i qayerga tushishini (rangi sozlanadi) ajratadi - borib kutib olasiz",
                 Module.Category.RENDER, () -> PearlTrackerConfig.get().enabled, v -> PearlTrackerConfig.get().enabled = v, () -> {
             PearlTrackerConfig c = PearlTrackerConfig.get();
             return List.of(
                     key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", PearlTrackerClient.keyToggle),
                     bool("Uchish yo'li", "Pearl uchadigan yo'lni nuqtalar bilan ko'rsatadi", () -> c.trajectory,
                             v -> c.trajectory = v),
-                    num("Qizil radius", "Tushadigan joy atrofidagi qizil doira", 5, 40, () -> c.radiusTenths,
+                    num("Doira radiusi", "Tushadigan joy atrofidagi doira", 5, 40, () -> c.radiusTenths,
                             v -> c.radiusTenths = v, v -> (v / 10.0) + " blok"),
                     bool("O'zimniki ham", "O'zingiz otgan pearl'lar ham", () -> c.own, v -> c.own = v),
                     bool("Do'stlarniki emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
-                    bool("Chat xabari", "\"X pearl otdi: koordinata\"", () -> c.chat, v -> c.chat = v));
+                    bool("Chat xabari", "\"X pearl otdi: koordinata\"", () -> c.chat, v -> c.chat = v),
+                    group("Rang"),
+                    choice("Tushish joyi rangi", "Ko'zingizga yaxshi ko'rinadigan rangni tanlang",
+                            new String[] {"Qizil", "Yashil", "Sariq", "Ko'k", "Custom"},
+                            () -> Math.floorMod(c.markColor, 5), v -> c.markColor = v),
+                    num("Custom - qizil", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.customR,
+                            v -> c.customR = v),
+                    num("Custom - yashil", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.customG,
+                            v -> c.customG = v),
+                    num("Custom - ko'k", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.customB,
+                            v -> c.customB = v));
         }));
 
         l.add(new Module("Arraylist", "Ekran chetida yoqilgan modullar ro'yxati (Meteor kabi)",
-                Module.Category.RENDER, () -> Config.get().arraylist, v -> Config.get().arraylist = v, () -> {
+                Module.Category.CLIENT, () -> Config.get().arraylist, v -> Config.get().arraylist = v, () -> {
             Config c = Config.get();
             return List.of(
-                    choice("Joyi", "Ekranning qaysi burchagida", ArrayListHud.POSITIONS,
-                            () -> Math.floorMod(c.arraylistPos, ArrayListHud.POSITIONS.length), v -> c.arraylistPos = v),
+                    choice("Joyi", "Ekranning qaysi burchagida (Custom joy yoqilgan bo'lsa e'tiborga olinmaydi)",
+                            ArrayListHud.POSITIONS, () -> Math.floorMod(c.arraylistPos, ArrayListHud.POSITIONS.length),
+                            v -> c.arraylistPos = v),
                     bool("Kamalak", "Rangi kamalak bo'lib o'zgarib turadi (OFF - asosiy rang)", () -> c.arraylistRainbow,
-                            v -> c.arraylistRainbow = v));
+                            v -> c.arraylistRainbow = v),
+                    num("Matn o'lchami", "Sig'masa kichiklashtiring, kerak bo'lsa kattalashtiring", 25, 300,
+                            () -> c.hudScale, v -> c.hudScale = v, v -> v + "%"),
+                    group("Joylashuv"),
+                    bool("Custom joy", "ClickGUI ochiq paytda \"Arraylist\" yorlig'ini sudrab o'zingiz joylashtirasiz",
+                            () -> c.arraylistCustomPos, v -> c.arraylistCustomPos = v),
+                    action("Standart joyga qaytarish", "Custom joyni bekor qiladi, \"Joyi\" sozlamasiga qaytadi",
+                            () -> c.arraylistCustomPos = false));
         }));
 
         l.add(new Module("Anti-cheat", "Kamerani silliq burish va boshqa \"odamga o'xshash\" sozlamalar",

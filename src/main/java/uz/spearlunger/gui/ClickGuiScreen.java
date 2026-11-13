@@ -21,6 +21,8 @@ public class ClickGuiScreen extends Screen {
     private final Screen parent;
     private Module.Category dragging = null;
     private double dragDx, dragDy;
+    private boolean draggingArraylist = false;
+    private double dragArrDx, dragArrDy;
 
     public ClickGuiScreen(Screen parent) {
         super(Text.literal("ClickGUI"));
@@ -49,6 +51,28 @@ public class ClickGuiScreen extends Screen {
     private double mouseX() { return client.mouse.getScaledX(client.getWindow()); }
 
     private double mouseY() { return client.mouse.getScaledY(client.getWindow()); }
+
+    private static boolean inside(double mx, double my, int x, int y, int w, int h) {
+        return mx >= x && mx < x + w && my >= y && my < y + h;
+    }
+
+    /** Arraylist'ni ClickGUI ichida sudrash uchun "ushlagich" qutisi: {x, y, w, h}. */
+    private int[] arrHandle() {
+        String label = "Arraylist";
+        int tw = textRenderer.getWidth(label);
+        int[] a = ArrayListHud.anchor(client, width, height, 1, tw);
+        return new int[] { a[0] - 3, a[1], tw + 6, 11 };
+    }
+
+    /** Pastki markazdagi profil paneli: {+ x, y, + kengligi, nom kengligi}. */
+    private int[] profileRect() {
+        String label = "‹ " + Modules.activeProfile() + " ›";
+        int lw = textRenderer.getWidth(label);
+        int plusW = 14, gap = 6;
+        int y = height - 32;
+        int x0 = width / 2 - (plusW + gap + lw) / 2;
+        return new int[] { x0, y, plusW, lw };
+    }
 
     @Override
     public void render(DrawContext ctx, int mouseX, int mouseY, float delta) {
@@ -92,9 +116,29 @@ public class ClickGuiScreen extends Screen {
             ctx.fill(x, y + HEADER_H + bodyH + 2, x + PANEL_W, y + HEADER_H + bodyH + 3, accent);
         }
 
+        if (Config.get().arraylist) {
+            int[] hb = arrHandle();
+            boolean hoverArr = inside(mouseX, mouseY, hb[0], hb[1], hb[2], hb[3]);
+            ctx.fill(hb[0], hb[1], hb[0] + hb[2], hb[1] + hb[3],
+                    draggingArraylist || hoverArr ? Theme.accent(0xCC) : 0x80000000);
+            ctx.drawTextWithShadow(textRenderer, Text.literal("Arraylist"), hb[0] + 3, hb[1] + 1, Theme.TEXT);
+        }
+
+        int[] pr = profileRect();
+        int ppx = pr[0], ppy = pr[1], plusW = pr[2], lw = pr[3];
+        boolean hoverPlus = inside(mouseX, mouseY, ppx, ppy - 1, plusW, 11);
+        ctx.fill(ppx, ppy - 1, ppx + plusW, ppy + 10, hoverPlus ? Theme.accent() : Theme.WIDGET_BG);
+        ctx.drawCenteredTextWithShadow(textRenderer, Text.literal("+"), ppx + plusW / 2, ppy + 1, Theme.TEXT);
+        int pnx = ppx + plusW + 6;
+        boolean hoverName = inside(mouseX, mouseY, pnx, ppy - 1, lw, 11);
+        ctx.drawTextWithShadow(textRenderer, "‹ " + Modules.activeProfile() + " ›", pnx, ppy + 1,
+                hoverName ? Theme.TEXT : Theme.accent());
+
         int by = height - 14;
-        if (hovered != null) {
-            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(hovered.desc), width / 2, by - 12, Theme.TEXT);
+        String tip = hoverPlus ? "Yangi profil yaratish" : hoverName
+                ? "Chap: keyingi profil  •  O'ng: oldingi profil" : hovered != null ? hovered.desc : null;
+        if (tip != null) {
+            ctx.drawCenteredTextWithShadow(textRenderer, Text.literal(tip), width / 2, by - 12, Theme.TEXT);
         }
         ctx.drawCenteredTextWithShadow(textRenderer,
                 Text.literal("Chap: yoqish/o'chirish  •  O'ng: sozlamalar  •  O'rta: tugma (bind) berish  •  Sarlavhani sudrang"),
@@ -105,6 +149,27 @@ public class ClickGuiScreen extends Screen {
     public boolean mouseClicked(Click click, boolean doubled) {
         double mx = mouseX(), my = mouseY();
         int button = click.button();
+        if (button == 0 && Config.get().arraylist) {
+            int[] hb = arrHandle();
+            if (inside(mx, my, hb[0], hb[1], hb[2], hb[3])) {
+                draggingArraylist = true;
+                dragArrDx = mx - hb[0];
+                dragArrDy = my - hb[1];
+                return true;
+            }
+        }
+        int[] pr = profileRect();
+        int ppx = pr[0], ppy = pr[1], plusW = pr[2], lw = pr[3];
+        if (button == 0 && inside(mx, my, ppx, ppy - 1, plusW, 11)) {
+            client.setScreen(new ProfileNameScreen(this));
+            return true;
+        }
+        int pnx = ppx + plusW + 6;
+        if ((button == 0 || button == 1) && inside(mx, my, pnx, ppy - 1, lw, 11)) {
+            Modules.cycleProfile(button == 1 ? -1 : 1);
+            return true;
+        }
+
         // ustma-ust tushsa eng ustidagi (oxirgi chizilgan) panel
         Module.Category[] cats = Module.Category.values();
         for (int i = cats.length - 1; i >= 0; i--) {
@@ -141,6 +206,13 @@ public class ClickGuiScreen extends Screen {
                     new int[] { (int) Math.round(mouseX() - dragDx), (int) Math.round(mouseY() - dragDy) });
             return true;
         }
+        if (draggingArraylist) {
+            Config cfg = Config.get();
+            cfg.arraylistCustomPos = true;
+            cfg.arraylistX = (int) Math.round(mouseX() - dragArrDx) + 3;
+            cfg.arraylistY = (int) Math.round(mouseY() - dragArrDy);
+            return true;
+        }
         return super.mouseDragged(click, dx, dy);
     }
 
@@ -148,6 +220,11 @@ public class ClickGuiScreen extends Screen {
     public boolean mouseReleased(Click click) {
         if (dragging != null) {
             dragging = null;
+            Config.save();
+            return true;
+        }
+        if (draggingArraylist) {
+            draggingArraylist = false;
             Config.save();
             return true;
         }

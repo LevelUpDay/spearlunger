@@ -7,6 +7,7 @@ import net.fabricmc.loader.api.FabricLoader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Config {
@@ -61,6 +62,16 @@ public class Config {
     public int rMode = 0;
     /** Ekranda lunge holati (cooldown, ochlik). */
     public boolean hud = true;
+    /**
+     * Cooldown'ni "tez almashtirish" trikisi bilan chetlab o'tish: qo'ldagi narsa almashganda cooldown
+     * player tick'ida nolga tushadi, lekin undan OLDIN (shu tickda) urilsa eski (to'lgan) cooldown hisoblanadi -
+     * shuning uchun har jabdan oldin boshqa slotga chiqib-kirib, nayzaning o'z cooldown'ini umuman kutmaymiz.
+     * Ba'zi serverlar bu "swap" trikini ataylab bloklamaydi.
+     */
+    public boolean fastSwitch = false;
+    /** fastSwitch: hotbar'da 2-chi Lunge nayza bo'lsa, dummy slotga chiqib-kirish o'rniga ikkisi orasida
+     * almashtiradi - har tickda bittasi bilan jab (umuman kutilmaydi, 1 nayzaga qaraganda tezroq). */
+    public boolean dualSpear = false;
 
     /** X uchun qidiruv: gorizontal masofa (blok). */
     public int rangeHorizontal = 50;
@@ -90,7 +101,20 @@ public class Config {
     /** 0 = yuqori chap, 1 = yuqori o'ng, 2 = pastki o'ng. */
     public int arraylistPos = 2;
     public boolean arraylistRainbow = false;
+    /** Arraylist (va asosiy HUD) matnlari o'lchami, % (100 = odatiy). */
+    public int hudScale = 100;
+    /** Arraylist'ni ClickGUI ichida sudrab, o'zi belgilagan joyga qo'yilganmi (ON bo'lsa "Joyi" sozlamasi e'tiborga olinmaydi). */
+    public boolean arraylistCustomPos = false;
+    public int arraylistX = 6;
+    public int arraylistY = 32;
     public Map<String, int[]> guiPanels = new HashMap<>();
+
+    /**
+     * Profillar: masalan "Bedwars", "PvP" - har birida qaysi modullar yoqilgan/o'chirilgani alohida saqlanadi.
+     * ClickGUI pastki markazida "+" bilan xohlagancha yangisini yaratish, ‹ › bilan almashtirish mumkin.
+     */
+    public Map<String, Map<String, Boolean>> profiles = new LinkedHashMap<>();
+    public String activeProfile = "Standart";
 
     public AntiCheat ac() {
         if (antiCheat == null) antiCheat = new AntiCheat();
@@ -115,6 +139,8 @@ public class Config {
             }
             instance.ac();
             if (instance.guiPanels == null) instance.guiPanels = new HashMap<>();
+            if (instance.profiles == null) instance.profiles = new LinkedHashMap<>();
+            if (instance.activeProfile == null) instance.activeProfile = "Standart";
             save();   // yangi maydonlarni faylga yozib qo'yamiz
         } catch (Exception e) {
             e.printStackTrace();

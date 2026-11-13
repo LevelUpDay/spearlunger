@@ -18,7 +18,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import uz.autotnt.AutoTntConfig;
-import uz.pearlclutch.PearlClutchClient;
+import uz.spearlunger.PearlHelper;
 import uz.spearlunger.Rotations;
 import uz.spearlunger.InvHelper;
 
@@ -127,7 +127,7 @@ public class PvpController {
         if (p.isOnGround()) {
             // juda uzoq - pearl
             if (cfg.pearl && pearlCooldown == 0 && reachDist >= cfg.pearlDist
-                    && PearlClutchClient.CONTROLLER.throwAt(c, p, target.getEntityPos().add(0, 0.05, 0))) {
+                    && PearlHelper.throwAt(c, p, target.getEntityPos().add(0, 0.05, 0))) {
                 pearlCooldown = 40;
                 state = "pearl";
                 return;

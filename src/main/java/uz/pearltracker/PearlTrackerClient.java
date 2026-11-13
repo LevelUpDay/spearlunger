@@ -114,6 +114,8 @@ public class PearlTrackerClient implements ClientModInitializer {
         Projector pr = Projector.create(c, counter.getTickProgress(true), ctx.getScaledWindowWidth(),
                 ctx.getScaledWindowHeight());
         double r = cfg.radiusTenths / 10.0;
+        int ring = markColor(cfg);
+        int fill = (ring & 0x00FFFFFF) | 0x70000000;
         for (Track t : TRACKS) {
             if (cfg.trajectory) {
                 for (int i = 0; i < t.path.size(); i += 2) {
@@ -121,30 +123,41 @@ public class PearlTrackerClient implements ClientModInitializer {
                     if (s != null) ctx.fill((int) s[0] - 1, (int) s[1] - 1, (int) s[0] + 1, (int) s[1] + 1, 0xC0FF55FF);
                 }
             }
-            // tushadigan joy: to'ldirilgan qizil doira (nuqtalardan) + qalin chegara
+            // tushadigan joy: to'ldirilgan doira (nuqtalardan) + qalin chegara - rangi sozlanadigan
             Vec3d l = t.landing.add(0, 0.05, 0);
             for (double dx = -r; dx <= r; dx += 0.25) {
                 for (double dz = -r; dz <= r; dz += 0.25) {
                     if (dx * dx + dz * dz > r * r) continue;
                     double[] s = pr.project(l.add(dx, 0, dz));
                     if (s == null) continue;
-                    ctx.fill((int) s[0] - 2, (int) s[1] - 2, (int) s[0] + 2, (int) s[1] + 2, 0x70FF0000);
+                    ctx.fill((int) s[0] - 2, (int) s[1] - 2, (int) s[0] + 2, (int) s[1] + 2, fill);
                 }
             }
             for (int a = 0; a < 48; a++) {
                 double ang = a * Math.PI * 2 / 48;
                 double[] s = pr.project(l.add(Math.cos(ang) * r, 0, Math.sin(ang) * r));
-                if (s != null) ctx.fill((int) s[0] - 1, (int) s[1] - 1, (int) s[0] + 2, (int) s[1] + 2, 0xFFFF2020);
+                if (s != null) ctx.fill((int) s[0] - 1, (int) s[1] - 1, (int) s[0] + 2, (int) s[1] + 2, ring);
             }
             double[] top = pr.project(l.add(0, 1.2, 0));
             if (top != null) {
-                String label = String.format("§c⬇ %s §f%.1fs §7%.0fm", t.owner, t.ticks / 20.0,
+                String label = String.format("⬇ %s §f%.1fs §7%.0fm", t.owner, t.ticks / 20.0,
                         pr.distance(t.landing));
                 int tw = c.textRenderer.getWidth(label);
                 ctx.fill((int) top[0] - tw / 2 - 3, (int) top[1] - 11, (int) top[0] + tw / 2 + 3, (int) top[1], 0x90000000);
-                ctx.drawTextWithShadow(c.textRenderer, label, (int) top[0] - tw / 2, (int) top[1] - 10, 0xFFFFFFFF);
+                ctx.drawTextWithShadow(c.textRenderer, label, (int) top[0] - tw / 2, (int) top[1] - 10, ring);
             }
         }
+    }
+
+    /** Tushish joyi uchun tanlangan rang (ARGB). */
+    private static int markColor(PearlTrackerConfig cfg) {
+        return switch (Math.floorMod(cfg.markColor, 5)) {
+            case 1 -> 0xFF40FF40;   // yashil
+            case 2 -> 0xFFFFD020;   // sariq
+            case 3 -> 0xFF4080FF;   // ko'k
+            case 4 -> 0xFF000000 | (cfg.customR << 16) | (cfg.customG << 8) | cfg.customB;
+            default -> 0xFFFF2020;   // qizil
+        };
     }
 
     private static boolean isFriend(PlayerEntity t) {

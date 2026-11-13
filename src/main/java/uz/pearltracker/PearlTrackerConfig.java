@@ -19,6 +19,9 @@ public class PearlTrackerConfig {
     public boolean ignoreFriends = true;
     /** Chatga "X pearl otdi" xabari. */
     public boolean chat = false;
+    /** Tushish joyi rangi: 0=Qizil, 1=Yashil, 2=Sariq, 3=Ko'k, 4=Custom (customR/G/B). */
+    public int markColor = 0;
+    public int customR = 0, customG = 255, customB = 0;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static PearlTrackerConfig instance = new PearlTrackerConfig();

@@ -202,12 +202,59 @@ public class LungeController {
      * Shuning uchun birinchi lunge darhol chiqadi, keyingilari esa nayzaning o'z cooldown'i bilan.
      */
     private void swapAndLunge(MinecraftClient client, ClientPlayerEntity player, int spear) {
+        if (Config.get().fastSwitch) {
+            fastSwitchLunge(client, player, spear);
+            return;
+        }
         if (player.getInventory().getSelectedSlot() != spear) {
             select(player, spear);
             nextExtraDelay = 0;
             sinceReady = 1;   // qo'shimcha kechikishsiz - darhol
         }
         tryLunge(client, player);
+    }
+
+    /**
+     * Har jabdan oldin boshqa slotga chiqib-kirib (yoki ikkinchi nayzaga almashtirib) "slot almashdi" holatini
+     * qayta-qayta hosil qilamiz - shu orqali nayzaning o'z cooldown'i umuman kutilmaydi (yuqoridagi izohga qarang).
+     * dualSpear: 2-chi Lunge nayza topilsa ikkisi orasida almashtiramiz - har tickda real jab (eng tezi);
+     * aks holda bitta tick bo'sh slotga chiqib, keyingi tickda qaytib uramiz (har 2 tickda bir jab).
+     */
+    private void fastSwitchLunge(MinecraftClient client, ClientPlayerEntity player, int spear) {
+        int sel = player.getInventory().getSelectedSlot();
+        int second = Config.get().dualSpear ? findSecondLungeSpear(player, spear) : -1;
+        if (second >= 0) {
+            int target = sel == spear ? second : spear;
+            select(player, target);
+            attackNow(client, player, false);
+            return;
+        }
+        if (sel == spear) {
+            select(player, dummySlot(player, spear));
+            return;   // shu tick faqat chiqamiz - keyingi tickda qaytib uramiz
+        }
+        select(player, spear);
+        attackNow(client, player, false);
+    }
+
+    private int findSecondLungeSpear(ClientPlayerEntity p, int exclude) {
+        int best = -1, bestLevel = 0;
+        for (int i = 0; i < 9; i++) {
+            if (i == exclude) continue;
+            ItemStack s = p.getInventory().getStack(i);
+            if (s.isEmpty() || !s.contains(DataComponentTypes.PIERCING_WEAPON) || lowDurability(s)) continue;
+            int lvl = enchantLevel(s, "lunge");
+            if (lvl > bestLevel) {
+                bestLevel = lvl;
+                best = i;
+            }
+        }
+        return best;
+    }
+
+    private static int dummySlot(ClientPlayerEntity p, int exclude) {
+        for (int i = 0; i < 9; i++) if (i != exclude && p.getInventory().getStack(i).isEmpty()) return i;
+        return exclude == 8 ? 7 : 8;
     }
 
     // ------------------------------------------------------------ avto-ovqat
@@ -397,32 +444,44 @@ public class LungeController {
     // ------------------------------------------------------------ lunge
     /** Cooldown to'lgan bo'lsa jab qiladi (Lunge shu jab'dan keyin ishga tushadi). */
     private void tryLunge(MinecraftClient client, ClientPlayerEntity player) {
+        attackNow(client, player, true);
+    }
+
+    /**
+     * Jab qiladi (agar mumkin bo'lsa). withExtraDelay = true - oddiy rejim (extraDelayTicks/randomDelayMax
+     * kutiladi); false - fastSwitch rejimi: cooldown tekshiruvi baribir o'tadi, lekin qo'shimcha kutish yo'q
+     * (slot almashtirish trikining o'zi cooldown'ni chetlab o'tadi).
+     */
+    private boolean attackNow(MinecraftClient client, ClientPlayerEntity player, boolean withExtraDelay) {
         ItemStack stack = player.getMainHandStack();
         PiercingWeaponComponent piercing = stack.get(DataComponentTypes.PIERCING_WEAPON);
-        if (piercing == null) return;
+        if (piercing == null) return false;
 
         String block = blockedReason(player, stack);
         if (block != null) {
             warnOnce(player, block);
-            return;
+            return false;
         }
         lastWarn = null;
 
         if (player.isBelowMinimumAttackCharge(stack, 0) || player.getAttackCooldownProgress(0.0f) < 1.0f) {
             sinceReady = 0;
-            return;
+            return false;
         }
-        if (sinceReady == 0) {
-            int r = Config.get().ac().randomDelayMax;
-            nextExtraDelay = Config.get().extraDelayTicks + (r > 0 ? RNG.nextInt(r + 1) : 0);
+        if (withExtraDelay) {
+            if (sinceReady == 0) {
+                int r = Config.get().ac().randomDelayMax;
+                nextExtraDelay = Config.get().extraDelayTicks + (r > 0 ? RNG.nextInt(r + 1) : 0);
+            }
+            if (sinceReady++ < nextExtraDelay) return false;
         }
-        if (sinceReady++ < nextExtraDelay) return;
-        if (client.interactionManager.isFlyingLocked()) return;
+        if (client.interactionManager.isFlyingLocked()) return false;
 
         client.interactionManager.attackWithPiercingWeapon(piercing);
         player.swingHand(Hand.MAIN_HAND);
         lunges++;
         sinceReady = 0;
+        return true;
     }
 
     private boolean hungerLow(ClientPlayerEntity player) {

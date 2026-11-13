@@ -218,6 +218,13 @@ public class CobwebController {
         if (slot < 0) return;
         int original = p.getInventory().getSelectedSlot();
         p.getInventory().setSelectedSlot(slot);
+        // cobweb haqiqatan ham qo'lga olinganini tekshiramiz - aks holda hozirgi (boshqa) narsani qo'ymaymiz
+        if (!p.getMainHandStack().isOf(Items.COBWEB)) {
+            p.getInventory().setSelectedSlot(original);
+            if (borrowed != null && InvHelper.returnItems()) InvHelper.swap(c, p, borrowed[0], borrowed[1]);
+            borrowed = null;
+            return;
+        }
         c.interactionManager.interactBlock(p, Hand.MAIN_HAND, new BlockHitResult(pl.hit, pl.side, pl.base, false));
         p.swingHand(Hand.MAIN_HAND);
         p.getInventory().setSelectedSlot(original);

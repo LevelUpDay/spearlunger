@@ -43,6 +43,11 @@ public final class Module {
         Modules.saveAll();
     }
 
+    /** Profil almashtirishda ishlatiladi: saveAll() chaqirmaydi (chaqiruvchi o'zi, hammasi tayyor bo'lgach, qiladi). */
+    public void applyEnabled(boolean on) {
+        if (setEnabled != null) setEnabled.accept(on);
+    }
+
     /** Modulni yoqib-o'chiradigan tugma sozlamasi (birinchi "Yoqish/o'chirish" Key), yo'q bo'lsa null. */
     public Setting.Key toggleKey() {
         if (!toggleable()) return null;
