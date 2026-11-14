@@ -15,48 +15,113 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.EmptyBlockView;
 import uz.spearlunger.InvHelper;
 import uz.spearlunger.Rotations;
 
+import java.util.Random;
+
 /**
- * Shift + yurish (W/A/S/D) tutilgan - "ko'prik qiladigan" turishda - oldingi qadam ostida joy yo'q bo'lsa,
- * hozirgi tik turgan blokning yon yuzasiga qarab yangi blok qo'yadi (klassik "ninja bridge"). Shift tufayli
- * vanilla o'zi chekkadan yiqilib ketishga yo'l qo'ymaydi, shuning uchun mod faqat kerakli blokni qo'yishga ulguradi.
- * Siz qo'yib yuborsangiz (shift/yurish to'xtasa) yoki oldinda devor (to'siq) bo'lsa - to'xtaydi.
+ * Yoqilganda (tugma yoki ClickGUI) o'zi harakatga tushadi: hozir qarab turgan tomonni (4 tomondan eng yaqinini)
+ * yo'nalish qilib oladi va shu tomonga devorga yetguncha ko'prik quradi - keyin o'zi o'chadi. Qo'lda o'chirsangiz:
+ * yerda bo'lsangiz darhol to'xtaydi, havoda (ko'prik ustida sakrab/tushib turgan paytda) bo'lsangiz avval
+ * tagingizga (topilgan birinchi mos tomonga qarab) blok qo'yib, xavfsiz tushgandan keyin to'xtaydi.
+ * Harakatni haqiqiy klaviatura tugmalarini (forward/back/sneak/jump) bosib turish orqali boshqaramiz -
+ * xuddi odam o'zi bosgandek (uz.autotravel'dagi kabi usul).
  */
 public class BridgeController {
-    private enum Phase { WATCH, AIM }
+    private enum State { IDLE, RUNNING, SAFE_STOP }
 
-    private Phase phase = Phase.WATCH;
-    private BlockPos aimSupport = null;
-    private Direction aimDir = null;
+    private static final Random RNG = new Random();
+
+    private State state = State.IDLE;
+    private Direction dir = Direction.NORTH;
+    private int blocksPlaced = 0;
+    private int jumpEvery = 6;
+    private boolean jumpPending = false;
+    private int sneakReleaseTicks = 0;
+    private int witchPauseTicks = 0;
+    private int safeStopTicks = 0;
     private String status = null;
     private String lastWarn = null;
 
     public void tick(MinecraftClient c) {
         ClientPlayerEntity p = c.player;
-        if (p == null || c.world == null || c.interactionManager == null) {
-            phase = Phase.WATCH;
-            return;
-        }
         BridgeConfig cfg = BridgeConfig.get();
         while (AutoBridgeClient.keyToggle.wasPressed()) {
             cfg.enabled = !cfg.enabled;
             BridgeConfig.save();
-            p.sendMessage(Text.literal(cfg.enabled ? "§aAuto Bridge: ON" : "§cAuto Bridge: OFF"), true);
+            if (p != null) p.sendMessage(Text.literal(cfg.enabled ? "§aAuto Bridge: ON" : "§cAuto Bridge: OFF"), true);
         }
-        if (!cfg.enabled || InvHelper.screenOpen(c) || !active(c)) {
-            phase = Phase.WATCH;
+        if (p == null || c.world == null || c.interactionManager == null) {
+            state = State.IDLE;
+            status = null;
+            return;
+        }
+        if (InvHelper.screenOpen(c)) {
+            if (state != State.IDLE) release(c);
+            state = State.IDLE;
             status = null;
             return;
         }
 
-        Direction dir = travelDirection(c, p);
-        if (dir == null) {
+        if (cfg.enabled && state == State.IDLE) start(p);
+        if (!cfg.enabled && state == State.RUNNING) requestStop(c, p);
+
+        switch (state) {
+            case RUNNING -> tickRunning(c, p, cfg);
+            case SAFE_STOP -> tickSafeStop(c, p, cfg);
+            default -> status = null;
+        }
+    }
+
+    // ------------------------------------------------------------ boshlash / to'xtash
+    private void start(ClientPlayerEntity p) {
+        dir = lockedDirection(p);
+        state = State.RUNNING;
+        blocksPlaced = 0;
+        jumpPending = false;
+        sneakReleaseTicks = 0;
+        witchPauseTicks = 0;
+        lastWarn = null;
+        BridgeStyle st = style(BridgeConfig.get());
+        jumpEvery = switch (st) {
+            case SPEED, JUMP -> 1;
+            case DOUBLE_GOD -> 2;
+            default -> 6;
+        };
+        status = "§6" + st.title + " boshlandi";
+    }
+
+    /** O'chirilganda: yerda bo'lsangiz darhol, havoda bo'lsangiz xavfsiz to'xtashga o'tadi. */
+    private void requestStop(MinecraftClient c, ClientPlayerEntity p) {
+        if (p.isOnGround()) {
+            state = State.IDLE;
+            release(c);
             status = null;
+        } else {
+            state = State.SAFE_STOP;
+            safeStopTicks = 0;
+            status = "§eto'xtash (havoda)...";
+        }
+    }
+
+    private void finishAtWall(MinecraftClient c, ClientPlayerEntity p) {
+        BridgeConfig cfg = BridgeConfig.get();
+        cfg.enabled = false;
+        BridgeConfig.save();
+        if (cfg.messages) p.sendMessage(Text.literal("§aAuto Bridge: devorga yetdi - to'xtadi."), true);
+        state = State.IDLE;
+        release(c);
+        status = "§7devor - tugadi";
+    }
+
+    // ------------------------------------------------------------ asosiy tsikl
+    private void tickRunning(MinecraftClient c, ClientPlayerEntity p, BridgeConfig cfg) {
+        BridgeStyle st = style(cfg);
+        if (st == BridgeStyle.JUMP) {
+            tickJump(c, p, cfg);
             return;
         }
 
@@ -66,72 +131,161 @@ public class BridgeController {
         BlockPos nextFoot = feet.offset(dir);
         BlockPos nextSupport = nextFoot.down();
 
-        if (!solid(w, support)) {   // o'zimiz ham havodamiz - qila olmaymiz
-            phase = Phase.WATCH;
-            status = null;
+        drive(c, p, st);
+
+        if (!solid(w, support)) {
+            status = "§7havoda...";
             return;
         }
-        if (blocked(w, nextFoot)) {   // devor - oldinda to'siq, o'tib bo'lmaydi
-            phase = Phase.WATCH;
-            if (cfg.messages) warnOnce(p, "§eAuto Bridge: oldinda devor - to'xtadi.");
-            status = "§7to'siq (devor)";
+        if (blocked(w, nextFoot)) {
+            finishAtWall(c, p);
             return;
         }
-        if (solid(w, nextSupport)) {   // joy allaqachon bor - hech narsa kerak emas
-            phase = Phase.WATCH;
-            lastWarn = null;
+        if (solid(w, nextSupport)) {
             status = "§atayyor";
+            lastWarn = null;
             return;
         }
 
-        switch (Math.floorMod(cfg.mode, 3)) {
-            case 1 -> modeSimple(c, p, support, dir, cfg);
-            case 2 -> modeClassic(c, p, support, dir, cfg);
-            default -> modeSilent(c, p, support, dir, cfg);
-        }
+        styleBehavior(c, p, cfg, st, support);
     }
 
-    // ------------------------------------------------------------ turlar
-    private void modeSilent(MinecraftClient c, ClientPlayerEntity p, BlockPos support, Direction dir, BridgeConfig cfg) {
-        if (place(c, p, support, dir, cfg, true)) status = "§aqo'yildi §7(tez)";
-    }
-
-    private void modeSimple(MinecraftClient c, ClientPlayerEntity p, BlockPos support, Direction dir, BridgeConfig cfg) {
-        if (!looksBridgeStance(p, dir)) {
-            status = "§7orqaga-pastga qarang...";
+    private void tickJump(MinecraftClient c, ClientPlayerEntity p, BridgeConfig cfg) {
+        ClientWorld w = c.world;
+        BlockPos nextFoot = p.getBlockPos().offset(dir);
+        if (blocked(w, nextFoot)) {
+            finishAtWall(c, p);
             return;
         }
-        if (place(c, p, support, dir, cfg, false)) status = "§aqo'yildi §7(oddiy)";
+        GameOptions o = c.options;
+        o.forwardKey.setPressed(true);
+        p.setSprinting(true);
+        maybeJump(c, p);
+        Rotations.turn(p, yawOf(dir), 35.0f);
+        if (placeBelowSelf(c, p, cfg)) placed(cfg);
+        status = p.isOnGround() ? "§atayyor (sakrab)" : "§7havoda...";
     }
 
-    private void modeClassic(MinecraftClient c, ClientPlayerEntity p, BlockPos support, Direction dir, BridgeConfig cfg) {
-        if (phase == Phase.WATCH) {
-            phase = Phase.AIM;
-            aimSupport = support;
-            aimDir = dir;
+    /** Qarash va blok qo'yish: uslubga qarab oldinga-pastga yoki orqaga-pastga qaraydi. */
+    private void styleBehavior(MinecraftClient c, ClientPlayerEntity p, BridgeConfig cfg, BridgeStyle st, BlockPos support) {
+        switch (st) {
+            case CLASSIC, NINJA -> {
+                boolean aimed = Rotations.turn(p, yawOf(dir.getOpposite()), 75.0f);
+                if (aimed && place(c, p, support, dir, cfg, false)) placed(cfg);
+            }
+            case ANDROMEDA -> {
+                if (place(c, p, support, dir, cfg, true)) placed(cfg);
+            }
+            default -> {
+                Vec3d eye = p.getEyePos();
+                Vec3d hit = hitPoint(support, dir);
+                boolean aimed = Rotations.turn(p, yawOf(dir), Rotations.pitchTo(eye, hit));
+                if (aimed && place(c, p, support, dir, cfg, false)) placed(cfg);
+            }
         }
-        Vec3d hit = hitPoint(aimSupport, aimDir);
-        Vec3d eye = p.getEyePos();
-        boolean aimed = Rotations.turn(p, Rotations.yawTo(eye, hit), Rotations.pitchTo(eye, hit));
-        if (!aimed) {
-            status = "§7burilyapman...";
+    }
+
+    private void placed(BridgeConfig cfg) {
+        lastWarn = null;
+        status = "§aqo'yildi";
+        blocksPlaced++;
+        if (blocksPlaced % jumpEvery == 0) jumpPending = true;
+        if (style(cfg) == BridgeStyle.NINJA) sneakReleaseTicks = 3;
+    }
+
+    /** Har tick bosiladigan tugmalar (yurish/sneak/sprint/sakrash) - uslubga qarab. */
+    private void drive(MinecraftClient c, ClientPlayerEntity p, BridgeStyle st) {
+        GameOptions o = c.options;
+        switch (st) {
+            case CLASSIC -> {
+                o.sneakKey.setPressed(true);
+                o.backKey.setPressed(true);
+            }
+            case NINJA -> {
+                o.backKey.setPressed(true);
+                if (sneakReleaseTicks > 0) {
+                    o.sneakKey.setPressed(false);
+                    sneakReleaseTicks--;
+                } else {
+                    o.sneakKey.setPressed(true);
+                }
+            }
+            case WITCHLY -> {
+                if (witchPauseTicks > 0) {
+                    witchPauseTicks--;
+                    o.forwardKey.setPressed(false);
+                } else {
+                    o.forwardKey.setPressed(true);
+                    if (RNG.nextInt(140) == 0) witchPauseTicks = 2 + RNG.nextInt(4);
+                }
+            }
+            case BREEZY -> o.forwardKey.setPressed(true);
+            case ANDROMEDA -> {
+                o.forwardKey.setPressed(true);
+                p.setSprinting(true);
+            }
+            case GOD, DOUBLE_GOD, SPEED -> {
+                o.forwardKey.setPressed(true);
+                p.setSprinting(true);
+                maybeJump(c, p);
+            }
+            case JUMP -> { /* tickJump() ichida */ }
+        }
+    }
+
+    private void maybeJump(MinecraftClient c, ClientPlayerEntity p) {
+        if (jumpPending && p.isOnGround()) {
+            c.options.jumpKey.setPressed(true);
+            jumpPending = false;
+        } else {
+            c.options.jumpKey.setPressed(false);
+        }
+    }
+
+    // ------------------------------------------------------------ xavfsiz to'xtash
+    private void tickSafeStop(MinecraftClient c, ClientPlayerEntity p, BridgeConfig cfg) {
+        release(c);
+        if (p.isOnGround()) {
+            state = State.IDLE;
+            status = null;
+            safeStopTicks = 0;
             return;
         }
-        if (place(c, p, aimSupport, aimDir, cfg, false)) status = "§aqo'yildi §7(klassik)";
-        phase = Phase.WATCH;
+        if (placeBelowSelf(c, p, cfg)) {
+            status = "§axavfsiz to'xtadi";
+        } else if (!solid(c.world, p.getBlockPos().down())) {
+            warnOnce(p, "§cAuto Bridge: tagida blok yo'q - ehtiyot bo'ling, yiqilyapsiz!");
+            status = "§cblok yo'q!";
+        }
+        if (++safeStopTicks > 100) {
+            state = State.IDLE;
+            status = null;
+            safeStopTicks = 0;
+        }
     }
 
-    /** "Orqaga-pastga" turishda: pastga qaragan (pitch) va yo'nalishga qarama-qarshi tomonga qaragan (yaw). */
-    private static boolean looksBridgeStance(ClientPlayerEntity p, Direction dir) {
-        if (p.getPitch() < 40.0f) return false;
-        Direction back = dir.getOpposite();
-        float wantYaw = Rotations.yawTo(Vec3d.ZERO, new Vec3d(back.getOffsetX(), 0, back.getOffsetZ()));
-        return Math.abs(MathHelper.wrapDegrees(wantYaw - p.getYaw())) < 70.0f;
+    /** Hozir turgan joy tagiga, atrofdagi birinchi mos (solid) tomonga qarab blok qo'yadi (havoda ham ishlaydi). */
+    private boolean placeBelowSelf(MinecraftClient c, ClientPlayerEntity p, BridgeConfig cfg) {
+        ClientWorld w = c.world;
+        BlockPos target = p.getBlockPos().down();
+        if (solid(w, target)) return false;
+        Direction[] faces = { dir.getOpposite(), dir, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST };
+        for (Direction d : faces) {
+            BlockPos against = target.offset(d);
+            if (solid(w, against)) {
+                return place(c, p, against, d.getOpposite(), cfg, true);
+            }
+        }
+        return false;
     }
 
     // ------------------------------------------------------------ qo'yish
     private static Vec3d hitPoint(BlockPos against, Direction face) {
         return Vec3d.ofCenter(against).add(face.getOffsetX() * 0.5, face.getOffsetY() * 0.5, face.getOffsetZ() * 0.5);
+    }
+
+    private static float yawOf(Direction d) {
+        return Rotations.yawTo(Vec3d.ZERO, new Vec3d(d.getOffsetX(), 0, d.getOffsetZ()));
     }
 
     /** against blokining face tomoniga blok qo'yadi. silent = true: qarashni sendLook orqali yashirincha o'zgartirib qo'yadi. */
@@ -191,24 +345,15 @@ public class BridgeController {
     }
 
     // ------------------------------------------------------------ yo'nalish va holat
-    /** Shift bosilgan va yurish tugmalaridan kamida bittasi bosilgan - "ko'prik qilaman" turishi. */
-    private static boolean active(MinecraftClient c) {
-        GameOptions o = c.options;
-        return o.sneakKey.isPressed()
-                && (o.forwardKey.isPressed() || o.backKey.isPressed() || o.leftKey.isPressed() || o.rightKey.isPressed());
+    private static BridgeStyle style(BridgeConfig cfg) {
+        return BridgeStyle.of(cfg.style);
     }
 
-    /** Bosilgan tugmalar + qarash (yaw) bo'yicha gorizontal harakat yo'nalishi (eng yaqin 4 tomondan biri). */
-    private static Direction travelDirection(MinecraftClient c, ClientPlayerEntity p) {
-        GameOptions o = c.options;
-        double f = (o.forwardKey.isPressed() ? 1 : 0) - (o.backKey.isPressed() ? 1 : 0);
-        double s = (o.rightKey.isPressed() ? 1 : 0) - (o.leftKey.isPressed() ? 1 : 0);
-        if (f == 0 && s == 0) return null;
+    /** Hozirgi qarashga (yaw) eng yaqin gorizontal tomon - shu tomonga devorga yetguncha boradi. */
+    private static Direction lockedDirection(ClientPlayerEntity p) {
         double rad = Math.toRadians(p.getYaw());
-        double sinYaw = Math.sin(rad), cosYaw = Math.cos(rad);
-        double mx = f * -sinYaw + s * cosYaw;
-        double mz = f * cosYaw + s * sinYaw;
-        return Direction.getFacing(mx, 0, mz);
+        double dx = -Math.sin(rad), dz = Math.cos(rad);
+        return Direction.getFacing(dx, 0, dz);
     }
 
     private static boolean solid(ClientWorld w, BlockPos pos) {
@@ -220,6 +365,19 @@ public class BridgeController {
         return solid(w, nextFoot) || solid(w, nextFoot.up());
     }
 
+    /** Hamma harakat tugmalarini qo'yib yuboradi (modul to'xtaganda). */
+    private static void release(MinecraftClient c) {
+        GameOptions o = c.options;
+        o.forwardKey.setPressed(false);
+        o.backKey.setPressed(false);
+        o.leftKey.setPressed(false);
+        o.rightKey.setPressed(false);
+        o.jumpKey.setPressed(false);
+        o.sneakKey.setPressed(false);
+        o.sprintKey.setPressed(false);
+        if (c.player != null) c.player.setSprinting(false);
+    }
+
     private void warnOnce(ClientPlayerEntity p, String msg) {
         if (!msg.equals(lastWarn)) {
             p.sendMessage(Text.literal(msg), true);
@@ -229,7 +387,7 @@ public class BridgeController {
 
     public String hudLine(MinecraftClient c) {
         BridgeConfig cfg = BridgeConfig.get();
-        if (!cfg.enabled || !cfg.hud) return null;
+        if (!cfg.hud || (!cfg.enabled && state == State.IDLE)) return null;
         return status == null ? null : "§6Auto Bridge: " + status;
     }
 }
