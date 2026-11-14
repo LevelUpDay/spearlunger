@@ -40,8 +40,8 @@ public class PearlTrackerClient implements ClientModInitializer {
     private static final double GRAVITY = 0.03, DRAG = 0.99;
     public static KeyBinding keyToggle;
 
-    /** Bitta uchayotgan pearl: tushish joyi, yo'li, qolgan ticklar, kimniki. */
-    private record Track(Vec3d landing, List<Vec3d> path, int ticks, String owner) {}
+    /** Bitta uchayotgan pearl: tushish joyi, yo'li, qolgan ticklar, kimniki, o'zimizniki yoki yo'q. */
+    private record Track(Vec3d landing, List<Vec3d> path, int ticks, String owner, boolean mine) {}
 
     private static final List<Track> TRACKS = new ArrayList<>();
     private static final Set<UUID> ANNOUNCED = new HashSet<>();
@@ -74,9 +74,10 @@ public class PearlTrackerClient implements ClientModInitializer {
         for (EnderPearlEntity pearl : c.world.getEntitiesByClass(EnderPearlEntity.class, p.getBoundingBox().expand(128),
                 e -> true)) {
             Entity owner = pearl.getOwner();
-            if (owner == p && !cfg.own) continue;
+            boolean mine = owner == p;
+            if (mine && !cfg.own) continue;
             if (owner instanceof PlayerEntity pl && cfg.ignoreFriends && isFriend(pl)) continue;
-            Track t = simulate(c.world, pearl, owner == null ? "?" : owner.getName().getString());
+            Track t = simulate(c.world, pearl, owner == null ? "?" : owner.getName().getString(), mine);
             if (t == null) continue;
             TRACKS.add(t);
             if (cfg.chat && ANNOUNCED.add(pearl.getUuid())) {
@@ -86,7 +87,7 @@ public class PearlTrackerClient implements ClientModInitializer {
         }
     }
 
-    private static Track simulate(ClientWorld w, EnderPearlEntity pearl, String owner) {
+    private static Track simulate(ClientWorld w, EnderPearlEntity pearl, String owner, boolean mine) {
         Vec3d pos = pearl.getEntityPos(), v = pearl.getVelocity();
         if (v.lengthSquared() < 1e-4) return null;
         List<Vec3d> path = new ArrayList<>();
@@ -96,12 +97,12 @@ public class PearlTrackerClient implements ClientModInitializer {
                     RaycastContext.FluidHandling.NONE, pearl));
             if (r.getType() == HitResult.Type.BLOCK) {
                 path.add(r.getPos());
-                return new Track(r.getPos(), path, i + 1, owner);
+                return new Track(r.getPos(), path, i + 1, owner, mine);
             }
             path.add(next);
             pos = next;
             v = v.multiply(DRAG).add(0, -GRAVITY, 0);
-            if (pos.y < w.getBottomY() - 16) return new Track(pos, path, i + 1, owner);   // void'ga
+            if (pos.y < w.getBottomY() - 16) return new Track(pos, path, i + 1, owner, mine);   // void'ga
         }
         return null;
     }
@@ -114,9 +115,9 @@ public class PearlTrackerClient implements ClientModInitializer {
         Projector pr = Projector.create(c, counter.getTickProgress(true), ctx.getScaledWindowWidth(),
                 ctx.getScaledWindowHeight());
         double r = cfg.radiusTenths / 10.0;
-        int ring = markColor(cfg);
-        int fill = (ring & 0x00FFFFFF) | 0x70000000;
         for (Track t : TRACKS) {
+            int ring = t.mine() ? ownMarkColor(cfg) : markColor(cfg);
+            int fill = (ring & 0x00FFFFFF) | 0x70000000;
             if (cfg.trajectory) {
                 for (int i = 0; i < t.path.size(); i += 2) {
                     double[] s = pr.project(t.path.get(i));
@@ -140,8 +141,8 @@ public class PearlTrackerClient implements ClientModInitializer {
             }
             double[] top = pr.project(l.add(0, 1.2, 0));
             if (top != null) {
-                String label = String.format("⬇ %s §f%.1fs §7%.0fm", t.owner, t.ticks / 20.0,
-                        pr.distance(t.landing));
+                String label = String.format("⬇ %s%s §f%.1fs §7%.0fm", t.mine() ? "(men) " : "", t.owner,
+                        t.ticks / 20.0, pr.distance(t.landing));
                 int tw = c.textRenderer.getWidth(label);
                 ctx.fill((int) top[0] - tw / 2 - 3, (int) top[1] - 11, (int) top[0] + tw / 2 + 3, (int) top[1], 0x90000000);
                 ctx.drawTextWithShadow(c.textRenderer, label, (int) top[0] - tw / 2, (int) top[1] - 10, ring);
@@ -149,13 +150,22 @@ public class PearlTrackerClient implements ClientModInitializer {
         }
     }
 
-    /** Tushish joyi uchun tanlangan rang (ARGB). */
+    /** Dushman pearl'ining tushish joyi rangi (ARGB). */
     private static int markColor(PearlTrackerConfig cfg) {
-        return switch (Math.floorMod(cfg.markColor, 5)) {
+        return palette(cfg.markColor, cfg.customR, cfg.customG, cfg.customB);
+    }
+
+    /** O'zingizning pearl'ingizning tushish joyi rangi - dushmanikidan farqlanishi uchun. */
+    private static int ownMarkColor(PearlTrackerConfig cfg) {
+        return palette(cfg.ownMarkColor, cfg.ownCustomR, cfg.ownCustomG, cfg.ownCustomB);
+    }
+
+    private static int palette(int choice, int customR, int customG, int customB) {
+        return switch (Math.floorMod(choice, 5)) {
             case 1 -> 0xFF40FF40;   // yashil
             case 2 -> 0xFFFFD020;   // sariq
             case 3 -> 0xFF4080FF;   // ko'k
-            case 4 -> 0xFF000000 | (cfg.customR << 16) | (cfg.customG << 8) | cfg.customB;
+            case 4 -> 0xFF000000 | (customR << 16) | (customG << 8) | customB;
             default -> 0xFFFF2020;   // qizil
         };
     }

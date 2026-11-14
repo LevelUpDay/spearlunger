@@ -27,8 +27,8 @@ public class CrystalHudConfig {
     public boolean autoPlace = false;
     /** Hotbar'da end crystal bo'lmasa inventardan olib keladi (keyin joyiga qaytaradi). */
     public boolean fromInventory = true;
-    /** Avto-qo'yishlar orasida eng kami shuncha tick. */
-    public int autoPlaceDelay = 10;
+    /** Avto-qo'yishlar orasida eng kami shuncha tick (standart 5 - avvalgisidan 2x tezroq). */
+    public int autoPlaceDelay = 5;
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static CrystalHudConfig instance = new CrystalHudConfig();
