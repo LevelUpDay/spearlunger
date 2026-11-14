@@ -21,9 +21,7 @@ public class TntHud {
 
         String[] ign = {"Auto", "Flint->cart", "Fire charge", "Activator"};
         int x = 6, y = 6;
-        line(ctx, c, "§6Auto TNT §7| Bow: " + (cfg.bowMode ? "§aON" : "§cOFF")
-                + " §7| Rail: " + (cfg.railTrigger ? "§aON" : "§cOFF")
-                + " §7| Profil " + (cfg.active + 1) + " §7| " + ign[Math.floorMod(cf.ignition, 4)], x, y);
+        line(ctx, c, "§6Auto TNT §7| Profil " + (cfg.active + 1) + " §7| " + ign[Math.floorMod(cf.ignition, 4)], x, y);
         y += 10;
         line(ctx, c, "§7Hotbar: " + mark(p, cf.ignition == 3 ? s -> s.isOf(Items.ACTIVATOR_RAIL) : s -> s.isIn(ItemTags.RAILS), "Rail")
                 + " " + mark(p, s -> s.isOf(Items.TNT_MINECART), "Cart")

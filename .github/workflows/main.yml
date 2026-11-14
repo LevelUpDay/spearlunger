@@ -15,5 +15,5 @@ jobs:
       - run: ./gradlew build
       - uses: actions/upload-artifact@v4
         with:
-          name: spearlunger-jar
+          name: automod-jar
           path: build/libs/*.jar

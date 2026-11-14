@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "id": "spearlunger",
+  "id": "automod",
   "version": "${version}",
-  "name": "Spear Lunger + Utility Pack",
-  "description": "Auto Lunge, Auto PvP, Auto Mace, Elytra PvP, Auto Travel (/goto), Crystal HUD, Pearl Boost, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Bridge, Auto Potion, Bow Aim, Anchor Guard, Fall Combo, Fast Place, Auto Clutch, Chest Stealer, Nametags+, NoRender, Pearl Tracker, Arraylist va Meteor uslubidagi ClickGUI (O).",
+  "name": "AutoMod - Utility Pack",
+  "description": "Auto Lunge, Auto PvP, Auto Mace, Elytra PvP, Player Chase, Auto Travel (/goto), Crystal HUD, Pearl Boost, Auto TNT, Auto Elytra, Auto Totem, Auto Cobweb, Auto Bridge, Auto Potion, Bow Aim, Anchor Guard, Fall Combo, Fast Place, Auto Clutch, Chest Stealer, Nametags+, NoRender, Pearl Tracker, Arraylist va Meteor uslubidagi ClickGUI (O).",
   "authors": [
     "LevelUpDay"
   ],
@@ -32,11 +32,12 @@
       "uz.automace.AutoMaceClient",
       "uz.autotravel.AutoTravelClient",
       "uz.crystalhud.CrystalHudClient",
-      "uz.elytrapvp.ElytraPvpClient"
+      "uz.elytrapvp.ElytraPvpClient",
+      "uz.playerchase.PlayerChaseClient"
     ]
   },
   "mixins": [
-    "spearlunger.mixins.json"
+    "automod.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.18.1",

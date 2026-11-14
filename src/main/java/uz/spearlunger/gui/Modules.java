@@ -43,6 +43,8 @@ import uz.pearlboost.PearlBoostClient;
 import uz.pearlboost.PearlBoostConfig;
 import uz.pearltracker.PearlTrackerClient;
 import uz.pearltracker.PearlTrackerConfig;
+import uz.playerchase.PlayerChaseClient;
+import uz.playerchase.PlayerChaseConfig;
 import uz.spearlunger.Config;
 import uz.spearlunger.SpearLungerClient;
 
@@ -163,6 +165,7 @@ public final class Modules {
         NoRenderConfig.save();
         PearlTrackerConfig.save();
         BridgeConfig.save();
+        PlayerChaseConfig.save();
     }
 
     private static List<Module> build() {
@@ -311,6 +314,42 @@ public final class Modules {
                             v -> c.ignoreFriends = v),
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v),
                     bool("HUD", "Nishon, holat va oxirgi zarba", () -> c.hud, v -> c.hud = v));
+        }));
+
+        l.add(new Module("Player Chase", "Tugma: eng yaqin (yoki pritseldagi) o'yinchiga elytra bilan tez uchib boradi, "
+                + "yetgach mace bilan uradi va o'zi o'chadi",
+                Module.Category.COMBAT, () -> PlayerChaseConfig.get().enabled, v -> PlayerChaseConfig.get().enabled = v, () -> {
+            PlayerChaseConfig c = PlayerChaseConfig.get();
+            return List.of(
+                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi", PlayerChaseClient.keyToggle),
+                    key("Chase tugmasi", "Nishonga uchib boradi (yana bossangiz bekor qiladi)", PlayerChaseClient.keyChase),
+                    group("Nishon"),
+                    choice("Nishon tanlash", "Qaysi o'yinchini tanlash", new String[] {"Eng yaqin", "Pritsel bo'yicha"},
+                            () -> Math.floorMod(c.targetSelect, 2), v -> c.targetSelect = v),
+                    num("Masofa", "Nishon qidirish (blok)", 10, 120, () -> c.range, v -> c.range = v, v -> v + " blok"),
+                    bool("Do'stlarga emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
+                            v -> c.ignoreFriends = v),
+                    group("Uchish"),
+                    num("Hujum balandligi", "Nishondan shuncha baland uchib, keyin sho'ng'iydi", 4, 40,
+                            () -> c.attackHeight, v -> c.attackHeight = v, v -> v + " blok"),
+                    num("Yechish vaqti", "Yetib borishga shuncha tick qolganda elytrani yechadi", 1, 20,
+                            () -> c.unequipLead, v -> c.unequipLead = v, v -> v + " tick"),
+                    num("Firework oralig'i", "Firework'lar orasida eng kami", 5, 60, () -> c.fireworkDelay,
+                            v -> c.fireworkDelay = v, v -> v + " tick"),
+                    num("Min durability", "Elytra shundan kam bo'lsa ishlatilmaydi", 1, 100, () -> c.minDurability,
+                            v -> c.minDurability = v),
+                    bool("Wind charge bilan uchish", "Firework bo'lmasa oyoq ostiga wind charge - tepaga otilib uchadi",
+                            () -> c.windTakeoff, v -> c.windTakeoff = v),
+                    group("Zaxira"),
+                    bool("Pearl bilan (elytra bo'lmasa)", "Elytra/firework yo'q bo'lsa nishon tomonga pearl otadi",
+                            () -> c.pearlFallback, v -> c.pearlFallback = v),
+                    group("Boshqa"),
+                    bool("Urgandan keyin o'chish", "Nishonga yetib urgach modul o'zi o'chadi", () -> c.autoOffAfterHit,
+                            v -> c.autoOffAfterHit = v),
+                    num("Vaqt limiti", "Eng ko'pi bilan shuncha tick ishlaydi", 40, 1000, () -> c.timeoutTicks,
+                            v -> c.timeoutTicks = v, v -> v + " tick"),
+                    bool("Xabarlar", "Chat xabarlari", () -> c.messages, v -> c.messages = v),
+                    bool("HUD", "Ekranda nishon va holat", () -> c.hud, v -> c.hud = v));
         }));
 
         l.add(new Module("Auto Mace", "Tushayotganda nishonga yetishi bilan mace'ga o'tib uradi (bir tickda, eng kuchli paytda)",
@@ -650,26 +689,21 @@ public final class Modules {
                     bool("HUD", "Ekranda holat (tayyor / to'siq / blok tugadi)", () -> c.hud, v -> c.hud = v));
         }));
 
-        l.add(new Module("Auto TNT Cart", "Kamon/arbalet o'qi tushadigan joyga yoki qo'ygan railingizga TNT minecart",
+        l.add(new Module("Auto TNT Cart", "Qo'lda rail, o'ng tugmani yerga qarab bosib turing - rail, TNT minecart, "
+                + "olov/kamon bilan yoqish - hammasi avtomatik, qo'yib yuborsangiz to'xtaydi",
                 Module.Category.WORLD, () -> AutoTntConfig.get().enabled, v -> AutoTntConfig.get().enabled = v, () -> {
             AutoTntConfig c = AutoTntConfig.get();
             AutoTntConfig.Profile p = c.p();
             return List.of(
                     group("Tugmalar"),
                     key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)", AutoTntClient.keyToggle),
-                    key("Kamon rejimi", "Kamon auto-TNT yoqish/o'chirish", AutoTntClient.keyBow),
-                    key("Arbalet", "Arbalet auto-TNT (bir marta)", AutoTntClient.keyCrossbow),
-                    key("Rail rejimi", "Rail qo'yganda auto-TNT yoqish/o'chirish", AutoTntClient.keyRail),
                     key("Profil", "Profilni almashtirish", AutoTntClient.keyProfile),
                     key("Sozlamalar", "Shu oynani ochadi", AutoTntClient.keySettings),
-                    group("Rejimlar"),
-                    bool("Kamon auto-TNT", "Kamonni qo'yib yuborganda o'q tushadigan joyga TNT", () -> c.bowMode,
-                            v -> c.bowMode = v),
-                    bool("Rail qo'yganda TNT", "Rail qo'ysangiz: cart, olov va kamon bilan otish", () -> c.railTrigger,
-                            v -> c.railTrigger = v),
-                    bool("Rail: kamon bilan otish", "Rail rejimida oxirida cartga otadi", () -> c.railBow,
-                            v -> c.railBow = v),
-                    num("Kamon tortish", "Rail rejimida kamonni necha tick tortish", 4, 20, () -> c.bowPullTicks,
+                    group("Yagona rejim"),
+                    bool("Kamon bilan otish", "Oxirida cartga kamon bilan otadi (Flame bo'lmasa - oldiga olov qo'yib, o'q "
+                            + "o'tib yondiradi); kamon bo'lmasa/kerak bo'lmasa shunchaki flint bilan yoqadi",
+                            () -> c.railBow, v -> c.railBow = v),
+                    num("Kamon tortish", "Kamonni necha tick tortish", 4, 20, () -> c.bowPullTicks,
                             v -> c.bowPullTicks = v, v -> v + " tick"),
                     group("Profil " + (c.active + 1)),
                     choice("Profil", "Har bir profilning o'z sozlamalari", new String[] {"1", "2", "3"},
@@ -866,7 +900,7 @@ public final class Modules {
                             v -> c.autoPlaceDelay = v, v -> v + " tick"));
         }));
 
-        l.add(new Module("Pearl Tracker", "Dushman pearl'i qayerga tushishini (rangi sozlanadi) ajratadi - borib kutib olasiz",
+        l.add(new Module("Pearl Tracker", "Pearl qayerga tushishini ajratadi - o'zingizniki va dushmanniki 2 xil rangda",
                 Module.Category.RENDER, () -> PearlTrackerConfig.get().enabled, v -> PearlTrackerConfig.get().enabled = v, () -> {
             PearlTrackerConfig c = PearlTrackerConfig.get();
             return List.of(
@@ -875,12 +909,13 @@ public final class Modules {
                             v -> c.trajectory = v),
                     num("Doira radiusi", "Tushadigan joy atrofidagi doira", 5, 40, () -> c.radiusTenths,
                             v -> c.radiusTenths = v, v -> (v / 10.0) + " blok"),
-                    bool("O'zimniki ham", "O'zingiz otgan pearl'lar ham", () -> c.own, v -> c.own = v),
+                    bool("O'zimniki ham", "O'zingiz otgan pearl'lar ham (pastdagi \"O'zimniki rangi\" bilan)",
+                            () -> c.own, v -> c.own = v),
                     bool("Do'stlarniki emas", "/tntfriend ro'yxatidagilar", () -> c.ignoreFriends,
                             v -> c.ignoreFriends = v),
                     bool("Chat xabari", "\"X pearl otdi: koordinata\"", () -> c.chat, v -> c.chat = v),
-                    group("Rang"),
-                    choice("Tushish joyi rangi", "Ko'zingizga yaxshi ko'rinadigan rangni tanlang",
+                    group("Dushman rangi"),
+                    choice("Dushman tushish joyi rangi", "Ko'zingizga yaxshi ko'rinadigan rangni tanlang",
                             new String[] {"Qizil", "Yashil", "Sariq", "Ko'k", "Custom"},
                             () -> Math.floorMod(c.markColor, 5), v -> c.markColor = v),
                     num("Custom - qizil", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.customR,
@@ -888,7 +923,17 @@ public final class Modules {
                     num("Custom - yashil", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.customG,
                             v -> c.customG = v),
                     num("Custom - ko'k", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.customB,
-                            v -> c.customB = v));
+                            v -> c.customB = v),
+                    group("O'zimniki rangi"),
+                    choice("O'zimniki tushish joyi rangi", "Dushmandan farqli rang tanlang (standart - ko'k)",
+                            new String[] {"Qizil", "Yashil", "Sariq", "Ko'k", "Custom"},
+                            () -> Math.floorMod(c.ownMarkColor, 5), v -> c.ownMarkColor = v),
+                    num("Custom - qizil", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.ownCustomR,
+                            v -> c.ownCustomR = v),
+                    num("Custom - yashil", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.ownCustomG,
+                            v -> c.ownCustomG = v),
+                    num("Custom - ko'k", "Faqat \"Custom\" tanlanganda ishlatiladi", 0, 255, () -> c.ownCustomB,
+                            v -> c.ownCustomB = v));
         }));
 
         l.add(new Module("Arraylist", "Ekran chetida yoqilgan modullar ro'yxati (Meteor kabi)",

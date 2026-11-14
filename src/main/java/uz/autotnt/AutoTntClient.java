@@ -16,11 +16,8 @@ import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class AutoTntClient implements ClientModInitializer {
-    public static KeyBinding keyBow;       // B - bow rejimi on/off
-    public static KeyBinding keyCrossbow;  // Z - crossbow: bir marta hammasini qiladi
     public static KeyBinding keySettings;  // P - sozlamalar
     public static KeyBinding keyProfile;   // V - profilni almashtirish
-    public static KeyBinding keyRail;      // G - rail qo'yganda auto-TNT on/off
     public static KeyBinding keyToggle;    // modulni yoqish/o'chirish (tugma berilmagan)
     public static final TntController CONTROLLER = new TntController();
 
@@ -28,16 +25,10 @@ public class AutoTntClient implements ClientModInitializer {
     public void onInitializeClient() {
         AutoTntConfig.load();
         KeyBinding.Category cat = KeyBinding.Category.create(Identifier.of("autotnt", "main"));
-        keyBow = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding("key.autotnt.bow", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_B, cat));
-        keyCrossbow = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding("key.autotnt.crossbow", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_Z, cat));
         keySettings = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.autotnt.settings", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_P, cat));
         keyProfile = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.autotnt.profile", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_V, cat));
-        keyRail = KeyBindingHelper.registerKeyBinding(
-                new KeyBinding("key.autotnt.rail", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_G, cat));
         keyToggle = KeyBindingHelper.registerKeyBinding(
                 new KeyBinding("key.autotnt.toggle", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_UNKNOWN, cat));
 

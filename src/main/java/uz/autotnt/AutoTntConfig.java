@@ -23,19 +23,18 @@ public class AutoTntConfig {
         public int friendRadius = 6;      // do'st shu radiusda bo'lsa ishlamaydi (0 = o'chiq)
     }
 
-    /** Modul yoqilganmi (ClickGUI'da chap tugma). */
+    /** Modul yoqilganmi (ClickGUI'da chap tugma). Yoqilganda: rail qo'lda, o'ng tugmani yerga qarab bosib
+     *  turasiz - rail qo'yilgani bilanoq o'zi TNT minecart, kerak bo'lsa olov qo'yadi va kamon bilan otadi,
+     *  o'ng tugmani qo'yib yuborsangiz hali bajarilmagan qadamlar bekor qilinadi. */
     public boolean enabled = true;
-    public boolean bowMode = false;
     public boolean sounds = true;
     public boolean messages = true;
     public boolean hud = true;
     public boolean autoRefill = true;     // hotbar'da yo'q narsani inventardan olib keladi
     public boolean restoreInventory = true; // ishlatib bo'lgach olib kelinganlarini joyiga qaytaradi
-    /** Qo'lda rail qo'ysangiz: o'zi TNT minecart, kerak bo'lsa olov qo'yadi va kamon bilan otadi. */
-    public boolean railTrigger = false;
-    /** Rail rejimida oxirida kamon bilan cartga otish. */
+    /** Oxirida kamon bilan cartga otish (kamonda Flame bo'lmasa - olov orqali). */
     public boolean railBow = true;
-    /** Rail rejimida kamonni necha tick tortish (4 = eng kami, shunda ham o'q uchadi). */
+    /** Kamonni necha tick tortish (4 = eng kami, shunda ham o'q uchadi). */
     public int bowPullTicks = 6;
     public int active = 0;
     public Profile[] profiles = { new Profile(), new Profile(), new Profile() };
