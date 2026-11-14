@@ -8,13 +8,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class BridgeConfig {
+    /** Yoqilsa: modul o'zi yuradi (W/shift kerak emas), qo'ygan yo'nalishida devorga yetguncha boradi. */
     public boolean enabled = false;
-    /**
-     * 0 = Tez (silent): kamera qimirlamaydi, qayerga qarasangiz ham ko'prik quradi (eng tezi);
-     * 1 = Oddiy: o'zingiz orqaga-pastga qarab turishingiz kerak, mod shunchaki bosadi (kamerani o'zi burmaydi);
-     * 2 = Klassik: kamera ko'rinib pastga-orqaga buriladi, qo'yadi (haqiqiy "god bridge" burilishi).
-     */
-    public int mode = 0;
+    /** BridgeStyle tartib raqami - qaysi uslub bilan ko'prik qurilishi (ClickGUI'da "Turi"). */
+    public int style = BridgeStyle.CLASSIC.ordinal();
     /** Hotbar'da qurilish bloki bo'lmasa inventardan oladi (keyin joyiga qaytaradi). */
     public boolean fromInventory = true;
     public boolean messages = true;

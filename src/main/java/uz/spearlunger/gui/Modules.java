@@ -4,6 +4,7 @@ import uz.anchorguard.AnchorGuardClient;
 import uz.anchorguard.AnchorGuardConfig;
 import uz.autobridge.AutoBridgeClient;
 import uz.autobridge.BridgeConfig;
+import uz.autobridge.BridgeStyle;
 import uz.autoclutch.AutoClutchClient;
 import uz.autoclutch.ClutchConfig;
 import uz.autocobweb.AutoCobwebClient;
@@ -631,17 +632,18 @@ public final class Modules {
                     bool("Xabarlar", "Action bar xabarlari", () -> c.messages, v -> c.messages = v));
         }));
 
-        l.add(new Module("Auto Bridge", "Shift + yurish (W/A/S/D): oldinda joy bo'lmasa o'zi blok qo'yib ko'prik quradi",
+        l.add(new Module("Auto Bridge", "Yoqsangiz o'zi yuradi va ko'prik quradi - devorga yetguncha, keyin o'zi o'chadi",
                 Module.Category.MOVEMENT, () -> BridgeConfig.get().enabled, v -> BridgeConfig.get().enabled = v, () -> {
             BridgeConfig c = BridgeConfig.get();
             return List.of(
-                    key(Setting.TOGGLE_KEY, "Bosing va harf tanlang - modulni yoqib-o'chiradi (ClickGUI'da o'rta tugma ham)",
+                    key(Setting.TOGGLE_KEY, "Bosing - qarab turgan tomonga o'zi yurib ko'prik quradi (ClickGUI'da o'rta tugma ham)",
                             AutoBridgeClient.keyToggle),
-                    choice("Turi", "Tez: kamera qimirlamaydi, qayerga qarasangiz ham quradi. Oddiy: o'zingiz "
-                            + "orqaga-pastga qarab turasiz, mod shunchaki bosadi. Klassik: kamera ko'rinib "
-                            + "pastga-orqaga buriladi (haqiqiy \"god bridge\")",
-                            new String[] {"Tez (silent)", "Oddiy (qarab)", "Klassik (burilib)"},
-                            () -> Math.floorMod(c.mode, 3), v -> c.mode = v),
+                    choice("Uslub", "God/Double God/Speed/Jump: sprint + sakrab tez quradi. Andromeda: kamera "
+                            + "qimirlamaydi, eng tezi. Breezy/Witchly: yugurmasdan, osoyishta (Witchly - tasodifiy "
+                            + "pauzalar bilan odam kabi). Klassik/Ninja: shift bosib, kamera orqaga burilib quradi. "
+                            + "Qaysi tanlansa, doim o'sha uslub bilan quradi.",
+                            BridgeStyle.titles(), () -> Math.floorMod(c.style, BridgeStyle.values().length),
+                            v -> c.style = v),
                     bool("Inventardan olish", "Hotbar'da qurilish bloki bo'lmasa inventardan (keyin joyiga qaytaradi)",
                             () -> c.fromInventory, v -> c.fromInventory = v),
                     bool("Xabarlar", "Devor yoki blok tugaganda ogohlantiradi", () -> c.messages, v -> c.messages = v),

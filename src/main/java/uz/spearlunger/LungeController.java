@@ -12,6 +12,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
@@ -554,8 +555,17 @@ public class LungeController {
     }
 
     // ------------------------------------------------------------ yordamchilar
+    /**
+     * Hotbar slotini almashtiradi VA serverga xabar beradi (UpdateSelectedSlotC2SPacket) - xuddi raqam tugmasini
+     * bosgandek. setSelectedSlot() yolg'iz o'zi faqat mahalliy (client) holatni o'zgartiradi; shu paket yuborilmasa
+     * server hamon eski slot tanlangan deb biladi, shu sababli "tez almashtirish" (cooldown skip) va "2 nayza"
+     * ishlamaydi - server nayza haqiqatan qo'lga olinganini bilmaydi.
+     */
     private void select(ClientPlayerEntity player, int slot) {
-        if (slot >= 0 && slot < 9) player.getInventory().setSelectedSlot(slot);
+        if (slot < 0 || slot >= 9) return;
+        if (player.getInventory().getSelectedSlot() == slot) return;
+        player.getInventory().setSelectedSlot(slot);
+        player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot));
     }
 
     private void say(ClientPlayerEntity player, String msg) {
